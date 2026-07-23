@@ -28,8 +28,10 @@ export interface TileProviderEnv {
   pmtilesUrl?: string;
 }
 
+// OpenMapTiles' CC-BY grant on the tile schema requires its credit next to
+// the ODbL OSM credit (Planetiler prints the same requirement per build).
 export const OSM_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors';
+  '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors';
 
 /** The static path the pipeline writes the Harare extract to. */
 export const DEFAULT_PMTILES_PATH = "/map/tiles/harare.pmtiles";

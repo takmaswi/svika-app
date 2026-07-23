@@ -43,10 +43,11 @@ schema vector tiles and clipped to a Harare bounding box
 (30.85,-18.12 to 31.25,-17.62), by the committed pipeline in
 `tools/map-tiles/` (`pnpm map:tiles`). The OSM data date of the current
 build is recorded by the pipeline in `tools/map-tiles/OSM-DATE.txt`; the
-extract in use was built 2026-07-23 from the Geofabrik extract current on
-that date. OSM is (c) OpenStreetMap contributors, ODbL; attribution is
-rendered on the map itself. The tiles are display data only; nothing
-trains on them. MapTiler remains an env keyed fallback tile source only.
+extract in use was built 2026-07-23 from the Geofabrik extract stamped
+2026-07-22T20:21:25Z. OSM is (c) OpenStreetMap contributors, ODbL, and the
+tile schema is OpenMapTiles (CC-BY); both credits are rendered on the map
+itself. The tiles are display data only; nothing trains on them. MapTiler
+remains an env keyed fallback tile source only.
 
 ### What is deliberately not collected
 

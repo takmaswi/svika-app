@@ -1,0 +1,4 @@
+Geofabrik Zimbabwe OSM extract timestamp: 2026-07-22T20:21:25Z
+Built: 2026-07-23T15:41:00Z
+Bounds: 30.85,-18.12,31.25,-17.62
+Keep docs/DATASET-STATEMENT.md's OSM date in step with this file.

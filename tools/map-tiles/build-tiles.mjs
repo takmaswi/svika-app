@@ -22,7 +22,7 @@
 // itself; licensing is recorded in docs/DATASET-STATEMENT.md.
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -36,8 +36,15 @@ const PLANETILER_IMAGE = "ghcr.io/onthegomap/planetiler:latest";
 const GEOFABRIK_STATE_URL =
   "https://download.geofabrik.de/africa/zimbabwe-updates/state.txt";
 
-const DATA_DIR = process.env.SVIKA_MAP_DATA_DIR ?? path.join(HERE, "data");
-const OUT_FILE = path.join(REPO, "apps", "web", "public", "map", "tiles", "harare.pmtiles");
+// Planetiler's working data lives in a named Docker volume, not a bind
+// mount: Docker Desktop's host file sharing is slow enough on large
+// sequential I/O (the natural earth and water polygon passes) to stall the
+// build for an hour, while the same run on the VM's own disk takes minutes.
+// The first run downloads ~1.5 GB of sources into the volume; they are
+// cached there for every rerun.
+const DATA_VOLUME = process.env.SVIKA_MAP_VOLUME ?? "svika-map-tiles";
+const OUT_DIR = path.join(REPO, "apps", "web", "public", "map", "tiles");
+const OUT_FILE = path.join(OUT_DIR, "harare.pmtiles");
 const DATE_FILE = path.join(HERE, "OSM-DATE.txt");
 
 function log(msg) {
@@ -70,20 +77,21 @@ async function main() {
     process.exit(1);
   }
 
-  mkdirSync(DATA_DIR, { recursive: true });
-  mkdirSync(path.dirname(OUT_FILE), { recursive: true });
+  mkdirSync(OUT_DIR, { recursive: true });
 
   const osmDate = await fetchOsmDate();
   if (osmDate) log(`Geofabrik Zimbabwe extract timestamp: ${osmDate}`);
 
+  execFileSync("docker", ["volume", "create", DATA_VOLUME], { stdio: "ignore" });
+
   // Planetiler downloads the Zimbabwe extract plus its global helper
-  // sources (natural earth, water polygons, lake centerlines) into
-  // data/sources on the first run and reuses them afterwards.
+  // sources (natural earth, water polygons, lake centerlines) into the
+  // volume on the first run and reuses them afterwards.
   const args = [
     "run",
     "--rm",
     "-v",
-    `${DATA_DIR}:/data`,
+    `${DATA_VOLUME}:/data`,
     PLANETILER_IMAGE,
     "--area=zimbabwe",
     "--download",
@@ -94,12 +102,27 @@ async function main() {
   log(`docker ${args.join(" ")}`);
   execFileSync("docker", args, { stdio: "inherit" });
 
-  const built = path.join(DATA_DIR, "harare.pmtiles");
-  if (!existsSync(built)) {
-    log("Planetiler finished but /data/harare.pmtiles is missing");
+  // Copy the built file out of the volume into the web app's static dir.
+  execFileSync(
+    "docker",
+    [
+      "run",
+      "--rm",
+      "-v",
+      `${DATA_VOLUME}:/data`,
+      "-v",
+      `${OUT_DIR}:/out`,
+      "alpine",
+      "cp",
+      "/data/harare.pmtiles",
+      "/out/harare.pmtiles",
+    ],
+    { stdio: "inherit" },
+  );
+  if (!existsSync(OUT_FILE)) {
+    log("Planetiler finished but harare.pmtiles did not land in the static dir");
     process.exit(1);
   }
-  copyFileSync(built, OUT_FILE);
   const mb = (statSync(OUT_FILE).size / (1024 * 1024)).toFixed(1);
   log(`wrote ${path.relative(REPO, OUT_FILE)} (${mb} MB)`);
 

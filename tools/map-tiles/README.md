@@ -18,8 +18,10 @@ from the repo root, all requiring only Node 20+ and Docker Desktop:
   and mirrored in `docs/DATASET-STATEMENT.md`; keep the two in step.
 - IBM Plex fonts are SIL OFL 1.1.
 - Planetiler downloads its helper sources (natural earth, water polygons,
-  lake centerlines) into `data/sources/` on the first run (~1 GB, cached
-  afterwards). `data/` and `fonts-src/` are gitignored intermediates.
+  lake centerlines, ~1.5 GB) into the `svika-map-tiles` Docker volume on
+  the first run and caches them there. A named volume, not a bind mount,
+  because Docker Desktop file sharing stalls the big sequential passes.
+  `fonts-src/` is a gitignored intermediate.
 
 ## Serving
 
