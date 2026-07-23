@@ -44,7 +44,7 @@ export interface CommutePattern {
   windowEnd: number;
 }
 
-function catMinutes(iso: string): { minuteOfDay: number; dayOfWeek: number } {
+export function catMinutes(iso: string): { minuteOfDay: number; dayOfWeek: number } {
   const utc = new Date(iso);
   const shifted = new Date(utc.getTime() + CAT_OFFSET_MINUTES * 60_000);
   return {
