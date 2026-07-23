@@ -1,0 +1,41 @@
+{
+  "name": "fallback-maptiler",
+  "url": "http://localhost:3100/",
+  "throttle": {
+    "offline": false,
+    "downloadThroughput": 96000,
+    "uploadThroughput": 32000,
+    "latency": 300
+  },
+  "cold": {
+    "readyMs": 11726,
+    "bytes": {
+      "sprite": 668,
+      "vendor-tilejson": 4721,
+      "glyphs": 74599,
+      "map-static": 1734
+    },
+    "counts": {
+      "sprite": 2,
+      "vendor-tilejson": 1,
+      "glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "warm": {
+    "readyMs": 3076,
+    "bytes": {
+      "sprite": 0,
+      "vendor-tilejson": 0,
+      "glyphs": 0,
+      "map-static": 0
+    },
+    "counts": {
+      "sprite": 2,
+      "vendor-tilejson": 1,
+      "glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "offline": null
+}

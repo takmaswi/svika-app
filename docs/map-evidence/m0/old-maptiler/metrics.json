@@ -1,0 +1,45 @@
+{
+  "name": "old-maptiler",
+  "url": "http://localhost:3101/",
+  "throttle": {
+    "offline": false,
+    "downloadThroughput": 96000,
+    "uploadThroughput": 32000,
+    "latency": 300
+  },
+  "cold": {
+    "readyMs": 13521,
+    "bytes": {
+      "vendor-style": 3431,
+      "vendor-tiles": 97340,
+      "vendor-tilejson": 4547,
+      "vendor-glyphs": 49281,
+      "map-static": 1734
+    },
+    "counts": {
+      "vendor-style": 1,
+      "vendor-tiles": 2,
+      "vendor-tilejson": 1,
+      "vendor-glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "warm": {
+    "readyMs": 4658,
+    "bytes": {
+      "vendor-style": 0,
+      "vendor-tilejson": 0,
+      "vendor-tiles": 0,
+      "vendor-glyphs": 0,
+      "map-static": 243
+    },
+    "counts": {
+      "vendor-style": 1,
+      "vendor-tilejson": 1,
+      "vendor-tiles": 2,
+      "vendor-glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "offline": null
+}

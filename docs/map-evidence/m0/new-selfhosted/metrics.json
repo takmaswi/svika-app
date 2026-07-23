@@ -1,0 +1,44 @@
+{
+  "name": "new-selfhosted",
+  "url": "http://localhost:3100/",
+  "throttle": {
+    "offline": false,
+    "downloadThroughput": 96000,
+    "uploadThroughput": 32000,
+    "latency": 300
+  },
+  "cold": {
+    "readyMs": 9620,
+    "bytes": {
+      "sprite": 668,
+      "pmtiles-ranges": 46437,
+      "glyphs": 74599,
+      "map-static": 1734
+    },
+    "counts": {
+      "sprite": 2,
+      "pmtiles-ranges": 2,
+      "glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "warm": {
+    "readyMs": 3474,
+    "bytes": {
+      "sprite": 0,
+      "pmtiles-ranges": 0,
+      "glyphs": 0,
+      "map-static": 0
+    },
+    "counts": {
+      "sprite": 2,
+      "pmtiles-ranges": 2,
+      "glyphs": 1,
+      "map-static": 1
+    }
+  },
+  "offline": {
+    "ready": true,
+    "readyMs": 6139
+  }
+}
