@@ -83,20 +83,32 @@ async function measure(context, page, label) {
 
 async function main() {
   const browser = await chromium.launch();
-  const context = await browser.newContext({
+
+  // Byte accounting runs with the service worker BLOCKED: CDP reports
+  // encodedDataLength 0 for SW handled responses, so a cold run behind the
+  // worker undercounts. Cold bytes and cold timing come from this context;
+  // the requests are identical to a first visit (an empty SW cache adds
+  // nothing to a cold load).
+  const bytesContext = await browser.newContext({
     viewport: { width: 360, height: 760 },
     recordVideo: { dir: path.join(outDir, "video-tmp"), size: { width: 360, height: 760 } },
+    serviceWorkers: "block",
+  });
+  const cold = await measure(bytesContext, await bytesContext.newPage(), "cold");
+  console.log(`[${name}] cold map-ready in ${cold.readyMs} ms`);
+  await bytesContext.close();
+
+  // Warm timing and the offline proof run with the service worker ALLOWED:
+  // first visit primes the caches, the second view reads them.
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 760 },
     serviceWorkers: "allow",
   });
-  const page = await context.newPage();
-
-  const cold = await measure(context, page, "cold");
-  console.log(`[${name}] cold map-ready in ${cold.readyMs} ms`);
-
-  // Second view, same context: the service worker and HTTP cache are warm.
+  const primePage = await context.newPage();
+  await measure(context, primePage, "prime");
   const warmPage = await context.newPage();
   const warm = await measure(context, warmPage, "warm");
-  console.log(`[${name}] warm map-ready in ${warm.readyMs} ms`);
+  console.log(`[${name}] warm map-ready in ${warm.readyMs} ms (behind service worker)`);
 
   let offline = null;
   if (doOffline) {
