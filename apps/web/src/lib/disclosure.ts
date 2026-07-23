@@ -74,6 +74,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     detail: "Real rider owned rows under RLS, proven by the security suite.",
   },
   {
+    feature: "Answer first home peek",
+    tier: 1,
+    detail:
+      "Real UI over the same mined patterns as the commute alerts, gated by the same preference: inside the usual window the peek answers with the usual trip, after it with the ride back, carrying the live wait and its basis label, the fare and whether the wallet covers it; one tap books through the normal ledger path. A rider without a recognised moment keeps the search peek. No new intelligence.",
+  },
+  {
     feature: "Arrival estimate: the minutes",
     tier: 1,
     detail:

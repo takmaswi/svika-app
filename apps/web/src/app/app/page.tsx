@@ -21,7 +21,9 @@ import {
   YouIcon,
 } from "@/components/icons";
 import { InitialAvatar } from "@/components/profile/InitialAvatar";
-import { formatUsd } from "@svika/shared";
+import { formatUsd, planTrip, type RideLeg } from "@svika/shared";
+import { fetchNetwork } from "@/lib/network";
+import { bookTrip } from "@/lib/actions";
 import { boardCodesOf, type BoardCodeEmbed } from "@/lib/tickets";
 import {
   CORRIDOR_ROUTE_CODE,
@@ -39,6 +41,7 @@ import {
   mineCommutePatterns,
   type RideFact,
 } from "@/lib/commute/patterns";
+import { homePeekState } from "@/lib/commute/home-peek";
 
 interface SavedTripRow {
   id: string;
@@ -187,37 +190,76 @@ export default async function RiderHome({
   // the usual kombi is near. A demo persona (demo_sim) waives the window so
   // the alert plays on any stage clock; the mined route, the live ETA and the
   // basis label stay real. See docs/SPINE-2-COMMUTE-ALERTS.md.
+  interface HistoryRow {
+    from_stop_id: string;
+    to_stop_id: string;
+    purchased_at: string;
+    from_stop: { name: string } | null;
+    to_stop: { name: string } | null;
+  }
+  const facts: RideFact[] = ((historyRes.data ?? []) as unknown as HistoryRow[]).map(
+    (r) => ({
+      fromStopId: r.from_stop_id,
+      toStopId: r.to_stop_id,
+      fromName: r.from_stop?.name ?? "",
+      toName: r.to_stop?.name ?? "",
+      purchasedAt: r.purchased_at,
+    }),
+  );
+  const isDemo = profileRes.data?.demo_sim === true;
+  const patterns = mineCommutePatterns(facts, new Date());
+
   let commuteAlert: {
     fromName: string;
     toName: string;
     eta: EtaEstimate;
   } | null = null;
   if (prefsRes.data?.commute_alerts) {
-    interface HistoryRow {
-      from_stop_id: string;
-      to_stop_id: string;
-      purchased_at: string;
-      from_stop: { name: string } | null;
-      to_stop: { name: string } | null;
-    }
-    const facts: RideFact[] = ((historyRes.data ?? []) as unknown as HistoryRow[]).map(
-      (r) => ({
-        fromStopId: r.from_stop_id,
-        toStopId: r.to_stop_id,
-        fromName: r.from_stop?.name ?? "",
-        toName: r.to_stop?.name ?? "",
-        purchasedAt: r.purchased_at,
-      }),
-    );
-    const isDemo = profileRes.data?.demo_sim === true;
-    const pattern = alertPattern(mineCommutePatterns(facts, new Date()), new Date(), {
-      demo: isDemo,
-    });
+    const pattern = alertPattern(patterns, new Date(), { demo: isDemo });
     if (pattern) {
       const eta = await etaProvider.estimate(pattern.fromStopId, pattern.toStopId);
       if (etaSaysNear(eta.minutes)) {
         commuteAlert = { fromName: pattern.fromName, toName: pattern.toName, eta };
       }
+    }
+  }
+
+  // V1, answer first home: a known commuter's peek answers their moment (the
+  // usual trip inside its window, the ride back once it has passed) with the
+  // live wait, the fare and what one tap will do to the wallet. Pure UI over
+  // the same mined patterns; anyone else keeps the search peek. The same
+  // commute_alerts pref gates it: one switch means "act on my patterns", so
+  // a rider who opted out keeps the plain search home.
+  const peekState = prefsRes.data?.commute_alerts
+    ? homePeekState(patterns, new Date(), { demo: isDemo })
+    : ({ kind: "search" } as const);
+  let answer: {
+    kind: "commute" | "return";
+    fromStopId: string;
+    toStopId: string;
+    fromName: string;
+    toName: string;
+    routeName: string;
+    eta: EtaEstimate;
+    fareCents: number;
+    covered: boolean;
+  } | null = null;
+  if (peekState.kind !== "search") {
+    const network = await fetchNetwork(supabase);
+    const answerPlan = planTrip(network, peekState.fromStopId, peekState.toStopId);
+    const firstRide = answerPlan?.legs.find((l): l is RideLeg => l.type === "ride");
+    if (answerPlan && firstRide) {
+      const eta = await etaProvider.estimate(
+        peekState.fromStopId,
+        peekState.toStopId,
+      );
+      answer = {
+        ...peekState,
+        routeName: firstRide.routeName,
+        eta,
+        fareCents: answerPlan.totalFareCents,
+        covered: balance >= answerPlan.totalFareCents,
+      };
     }
   }
 
@@ -298,6 +340,38 @@ export default async function RiderHome({
       };
     }
   }
+
+  const searchForm = (
+    <form className="home-search" action="/app/plan" method="get">
+      <input
+        id="from"
+        name="from"
+        className="home-search-pill"
+        placeholder={t(lang, "rider.fromPlaceholder")}
+        aria-label={t(lang, "rider.fromLabel")}
+        autoComplete="off"
+        required
+      />
+      <div className="home-search-row">
+        <input
+          id="to"
+          name="to"
+          className="home-search-pill"
+          placeholder={t(lang, "rider.toPlaceholder")}
+          aria-label={t(lang, "rider.toLabel")}
+          autoComplete="off"
+          required
+        />
+        <button
+          className="home-search-go touch-target"
+          type="submit"
+          aria-label={t(lang, "rider.planCta")}
+        >
+          <ArrowIcon />
+        </button>
+      </div>
+    </form>
+  );
 
   return (
     <main className="home-screen">
@@ -386,71 +460,130 @@ export default async function RiderHome({
       <HomeSheet
         openLabel={t(lang, "home.sheetOpen")}
         closeLabel={t(lang, "home.sheetClose")}
-        title={t(lang, "rider.searchTitle")}
-        hint={t(lang, "home.sheetHint")}
+        title={answer ? undefined : t(lang, "rider.searchTitle")}
+        hint={answer ? undefined : t(lang, "home.sheetHint")}
         defaultOpen={justBooked || sheetOpen}
         peek={
-          <>
-            <form className="home-search" action="/app/plan" method="get">
-              <input
-                id="from"
-                name="from"
-                className="home-search-pill"
-                placeholder={t(lang, "rider.fromPlaceholder")}
-                aria-label={t(lang, "rider.fromLabel")}
-                autoComplete="off"
-                required
-              />
-              <div className="home-search-row">
-                <input
-                  id="to"
-                  name="to"
-                  className="home-search-pill"
-                  placeholder={t(lang, "rider.toPlaceholder")}
-                  aria-label={t(lang, "rider.toLabel")}
-                  autoComplete="off"
-                  required
-                />
-                <button
-                  className="home-search-go touch-target"
-                  type="submit"
-                  aria-label={t(lang, "rider.planCta")}
-                >
-                  <ArrowIcon />
-                </button>
+          answer ? (
+            // the answer peek: the known commuter's moment, §9 trio intact
+            // (route + arrival + fare), one §5 CTA that books in one tap.
+            // Wallet honesty rides the fare cell so the peek stays compact
+            // enough to clear the floating nav on the reference device.
+            <div className="peek-answer" data-testid="peek-answer">
+              <div>
+                <p className="peek-label">
+                  {t(
+                    lang,
+                    answer.kind === "commute"
+                      ? "home.answerUsual"
+                      : "home.answerReturn",
+                  )}
+                </p>
+                <h1 className="svika-title peek-answer-trip">
+                  {answer.fromName} {toWord} {answer.toName}
+                </h1>
               </div>
-            </form>
-            {corridorFare && corridorEta && (
               <div className="peek-stats" data-testid="peek-stats">
                 <div>
                   <p className="peek-label">{t(lang, "ticket.route")}</p>
-                  <p className="peek-route">{corridorFare.routes.name}</p>
+                  <p className="peek-route">{answer.routeName}</p>
                   <span className="peek-route-sub">
-                    {t(lang, "home.peekFrom")} {corridorFirstStop}
+                    {t(lang, "home.peekFrom")} {answer.fromName}
                   </span>
                 </div>
                 <div>
                   <p className="peek-label">{t(lang, "home.peekArrives")}</p>
                   <p className="peek-mono">
-                    {corridorEta.minutes} {t(lang, "common.minutes")}
+                    {answer.eta.minutes} {t(lang, "common.minutes")}
                   </p>
                   <EtaBasis
                     className="peek-route-sub"
-                    label={etaBasisLabel(lang, corridorEta)}
-                    card={etaBasisCard(lang, corridorEta)}
+                    label={etaBasisLabel(lang, answer.eta)}
+                    card={etaBasisCard(lang, answer.eta)}
                     moreHref="/app/intelligence"
                     moreLabel={t(lang, "eta.cardMore")}
                   />
                 </div>
                 <div>
                   <p className="peek-label">{t(lang, "ticket.fare")}</p>
-                  <p className="peek-mono">{formatUsd(corridorFare.fare_cents)}</p>
+                  <p className="peek-mono">{formatUsd(answer.fareCents)}</p>
+                  <span className="peek-route-sub" data-testid="answer-wallet">
+                    {t(
+                      lang,
+                      answer.covered
+                        ? "home.answerWalletCovers"
+                        : "home.answerWalletShort",
+                    )}
+                  </span>
                 </div>
               </div>
-            )}
-          </>
+              <form action={bookTrip} className="peek-answer-book">
+                <input type="hidden" name="from" value={answer.fromStopId} />
+                <input type="hidden" name="to" value={answer.toStopId} />
+                <input
+                  type="hidden"
+                  name="payment"
+                  value={answer.covered ? "wallet" : "cash"}
+                />
+                <button
+                  className="cta touch-target"
+                  type="submit"
+                  data-testid="answer-rebook"
+                >
+                  {t(lang, "home.answerCta")}
+                  <span className="cta-chip" aria-hidden>
+                    <ArrowIcon />
+                  </span>
+                </button>
+              </form>
+            </div>
+          ) : (
+            <>
+              {searchForm}
+              {corridorFare && corridorEta && (
+                <div className="peek-stats" data-testid="peek-stats">
+                  <div>
+                    <p className="peek-label">{t(lang, "ticket.route")}</p>
+                    <p className="peek-route">{corridorFare.routes.name}</p>
+                    <span className="peek-route-sub">
+                      {t(lang, "home.peekFrom")} {corridorFirstStop}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="peek-label">{t(lang, "home.peekArrives")}</p>
+                    <p className="peek-mono">
+                      {corridorEta.minutes} {t(lang, "common.minutes")}
+                    </p>
+                    <EtaBasis
+                      className="peek-route-sub"
+                      label={etaBasisLabel(lang, corridorEta)}
+                      card={etaBasisCard(lang, corridorEta)}
+                      moreHref="/app/intelligence"
+                      moreLabel={t(lang, "eta.cardMore")}
+                    />
+                  </div>
+                  <div>
+                    <p className="peek-label">{t(lang, "ticket.fare")}</p>
+                    <p className="peek-mono">{formatUsd(corridorFare.fare_cents)}</p>
+                  </div>
+                </div>
+              )}
+            </>
+          )
         }
       >
+        {answer && (
+          <section
+            className="home-plan-other"
+            aria-label={t(lang, "home.answerOther")}
+          >
+            <h2 className="svika-meta tickets-heading" data-testid="answer-plan-other">
+              {t(lang, "home.answerOther")}
+            </h2>
+            {searchForm}
+          </section>
+        )}
+
         {savedTrips.length > 0 && (
           <section className="home-picks" aria-label={t(lang, "home.yourTrips")}>
             <h2 className="svika-meta tickets-heading">{t(lang, "home.yourTrips")}</h2>

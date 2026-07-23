@@ -338,6 +338,34 @@ export const dict = {
   "home.peekArrives": { en: "Arrives", sn: "Inosvika" },
   "home.peekFrom": { en: "from", sn: "kubva" },
 
+  // V1 answer first home: the peek answers a known commuter's moment instead
+  // of opening with a search box. Copy stays honest about the wallet and the
+  // payment that one tap will make.
+  "home.answerUsual": {
+    en: "Your usual trip",
+    sn: "Rwendo rwako rwemazuva ose",
+  },
+  "home.answerReturn": {
+    en: "Your ride back",
+    sn: "Rwendo rwako rwekudzokera",
+  },
+  "home.answerWalletCovers": {
+    en: "Your wallet covers this",
+    sn: "Chikwama chako chinokwana",
+  },
+  "home.answerWalletShort": {
+    en: "Wallet short, this books as cash",
+    sn: "Chikwama hachikwani, iyi inobhukwa secash",
+  },
+  "home.answerCta": {
+    en: "Rebook this trip",
+    sn: "Bhuka rwendo urwu zvakare",
+  },
+  "home.answerOther": {
+    en: "Plan a different trip",
+    sn: "Ronga rumwe rwendo",
+  },
+
   "nav.home": { en: "Home", sn: "Home" },
   "nav.rides": { en: "Rides", sn: "Rides" },
   "nav.wallet": { en: "Wallet", sn: "Wallet" },
