@@ -1,7 +1,7 @@
 # K1 gate report: kombi board
 
-Status: DRAFT — awaiting Mhofu's ruling on the four proposed deviations and
-the staging registry numbers.
+Status: PASSED (closed 2026-07-24). Mhofu's rulings recorded below; Goal 4
+signed off.
 
 Scope: docs/PRODUCT-FIRST-PLAN.md batch K1, ruled 2026-07-23. The rider
 facing answer to "which kombi, and can I trust it": tappable kombi markers
@@ -106,14 +106,18 @@ moment drifting past the mined window, not an engine bug. Those specs
 passed in the clean rerun. No K1 change touches the commute, saved trip,
 share or theme code paths.
 
-## Decisions parked for Mhofu
+## Rulings (Mhofu, 2026-07-24)
 
-1. **Deviations 6–9** (docs/DESIGN-DEVIATIONS.md): card as top layer dialog
-   over the map; board rows as section 8 cards; trust chip colours
-   including signal for the drift state (extends the signal ONLY rule the
-   same way the D1 place pin did); the Kombis chip on the home header.
-2. **Staging registry numbers** (docs/CHECKS-FOR-MHOFU.md item 11):
-   invented plates, 16 seats, and the trust thresholds.
+1. **Deviations 6–9 all RATIFIED** (docs/DESIGN-DEVIATIONS.md): card as
+   top layer dialog over the map; board rows as section 8 cards; trust
+   chip colours with signal red for drift — ruled a correct extension of
+   the signal ONLY rule because red is against facts, never character; the
+   Kombis header chip.
+2. **CHECKS item 11 approved and CLOSED** as staging placeholders: the
+   invented plates, 16 declared seats and the 10 fares / 3 days / 1 drift
+   day thresholds stay as named constants. Real plates and per vehicle
+   seats arrive with owner enrolment; threshold tuning waits for real
+   vehicle linked fares (N1 substrate).
 3. **Roadmap note, not built:** real positions and vehicle stamped
    redemptions arrive with conductor shift GPS (N1 substrate); when
    conductors start recording which kombi they work, the trust surface

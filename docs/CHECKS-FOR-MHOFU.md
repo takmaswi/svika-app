@@ -112,11 +112,13 @@ appear from zoom 13), and feel for stutter. If it stutters, say the word
 and 3D demotes to roadmap without argument (the toggle comes out, the
 style keeps the layer for later). Ruling lands back in M0-GATE-REPORT.md.
 
-## 11. Kombi board staging registry (batch K1, opened 2026-07-23)
+## 11. Kombi board staging registry (batch K1) — CLOSED 2026-07-24
 
-The four vehicle rows seeded for the kombi card and board
-(`packages/db/seed/seed.mjs`, STAGING_VEHICLES) are staging inventions that
-need your eyes:
+Mhofu approved the numbers below as staging placeholders on the K1 gate:
+the invented plates, the 16 declared seats and the trust thresholds stay
+as named constants. Real plates and per vehicle seats arrive with owner
+enrolment; threshold tuning waits for real vehicle linked fares (the N1
+substrate). Original items for the record:
 
 - Plates AEZ 4821, AFK 2903, AGT 1157, ADR 7346: invented in the Zimbabwean
   three letter four digit shape, not real kombis. Real plates arrive from
