@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: 9.18.0
         version: 9.18.0
+      '@mapbox/vector-tile':
+        specifier: 2.0.5
+        version: 2.0.5
       eslint:
         specifier: 9.18.0
         version: 9.18.0
@@ -20,6 +23,12 @@ importers:
       next:
         specifier: 15.1.12
         version: 15.1.12(@playwright/test@1.49.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      pbf:
+        specifier: 4.0.2
+        version: 4.0.2
+      pmtiles:
+        specifier: 4.4.1
+        version: 4.4.1
       prettier:
         specifier: 3.4.2
         version: 3.4.2
