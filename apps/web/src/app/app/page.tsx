@@ -319,17 +319,27 @@ export default async function RiderHome({
   if (voiceLang && boarded && corridorStopIds.length === corridorStops.length) {
     const alightIndex = corridorStopIds.indexOf(boarded.to_stop_id);
     if (alightIndex !== -1) {
-      const hasWalkAfter = tickets.some(
-        (other) =>
-          other.id !== boarded.id &&
-          (statusByTicket.get(other.id) ?? "issued") === "issued" &&
-          other.from_stop_id !== boarded.to_stop_id &&
-          Math.abs(
-            new Date(other.purchased_at).getTime() -
-              new Date(boarded.purchased_at).getTime(),
-          ) <
-            30 * 60_000,
-      );
+      // a walking leg follows when another boarding waits at a different
+      // stop, or when the trip was planned to a place (D1): the recorded
+      // walk tail on this ticket carries the destination beyond the stop
+      const tailRes = await supabase
+        .from("trip_walk_tails")
+        .select("walk_meters")
+        .eq("ticket_id", boarded.id)
+        .maybeSingle();
+      const hasWalkAfter =
+        tailRes.data !== null ||
+        tickets.some(
+          (other) =>
+            other.id !== boarded.id &&
+            (statusByTicket.get(other.id) ?? "issued") === "issued" &&
+            other.from_stop_id !== boarded.to_stop_id &&
+            Math.abs(
+              new Date(other.purchased_at).getTime() -
+                new Date(boarded.purchased_at).getTime(),
+            ) <
+              30 * 60_000,
+        );
       voiceTrip = {
         targetMeters: distanceAlongLine(
           corridorMetrics,
@@ -422,7 +432,10 @@ export default async function RiderHome({
           key={boarded!.id}
           lang={voiceLang}
           trip={voiceTrip}
-          mode="live"
+          // ?voice=replay compresses the ride's last stretch through the
+          // same engine (the old story step mechanic): the e2e suite and
+          // the gate recording use it; no product surface links to it
+          mode={params.voice === "replay" ? "replay" : "live"}
           captions={{
             approaching: t(voiceLang!, "voice.approaching"),
             getOff: t(voiceLang!, "voice.getOff"),
