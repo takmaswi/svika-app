@@ -25,3 +25,9 @@ tools/deck/pdf-frames/
 
 # deck music raw renders (studio intermediates, credits already spent; cut+master reads these)
 tools/deck/music-raw/
+
+# map tile pipeline intermediates (regenerate with pnpm map:tiles; see tools/map-tiles/README.md)
+tools/map-tiles/data/
+tools/map-tiles/fonts-src/
+# the built Harare PMTiles extract is a generated binary, served from the static dir
+apps/web/public/map/tiles/

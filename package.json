@@ -21,7 +21,11 @@
     "spine:train": "pnpm --filter @svika/spine train",
     "watchdog:eval": "pnpm --filter @svika/spine watchdog:eval",
     "watchdog:run": "pnpm --filter @svika/spine watchdog:run",
-    "watchdog:bad-day": "pnpm --filter @svika/spine watchdog:bad-day"
+    "watchdog:bad-day": "pnpm --filter @svika/spine watchdog:bad-day",
+    "map:tiles": "node tools/map-tiles/build-tiles.mjs",
+    "map:fonts": "node tools/map-tiles/build-glyphs.mjs",
+    "map:sprites": "node tools/map-tiles/build-sprites.mjs",
+    "map:assets": "node tools/map-tiles/build-sprites.mjs && node tools/map-tiles/build-glyphs.mjs && node tools/map-tiles/build-tiles.mjs"
   },
   "engines": {
     "node": ">=20"
