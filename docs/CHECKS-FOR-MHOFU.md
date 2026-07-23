@@ -111,3 +111,20 @@ home map, tap "3D buildings", pan and zoom around the CBD (buildings
 appear from zoom 13), and feel for stutter. If it stutters, say the word
 and 3D demotes to roadmap without argument (the toggle comes out, the
 style keeps the layer for later). Ruling lands back in M0-GATE-REPORT.md.
+
+## 11. Kombi board staging registry (batch K1, opened 2026-07-23)
+
+The four vehicle rows seeded for the kombi card and board
+(`packages/db/seed/seed.mjs`, STAGING_VEHICLES) are staging inventions that
+need your eyes:
+
+- Plates AEZ 4821, AFK 2903, AGT 1157, ADR 7346: invented in the Zimbabwean
+  three letter four digit shape, not real kombis. Real plates arrive from
+  fieldwork.
+- 16 declared seats each, mirroring the watchdog simulator assumption in
+  item 1 above. If real corridor kombis differ, the seed and the watchdog
+  config change together.
+- Trust thresholds (`apps/web/src/lib/kombi/trust.ts`): 10 verified fares
+  across 3 distinct days in 30 days before "verified fares" shows; 1 day of
+  hourly load above declared seats flips the drift state. All my invention;
+  the rules are named constants and change in one place.

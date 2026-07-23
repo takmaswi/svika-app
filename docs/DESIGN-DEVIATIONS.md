@@ -54,3 +54,43 @@ filled with the walk tone (`#575F53` day, `rgba(255,255,255,.55)` night),
 the same tone as the dashed walking tail it terminates, with the usual
 white stroke. Stops on the plan keep their signal pins untouched; a plan
 that ends at a stop is unchanged.
+
+## 6. Kombi card as a top layer dialog over the map (K1, proposed)
+
+No reference screen shows a card opened by tapping a map marker; the peek
+sheet in section 9 is fixed chrome, not a modal. K1 needs the tapped kombi's
+card above the live map without leaving it, so the card rides the same
+carrier as the ETA basis card (an earlier flagged spec addition): a native
+dialog in the browser top layer, section 8 card grammar (white card, 1.5px
+char border, large card radius, day dark shadow; night overlay card) over
+the char tinted scrim `rgba(22,29,24,.45)`. One primary action per screen
+holds: the card's only CTA is the board, in the exact section 5 anatomy.
+Awaiting ratification on the K1 gate.
+
+## 7. Board rows as section 8 cards (K1, proposed)
+
+The reference screens have no list-of-vehicles view. The board renders one
+section 8 card per kombi (white, 1.5px char border, 16px radius by day;
+night overlay card), stacked with section spacing, entering with the svk
+rise stagger from section 12. The facts block inside is identical to the
+marker card so the two surfaces cannot drift. Awaiting ratification on the
+K1 gate.
+
+## 8. Trust chip colours, including signal for the drift state (K1, proposed)
+
+The spec has no trust or status chip grammar, and section 2 rules signal
+`#E84C30` for live dots and stops ONLY. Mhofu's K1 instruction rules that
+red means unverified against facts, never a character score, so the chips
+are: unverified (the default) a quiet soft ink outline chip; verified fares
+forest with white label by day, marigold outline at night; seats drift
+signal with white label by day, signal outline at night. This extends the
+signal ONLY rule by one deliberate use; flagged for ratification exactly
+like the D1 place pin was.
+
+## 9. The kombis chip on the map home (K1, proposed)
+
+The reference home has no door to a vehicle list. The board must be one tap
+from the map home, so a glass chip labelled "Kombis" joins the existing
+header chip row (theme, language, profile), same section 7 chip anatomy as
+its neighbours, linking to /app/kombis. Awaiting ratification on the K1
+gate.

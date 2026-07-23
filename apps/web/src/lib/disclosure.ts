@@ -69,6 +69,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Simulated. There is no GPS feed from vehicles yet. A mock adapter moves four markers along the real road by replaying the time curves of the two real rides recorded 2026-07-07, so each direction keeps its own recorded pace, slowdowns and stops. The map carries a permanent Demo movement chip. A real feed swaps in behind the same adapter.",
   },
   {
+    feature: "Kombi card and board",
+    tier: 2,
+    detail:
+      "Mixed and labelled on screen. The moving position is the simulated fleet behind the VehicleFeed adapter; plates and declared seats are a seeded staging registry, not fieldwork; the trust record is real rules over the live fare ledger, which holds no vehicle linked fares yet, so every kombi honestly shows the unverified default. Trust states are counts on a vehicle's ledger, never a person. Real positions arrive later from conductor shift GPS behind the same adapter.",
+  },
+  {
     feature: "Saved trips (nickname a trip)",
     tier: 1,
     detail: "Real rider owned rows under RLS, proven by the security suite.",
