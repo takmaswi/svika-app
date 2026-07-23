@@ -1,7 +1,7 @@
 // Mobile QA at the reference device (360x740, cheap Android). Two proofs:
 // the idle home peek folds compact so the live map is the hero, and sign out
-// is reachable straight from the profile and drops back to the demo door so a
-// judge can re-enter. Both run at the config viewport; no resize needed.
+// is reachable straight from the profile and drops back to the front door.
+// Both run at the config viewport; no resize needed.
 import { test, expect } from "@playwright/test";
 import { loginAs, waitForHydration } from "./helpers";
 
@@ -44,7 +44,7 @@ test.describe("mobile QA", () => {
     await expect(page.locator("#from")).toBeVisible();
   });
 
-  test("sign out is reachable from the profile and returns to the demo door", async ({
+  test("sign out is reachable from the profile and returns to the front door", async ({
     page,
   }) => {
     await loginAs(page, "RIDER");
@@ -55,9 +55,9 @@ test.describe("mobile QA", () => {
     await expect(signOut).toBeVisible();
     await signOut.click();
 
-    // back at the landing door, ready for the next judge
+    // back at the front door, signed out
     await expect(page).toHaveURL(/localhost:3000\/(\?.*)?$/, { timeout: 15_000 });
-    await expect(page.getByTestId("demo-door")).toBeVisible();
+    await expect(page.getByTestId("landing-cta")).toBeVisible();
 
     // the session is truly gone: the guarded app bounces to login
     await page.goto("/app");

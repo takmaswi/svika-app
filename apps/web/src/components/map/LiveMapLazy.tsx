@@ -15,19 +15,10 @@ export function LiveMapLazy({
   labels,
   overlay,
   camera,
-  vehicleBadges,
 }: {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
   camera?: "corridor" | "boarding";
-  vehicleBadges?: Record<string, string>;
 }) {
-  return (
-    <Inner
-      labels={labels}
-      overlay={overlay}
-      camera={camera}
-      vehicleBadges={vehicleBadges}
-    />
-  );
+  return <Inner labels={labels} overlay={overlay} camera={camera} />;
 }

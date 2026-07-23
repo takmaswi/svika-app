@@ -65,12 +65,6 @@ interface LiveMapProps {
    * the camera frames the planned trip above the sheet.
    */
   camera?: "corridor" | "boarding";
-  /**
-   * Per vehicle badge text (the capacity vision scene): a §7 place chip
-   * riding above each kombi, keyed by vehicle id. The marker itself is
-   * untouched; the badge is its own unrotated marker at the same point.
-   */
-  vehicleBadges?: Record<string, string>;
 }
 
 /** The active Mbare Sun map theme, from the same signals the CSS tokens use. */
@@ -78,9 +72,7 @@ function currentMapTheme(): MapTheme {
   const forced = document.documentElement.dataset.theme;
   if (forced === "dark") return "night";
   if (forced === "light") return "day";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "night"
-    : "day";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "day";
 }
 
 function boundsOf(coords: LngLat[]): [LngLat, LngLat] {
@@ -255,9 +247,10 @@ function addCorridorLayers(
         type: "LineString",
         // during the entrance the route grows from the rank (§12 svk-draw);
         // a muted corridor under a plan is context and never animates
-        coordinates: hidden && !muted
-          ? sliceAtDistances(corridorMetrics, 0, 1)
-          : corridorLine.coordinates,
+        coordinates:
+          hidden && !muted
+            ? sliceAtDistances(corridorMetrics, 0, 1)
+            : corridorLine.coordinates,
       },
     },
   });
@@ -323,12 +316,7 @@ function addCorridorLayers(
   });
 }
 
-export function LiveMap({
-  labels,
-  overlay,
-  camera = "corridor",
-  vehicleBadges,
-}: LiveMapProps) {
+export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const feedRef = useRef<VehicleFeed | null>(null);
@@ -366,10 +354,7 @@ export function LiveMap({
     let rawStyle: unknown = null;
     let entrancePending = false;
     const markers = new Map<string, maplibregl.Marker>();
-    const badges = new Map<string, maplibregl.Marker>();
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const themeObserver = new MutationObserver(applyTheme);
 
@@ -415,9 +400,7 @@ export function LiveMap({
             },
           });
         } else if (overlay) {
-          const src = m.getSource("plan-legs") as
-            | maplibregl.GeoJSONSource
-            | undefined;
+          const src = m.getSource("plan-legs") as maplibregl.GeoJSONSource | undefined;
           src?.setData({
             type: "FeatureCollection",
             features: overlay.legs.map((l, i) => {
@@ -490,8 +473,8 @@ export function LiveMap({
         : camera === "boarding"
           ? BOARDING_FIT
           : { padding: 48 };
-      // the story stage renders the map in a shorter box; paddings that meet
-      // the container strand fitBounds on the world view, so clamp them
+      // in a short container paddings that meet the box strand fitBounds on
+      // the world view, so clamp them
       const fitBoundsOptions = {
         ...rawFit,
         padding: clampFitPadding(
@@ -510,10 +493,7 @@ export function LiveMap({
         // added by hand below: bottom right would hide under the peek sheet
         attributionControl: false,
       });
-      map.addControl(
-        new maplibregl.AttributionControl({ compact: true }),
-        "top-right",
-      );
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right");
       mapRef.current = map;
       map.touchPitch.disable();
 
@@ -558,22 +538,6 @@ export function LiveMap({
               markers.set(pos.id, marker);
             } else {
               marker.setLngLat(pos.lngLat).setRotation(pos.headingDeg);
-            }
-            const badgeText = vehicleBadges?.[pos.id];
-            if (badgeText && map) {
-              let badge = badges.get(pos.id);
-              if (!badge) {
-                const el = document.createElement("span");
-                el.className = "kombi-capacity-chip";
-                el.dataset.testid = "capacity-badge";
-                el.textContent = badgeText;
-                badge = new maplibregl.Marker({ element: el, offset: [0, -34] })
-                  .setLngLat(pos.lngLat)
-                  .addTo(map);
-                badges.set(pos.id, badge);
-              } else {
-                badge.setLngLat(pos.lngLat);
-              }
             }
             if (stampData) {
               // e2e reads these to prove movement in coordinates, not pixels

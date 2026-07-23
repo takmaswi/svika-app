@@ -26,186 +26,13 @@ export const dict = {
     sn: "Ronga rwendo rwako, wana mazano usati wasimuka, uye famba wakachengeteka.",
   },
   "landing.cta": { en: "Find your kombi", sn: "Tsvaga kombi yako" },
-  "landing.statChange": { en: "Change kept", sn: "Chenji yakachengetwa" },
-  "landing.statWeek": { en: "this week", sn: "svondo rino" },
   "landing.signinHint": {
     en: "Hwindi or fleet owner?",
     sn: "Hwindi or fleet owner?",
   },
   "landing.signinLink": { en: "Sign in here", sn: "Sign in here" },
-  "landing.demoLead": {
-    en: "Walk straight in as Tino, a demo rider on the live system. No sign up.",
-    sn: "Pinda saTariro, arikungo tester system. Hapana kunyoresa.",
-  },
-  "landing.demoEnter": { en: "Enter the demo", sn: "Pinda mudemo" },
-  "landing.demoOwner": { en: "Owner dashboard", sn: "Dashboard yemuridzi" },
-  "landing.shelfReal": {
-    en: "Real stories, real money on the live system",
-    sn: "Nyaya chaidzo, mari chaiyo pasystem iri kushanda",
-  },
-  "landing.shelfIntel": {
-    en: "The intelligence, three spines with their evidence",
-    sn: "Njere dzacho, misana mitatu neumbowo hwayo",
-  },
-  "landing.intelEta": {
-    en: "How Svika knows your arrival",
-    sn: "Kuziva kunoita Svika kuti unosvika nguvai",
-  },
-  "landing.intelTakunda": {
-    en: "Takunda's alert, the learned routine",
-    sn: "Yeuchidzo yaTakunda, zvayakadzidza",
-  },
-  "landing.intelWatchdog": {
-    en: "The watchdog catches a leak",
-    sn: "Murindi anobata pabiwa mari",
-  },
-  "landing.shelfVision": {
-    en: "Vision scenes, simulations of what ships next",
-    sn: "Zviratidzo zveramangwana, nezviri kuuya",
-  },
-  "landing.visionTinashe": {
-    en: "The crash flow, Tinashe",
-    sn: "Zvekuita paita tsaona, Tinashe",
-  },
-  "landing.visionGogo": { en: "Gogo's mbudzi", sn: "Mbudzi yaGogo" },
-  "landing.visionCapacity": { en: "Kombi capacity", sn: "Kuzara kwekombi" },
-  "landing.demoStory1": {
-    en: "Change becomes credit",
-    sn: "Chenji inova kiredhiti",
-  },
-  "landing.demoStory2": {
-    en: "Two kombis and a walk",
-    sn: "Makombi maviri nekufamba",
-  },
-  "landing.demoStory4": {
-    en: "Rudo's night ride",
-    sn: "Rwendo rwaRudo rwehusiku",
-  },
-  "landing.demoErr": {
-    en: "The demo door is busy. Try again in a minute.",
-    sn: "Demo yakabatikana pari zvino. Edza zvakare mupfupi.",
-  },
 
   "demo.chip": { en: "Demo account", sn: "Akaunti yedemo" },
-
-  "story.next": { en: "Next", sn: "Mberi" },
-  "story.back": { en: "Back a step", sn: "Dzokera kumashure" },
-  "story.stay": { en: "Stay and explore", sn: "Chimbosara uone zvimwe" },
-  "story.shelf": { en: "Back to the stories", sn: "Dzokera kunyaya" },
-  "story.live": {
-    en: "Now try it yourself. Everything on this screen is live.",
-    sn: "Zvino zviedze iwe. Zvese zviri pano zvirikushanda chaihwo.",
-  },
-  "story.liveVision": {
-    en: "Now try it yourself. This scene is a simulation and touches no real account.",
-    sn: "Zvino zviedze iwe. Izvi ndezvekuedza chete, hazvibate akaunti chaiyo.",
-  },
-  "story.exit": { en: "Exit story", sn: "Buda munyaya" },
-  "story.err": {
-    en: "That step could not run. Try next again, or exit the story.",
-    sn: "Izvi hazvina kushanda. Edza zvakare, kana kuti buda.",
-  },
-  "story.preview": { en: "Preview", sn: "Muonero" },
-  "story.working": { en: "Working…", sn: "Kushanda…" },
-  "story.beatCode": { en: "Board code", sn: "Kodhi yekukwira" },
-  "story.beatCleared": { en: "Cleared", sn: "Yabviswa" },
-  "story.beatSimFriend": { en: "Simulated friend", sn: "Shamwari yekuratidzira" },
-  "story.beatMother": { en: "Mother's live view", sn: "Muono waamai unorarama" },
-  "story.beatOnBoard": { en: "On board", sn: "Ari mukombi" },
-  "story.town.0": {
-    en: "Preview: Tino books her trip and her 4 digit board code appears.",
-    sn: "Muonero: Tino anobhuka rwendo rwake uye kodhi yake ye4 inobuda.",
-  },
-  "story.town.1": {
-    en: "Preview: on the kombi the hwindi clears her board code.",
-    sn: "Muonero: mukombi hwindi anobvisa kodhi yake yekukwira.",
-  },
-  "story.town.2": {
-    en: "Preview: her 50c change drops straight into her wallet and the balance climbs.",
-    sn: "Muonero: chenji yake yemasendi 50 inopinda muchikwama chake uye mari yowedzera.",
-  },
-  "story.town.3": {
-    en: "That was the preview. Now watch it happen for real. Next books a real cash trip through the engine.",
-    sn: "Uyo waiva muonero. Zvino tarisa zvichiitika chaizvo. Enderera inobhuka rwendo rwecash chaidzo nesystem.",
-  },
-  "story.town.4": {
-    en: "Her real 4 digit code is ready. Tap to let the simulated hwindi clear it on the live ledger.",
-    sn: "Kodhi yake chaiyo ye4 yagadzirira. Baya kuti hwindi yekuratidzira ibvise pabhuku remari chairo.",
-  },
-  "story.town.5": {
-    en: "Her 50 cents of change is real wallet credit now, on the live ledger, not a promise on a moving kombi. Story over.",
-    sn: "Chenji yake yemasendi 50 yava mari chaiyo muchikwama, pabhuku remari chairo, kwete vimbiso mukombi inofamba. Nyaya yapera.",
-  },
-  "story.transfer.0": {
-    en: "Not every trip is one kombi. Heights to Avondale takes two, with a short walk between them.",
-    sn: "Haisi nzendo dzese dzine kombi imwe. Heights kusvika Avondale inoda mbiri, nekufamba kupfupi pakati.",
-  },
-  "story.transfer.1": {
-    en: "The walking leg is drawn dashed on the real map, and one quote covers both kombis: $3.00.",
-    sn: "Chikamu chekufamba chakadhirowewa nemadota pamepu chaiyo, uye mutengo mumwe unobata makombi ese: $3.00.",
-  },
-  "story.transfer.2": {
-    en: "One tap bought both legs from her wallet. Two boarding codes, one per kombi. Story over.",
-    sn: "Kubaya kamwe kwatenga zvikamu zvese kubva muchikwama. Makodhi maviri, imwe pakombi imwe neimwe. Nyaya yapera.",
-  },
-
-  "story.tk.0": {
-    en: "Meet Takunda. He rides this corridor to work every morning, and his alert is live: the usual kombi is close, with today's real minutes from the live feed. A fixed alarm cannot know that.",
-    sn: "Uyu ndiTakunda. Anokwira nzira iyi kubasa mangwanani ega ega, uye yeuchidzo yake iri kushanda: kombi yaanogara achikwira yaswedera, nemaminitsi echokwadi anhasi. Alarm yakagadzikwa haigone kuzviziva.",
-  },
-  "story.tk.1": {
-    en: "His trip lives as a quick pick. Next books it from his wallet through the real engine.",
-    sn: "Rwendo rwake rwakachengetwa. Enderera inorubhuka kubva muchikwama chake nesystem chaiyo.",
-  },
-  "story.tk.2": {
-    en: "His boarding card is ready. The hwindi here is simulated; the clearing and the money move through the real ledger.",
-    sn: "Kadhi rake rekukwira ragadzirira. Hwindi pano ndeyekuratidzira; kubvisa nemari zvinofamba nebhuku remari chairo.",
-  },
-  "story.tk.3": {
-    en: "He is on board. Watch: the voice speaks as his stop nears. The last stretch of the ride is fast forwarded; the triggers are the real engine.",
-    sn: "Ava mukombi. Tarisa: inzwi rinotaura chiteshi chake chava pedyo. Chikamu chekupedzisira cherwendo chakakurumidziswa; zvinomutsa inzwi ndezvechokwadi.",
-  },
-
-  "story.ru.0": {
-    en: "Preview: it is late and Rudo's wallet was stolen, so her balance reads zero. A simulated friend sends $2 and it climbs to $2.00.",
-    sn: "Muonero: kwadoka uye chikwama chaRudo chakabiwa, saka mari yake iri pazero. Shamwari yekuratidzira inotumira $2 uye inokwira kusvika $2.00.",
-  },
-  "story.ru.1": {
-    en: "Preview: she books the kombi home and her 4 digit board code appears.",
-    sn: "Muonero: anobhuka kombi yekuenda kumba uye kodhi yake ye4 inobuda.",
-  },
-  "story.ru.2": {
-    en: "Preview: on the kombi the hwindi clears her board code.",
-    sn: "Muonero: mukombi hwindi anobvisa kodhi yake yekukwira.",
-  },
-  "story.ru.3": {
-    en: "Preview: she shares the ride, and her mother opens the live link.",
-    sn: "Muonero: anogovera rwendo, uye amai vake vanovhura link inorarama.",
-  },
-  "story.ru.4": {
-    en: "That was the preview. Now watch it happen for real. A friend sends real credit into escrow; the friend is simulated, the ledger is real.",
-    sn: "Uyo waiva muonero. Zvino tarisa zvichiitika chaizvo. Shamwari inotumira mari chaiyo mukuchengetedza; shamwari ndeyekuratidzira, bhuku remari nderechokwadi.",
-  },
-  "story.ru.5": {
-    en: "A claim code reaches her phone (simulated SMS). Next types it in; the $2 lands in her wallet.",
-    sn: "Kodhi yekutora inosvika pafoni yake (SMS yekuratidzira). Enderera inoinyora; $2 inopinda muchikwama chake.",
-  },
-  "story.ru.6": {
-    en: "The credit is real wallet money now. She books the kombi home with it.",
-    sn: "Mari yava mari chaiyo yechikwama. Anobhuka kombi yekuenda kumba nayo.",
-  },
-  "story.ru.7": {
-    en: "Her boarding card is ready and the simulated hwindi clears her code on the live ledger. She is on her way.",
-    sn: "Kadhi rake rekukwira ragadzirira uye hwindi yekuratidzira yabvisa kodhi yake pabhuku remari chairo. Ava munzira.",
-  },
-  "story.ru.8": {
-    en: "Her mother worries. Next mints a live share link, straight from her ticket.",
-    sn: "Amai vake vanofunganya. Enderera inogadzira link yekuona rwendo, kubva patikiti rake.",
-  },
-  "story.ru.9": {
-    en: "This is exactly what her mother sees, no account needed: the live trip and arrival, never the code or the wallet. The link dies when the trip ends.",
-    sn: "Izvi ndizvo chaizvo zvinoonekwa naamai vake, pasina akaunti: rwendo runorarama nekusvika, kwete kodhi kana chikwama. Link inofa kana rwendo rwapera.",
-  },
 
   "login.title": { en: "Sign in to Svika", sn: "Sign in to Svika" },
   "login.phoneLabel": { en: "Phone number", sn: "Phone number" },
@@ -745,13 +572,19 @@ export const dict = {
     en: "Working against the live database.",
     sn: "Chiri kushanda pane database chaiyo.",
   },
-  "register.tier2": { en: "Staged, always labelled", sn: "Chakagadzirirwa, chinogara chakanyorwa" },
+  "register.tier2": {
+    en: "Staged, always labelled",
+    sn: "Chakagadzirirwa, chinogara chakanyorwa",
+  },
   "register.tier2Note": {
     en: "Clickable with a fixed or simulated backend, labelled on screen.",
     sn: "Chinodzvanywa asi chine backend yakagadzirirwa, chakanyorwa pachikamu.",
   },
   "register.updated": { en: "Last updated", sn: "Yagadziridzwa" },
-  "register.link": { en: "What is real, what is staged", sn: "Zvechokwadi, nezvakagadzirirwa" },
+  "register.link": {
+    en: "What is real, what is staged",
+    sn: "Zvechokwadi, nezvakagadzirirwa",
+  },
   "repo.link": { en: "View the code", sn: "Ona kodhi" },
 
   "lang.english": { en: "English", sn: "Chirungu" },
@@ -959,155 +792,13 @@ export const dict = {
   },
 
   // --- the intelligence doors: the three spines with their evidence -------
-  "story.eta.0": {
-    en: "Watch the arrives number on the card, and the label under it. That label always says what the number stands on: rides we recorded on this road with a phone, or plainly a demo estimate if the engine is ever unreachable. Tap any basis label in the app and it explains itself.",
-    sn: "Tarisa nhamba yekusvika pakadhi, nechiratidzo chiri pasi payo. Chiratidzo icho chinogara chichitaura painomira nhamba: nzendo dzatakarekodha munzira ino nefoni, kana kuti fungidziro yekuratidzira pachena kana injini isingawanikwe. Baya chiratidzo chipi zvacho muapp chinozvitsanangura.",
-  },
-  "story.eta.1": {
-    en: "The whole ladder: a measured average serves today, a trained model waits, and one committed rule promotes it only when it beats the average on rides it never saw. This table is the evidence itself.",
-    sn: "Danho rese: avhareji yakayerwa iri kushanda nhasi, modhi yakadzidziswa yakamirira, uye mutemo mumwe wakachengetwa unoikwidza chete kana ichikunda avhareji panzendo yaisati yaona. Tafura iyi ndihwo uchapupu pachahwo.",
-  },
-
-  "story.wd.0": {
-    en: "This is the owner's view. Every money figure comes from the real ledger. The watchdog card scans a simulated history, labelled as such, because a watchdog needs months and this network is days old.",
-    sn: "Uku ndiko kuona kwemuridzi. Nhamba yega yega yemari inobva mubhuku remari chairo. Kadhi remurindi rinoongorora nhoroondo yakagadzirwa, yakanyorwa saizvozvo, nekuti murindi anoda mwedzi uye network iyi ine mazuva.",
-  },
-  "story.wd.1": {
-    en: "Now the test. Next plants a heavy skim on yesterday inside that simulated history: one kombi of four hands over far less than it took. The route total barely moves.",
-    sn: "Zvino muedzo. Enderera inoisa kubiwa kukuru pazuro munhoroondo yakagadzirwa iya: kombi imwe pana ina inopa zvishoma kupfuura zvayakatora. Mari yese yenzira haizununguke zvakanyanya.",
-  },
-  "story.wd.2": {
-    en: "Read the flag. The fixed threshold rule stayed silent, exactly as its committed score said it would: one kombi's skim dilutes to a few percent at route level. The isolation forest flagged the day.",
-    sn: "Verenga chiratidzo. Mutemo wakagadzikwa wakaramba wakanyarara, sekutaura kwakaita zvibodzwa zvawo zvakachengetwa: kubiwa kwekombi imwe kunoderera kusvika pazvikamu zvishoma panzira yese. Sango rekupatsanura rakadoma zuva iri.",
-  },
-  "story.wd.3": {
-    en: "The explanation reads in English or Shona, and it names a day, a route and an unnamed vehicle, never a person. That rule is enforced by a unit test, not a promise.",
-    sn: "Tsanangudzo inoverengeka muChirungu kana muchiShona, uye inodoma zuva, nzira nekombi isina zita, kwete munhu. Mutemo uyu unosimbiswa nebvunzo yekodhi, kwete vimbiso.",
-  },
 
   // --- vision scenes: simulations of what ships next, always stamped ------
-  "vision.stamp": { en: "Simulation", sn: "Demo" },
 
   // Tinashe's crash flow
-  "story.tin.0": {
-    en: "Tinashe is riding home from a job interview when his kombi stops hard. This moment is staged: nothing detects crashes in this web app today.",
-    sn: "Tinashe ari kudzokera kumba achibva kuinterview yebasa apo kombi yake inomira zvakaoma. Chiitiko ichi ndechekufananidzira: hapana chinobata tsaona muapp iyi nhasi.",
-  },
-  "story.tin.1": {
-    en: "His mother's phone gets the auto message with a live location link. The link grammar is Svika's real share my ride feature.",
-    sn: "Foni yaamai vake inogamuchira meseji nelink yekuona paari. Link iyi inoshanda semashandiro eshare my ride chaiyo yeSvika.",
-  },
-  "story.tin.2": {
-    en: "A responder opens the link and sees what Tinashe chose to store: next of kin and medical aid. These are the real profile fields from the app today, shown with demo persona values.",
-    sn: "Mubatsiri anovhura link oona zvakasarudzwa naTinashe kuchengetwa: hama yepedyo nemedical aid. Ndiwo minda chaiyo yeprofile iripo nhasi, ichiratidzwa neruzivo rwemuenzaniso.",
-  },
-  "story.tin.3": {
-    en: "Plainly: crash detection ships with the native app, not this build. What is live today is the profile's emergency details, consented and protected, one tap from help.",
-    sn: "Zviri pachena: kubata tsaona kunouya neapp yepafoni, kwete build ino. Chiripo nhasi ndicho ruzivo rwepakaoma rwepaprofile, rwakabvumirwa uye rwakachengetedzwa, padyo nerubatsiro.",
-  },
-  "vision.tin.alertH": {
-    en: "Sudden stop on the corridor",
-    sn: "Kumbomira kamwe kamwe mu route",
-  },
-  "vision.tin.alertNear": { en: "near", sn: "pedyo ne" },
-  "vision.tin.alertSent": {
-    en: "The auto message with his live location is on its way to Amai Moyo.",
-    sn: "Meseji ine paari izvozvi iri kuenda kuna Amai Moyo.",
-  },
-  "vision.tin.kinPhone": { en: "Amai Moyo's phone", sn: "Foni yaAmai Moyo" },
-  "vision.tin.kinMsg": {
-    en: "Tinashe's kombi stopped suddenly near Copacabana. Follow his live location:",
-    sn: "Kombi yaTinashe yamira nekukurumidza pedyo neCopacabana. Ona paari izvozvi:",
-  },
-  "vision.tin.kinFrom": {
-    en: "Auto message from Svika",
-    sn: "Message yega kubva kuSvika",
-  },
-  "vision.tin.responderWhy": {
-    en: "What a responder sees through the emergency link: only what Tinashe chose to store.",
-    sn: "Zvinoonekwa nemubatsiri kuburikidza nelink yepakaoma: zvakasarudzwa naTinashe chete.",
-  },
-  "vision.tin.responderNote": {
-    en: "These fields are live in the product today. Only the rider can store them, with consent recorded, and removal is one tap on the profile.",
-    sn: "Minda iyi inoshanda muapp nhasi. Mufambi chete ndiye anoichengeta, nemvumo yakanyorwa, uye kubvisa kuri padyo paprofile.",
-  },
 
   // Gogo on her mbudzi
-  "story.gogo.0": {
-    en: "Gogo does not own a smartphone and never will. Her mbudzi's keypad works: dial *123# and press OK.",
-    sn: "Gogo havana smartphone uye havazombovi nayo. Makiyi embudzi yavo anoshanda: dhayira *123# wobaya OK.",
-  },
-  "story.gogo.1": {
-    en: "Every menu here is real tested code, and the how far answer comes from the same eta engine the app uses. What waits is a telco aggregator agreement: a contract, not a build.",
-    sn: "Menyu imwe neimwe pano icode chaiyo yakaedzwa, uye mhinduro yekuti kombi iri kure sei inobva kuinjini imwe chete yeeta inoshandiswa neapp. Chakamirirwa chibvumirano nemakambani emafoni: kondirakiti, kwete kuvaka.",
-  },
-  "vision.gogo.menu1": { en: "1. My credit", sn: "1. Mari yangu (Credit)" },
-  "vision.gogo.menu2": {
-    en: "2. Book my usual trip",
-    sn: "2. Bhuka rwendo rwangu rwemazuva ese",
-  },
-  "vision.gogo.menu3": {
-    en: "3. How far is my kombi",
-    sn: "3. Kombi yangu iri kupi",
-  },
-  "vision.gogo.menu4": { en: "4. Claim my change", sn: "4. Tora chenji yangu" },
-  "vision.gogo.invalid": {
-    en: "That choice is not on the menu.",
-    sn: "Sarudzo iyoyo haipo pamenyu.",
-  },
-  "vision.gogo.claimPrompt": {
-    en: "Enter the 4 digit change code from your ride. 0 goes back.",
-    sn: "Nyora kodi yema number 4 yechenji kubva parwendo rwako. 0 inodzoka.",
-  },
-  "vision.gogo.balance": { en: "Your credit:", sn: "Mari yako (Credit):" },
-  "vision.gogo.booked": { en: "Booked:", sn: "Yabhukiwa:" },
-  "vision.gogo.bookedCode": { en: "Show the hwindi code", sn: "Ratidza hwindi kodi" },
-  "vision.gogo.eta": { en: "Your kombi is about", sn: "Kombi yako inoda kukwana" },
-  "vision.gogo.etaDemo": { en: "(demo estimate)", sn: "(demo estimate)" },
-  "vision.gogo.claimed": {
-    en: "Change kept as credit. New balance:",
-    sn: "Chenji yachengetwa se kiredhiti. Balance itsva:",
-  },
-  "vision.gogo.claimRejected": {
-    en: "That code did not match a ride.",
-    sn: "Kodi iyi haienderane nerwendo.",
-  },
-  "vision.gogo.unavailable": {
-    en: "Service not available now. Try again.",
-    sn: "Basa iri harisi kuwanikwa parizvino. Edza zvakare.",
-  },
-  "vision.gogo.idleHint": { en: "Dial", sn: "Dzvanya" },
-  "vision.gogo.endedHint": {
-    en: "Session ended. Dial again:",
-    sn: "Sesheni yapera. Dzvanya zvakare:",
-  },
-  "vision.gogo.waiting": { en: "Please wait", sn: "Ndapota mirira" },
-  "vision.gogo.keyOk": { en: "OK", sn: "OK" },
-  "vision.gogo.keyClear": { en: "C", sn: "C" },
   // Kombi capacity
-  "story.cap.0": {
-    en: "Every kombi on the corridor wears how full its conductor declares it. The card holds that number against what redeemed tickets and check ins prove.",
-    sn: "Kombi imwe neimwe munzira inoratidza kuzara kwainotaurwa nahwindi wayo. Kadhi rinoenzanisa nhamba iyoyo nezvinoratidzwa nematikiti akashandiswa nekupinda kwakanyorwa.",
-  },
-  "story.cap.1": {
-    en: "When declared and proven drift apart, that is flagged as a pattern to review, never a person to accuse. This ships when real vehicles stream data.",
-    sn: "Kana zvakataurwa nezvakaratidzwa zvikasiyana, zvinongoratidzwa semaitiro ekuongorora, kwete munhu wekupomera. Izvi zvinouya kana mota chaidzo dzotumira ruzivo.",
-  },
-  "vision.cap.heading": {
-    en: "How full, honestly",
-    sn: "Kuzara chaiko, pachokwadi",
-  },
-  "vision.cap.colDeclared": { en: "Declares", sn: "Zvinotaurwa" },
-  "vision.cap.colProven": { en: "Proven", sn: "Zvakaratidzwa" },
-  "vision.cap.drift": {
-    en: "drifts today. A pattern to review, never an accusation.",
-    sn: "iri kusiyana nhasi. Maitiro ekuongorora, kwete mhosva.",
-  },
-
-  "vision.gogo.note": {
-    en: "The menus on this phone are real code with unit tests beside them, and the how far answer calls the live arrival engine. Reaching real handsets waits on a telco aggregator agreement, which is a contract, not a build. The money menus here move nothing.",
-    sn: "Menyu dziri pafoni iyi icode chaiyo ine miedzo padyo payo, uye mhinduro yekure kwekombi inodana injini chaiyo yekusvika. Kusvika pamafoni chaiwo kwakamirira chibvumirano nemakambani emafoni, kondirakiti kwete kuvaka. Menyu dzemari pano hadzifambisi chinhu.",
-  },
 } as const satisfies Record<string, Entry>;
 
 export type DictKey = keyof typeof dict;

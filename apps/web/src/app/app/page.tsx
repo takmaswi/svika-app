@@ -12,7 +12,6 @@ import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
 import { REPO_URL } from "@/lib/site";
 import { EtaBasis } from "@/components/home/EtaBasis";
-import { StoryStage } from "@/components/story/StoryStage";
 import { etaBasisCard, etaBasisLabel } from "@/lib/eta-provenance";
 import {
   ArrowIcon,
@@ -301,316 +300,309 @@ export default async function RiderHome({
   }
 
   return (
-    <StoryStage params={params} lang={lang}>
-      <main className="home-screen">
-        <div className="home-map">
-          <LiveMapLazy
-            labels={{
-              ariaLabel: t(lang, "map.ariaLabel"),
-              demoChip: t(lang, "map.demoChip"),
-              unavailable: t(lang, "map.unavailable"),
-              viewWhole: t(lang, "map.viewWhole"),
-              viewNear: t(lang, "map.viewNear"),
-            }}
-            camera="boarding"
-          />
-        </div>
+    <main className="home-screen">
+      <div className="home-map">
+        <LiveMapLazy
+          labels={{
+            ariaLabel: t(lang, "map.ariaLabel"),
+            demoChip: t(lang, "map.demoChip"),
+            unavailable: t(lang, "map.unavailable"),
+            viewWhole: t(lang, "map.viewWhole"),
+            viewNear: t(lang, "map.viewNear"),
+          }}
+          camera="boarding"
+        />
+      </div>
 
-        <header className="home-chips">
-          <span className="home-chip home-chip-brand svika-glass">
-            {/* Exported wordmark, never rebuilt. */}
-            <img className="wordmark" src="/wordmark.svg" alt="Svika" height={22} />
+      <header className="home-chips">
+        <span className="home-chip home-chip-brand svika-glass">
+          {/* Exported wordmark, never rebuilt. */}
+          <img className="wordmark" src="/wordmark.svg" alt="Svika" height={22} />
+        </span>
+        <span className="home-chips-right">
+          <span className="home-chip svika-glass">
+            <ThemeToggle
+              initialTheme={theme}
+              toDarkLabel={t(lang, "theme.toDark")}
+              toLightLabel={t(lang, "theme.toLight")}
+            />
           </span>
-          <span className="home-chips-right">
-            <span className="home-chip svika-glass">
-              <ThemeToggle
-                initialTheme={theme}
-                toDarkLabel={t(lang, "theme.toDark")}
-                toLightLabel={t(lang, "theme.toLight")}
+          <span className="home-chip svika-glass">
+            <LanguageToggle lang={lang} />
+          </span>
+          <Link
+            className="home-chip svika-glass home-chip-profile touch-target"
+            href="/app/profile"
+            aria-label={t(lang, "profile.open")}
+            data-testid="profile-chip"
+          >
+            <InitialAvatar name={fullName} size="chip" />
+          </Link>
+        </span>
+      </header>
+
+      {voiceTrip && (
+        <VoiceGuideLazy
+          key={boarded!.id}
+          lang={voiceLang}
+          trip={voiceTrip}
+          mode="live"
+          captions={{
+            approaching: t(voiceLang!, "voice.approaching"),
+            getOff: t(voiceLang!, "voice.getOff"),
+            walk: t(voiceLang!, "voice.walk"),
+          }}
+        />
+      )}
+
+      {commuteAlert && (
+        <aside className="commute-alert svika-glass-strong" data-testid="commute-alert">
+          <span className="svika-live-dot" aria-hidden>
+            <span className="svika-ripple-ring" />
+            <span className="svika-pulse-dot" />
+          </span>
+          <span className="commute-alert-body">
+            <span className="svika-body commute-alert-title">
+              {t(lang, "alert.title")}
+            </span>
+            <span className="svika-meta">
+              {commuteAlert.fromName} {toWord} {commuteAlert.toName} ·{" "}
+              <EtaBasis
+                label={etaBasisLabel(lang, commuteAlert.eta)}
+                card={etaBasisCard(lang, commuteAlert.eta)}
+                moreHref="/app/intelligence"
+                moreLabel={t(lang, "eta.cardMore")}
               />
             </span>
-            <span className="home-chip svika-glass">
-              <LanguageToggle lang={lang} />
-            </span>
-            <Link
-              className="home-chip svika-glass home-chip-profile touch-target"
-              href="/app/profile"
-              aria-label={t(lang, "profile.open")}
-              data-testid="profile-chip"
-            >
-              <InitialAvatar name={fullName} size="chip" />
-            </Link>
           </span>
-        </header>
+          <span className="peek-mono commute-alert-eta">
+            ~{commuteAlert.eta.minutes} {t(lang, "common.minutes")}
+          </span>
+        </aside>
+      )}
 
-        {voiceTrip && (
-          <VoiceGuideLazy
-            key={boarded!.id}
-            lang={voiceLang}
-            trip={voiceTrip}
-            mode={params.voicedemo === "1" ? "replay" : "live"}
-            captions={{
-              approaching: t(voiceLang!, "voice.approaching"),
-              getOff: t(voiceLang!, "voice.getOff"),
-              walk: t(voiceLang!, "voice.walk"),
-            }}
-          />
-        )}
-
-        {commuteAlert && (
-          <aside
-            className="commute-alert svika-glass-strong"
-            data-testid="commute-alert"
-          >
-            <span className="svika-live-dot" aria-hidden>
-              <span className="svika-ripple-ring" />
-              <span className="svika-pulse-dot" />
-            </span>
-            <span className="commute-alert-body">
-              <span className="svika-body commute-alert-title">
-                {t(lang, "alert.title")}
-              </span>
-              <span className="svika-meta">
-                {commuteAlert.fromName} {toWord} {commuteAlert.toName} ·{" "}
-                <EtaBasis
-                  label={etaBasisLabel(lang, commuteAlert.eta)}
-                  card={etaBasisCard(lang, commuteAlert.eta)}
-                  moreHref="/app/intelligence"
-                  moreLabel={t(lang, "eta.cardMore")}
-                />
-              </span>
-            </span>
-            <span className="peek-mono commute-alert-eta">
-              ~{commuteAlert.eta.minutes} {t(lang, "common.minutes")}
-            </span>
-          </aside>
-        )}
-
-        <HomeSheet
-          openLabel={t(lang, "home.sheetOpen")}
-          closeLabel={t(lang, "home.sheetClose")}
-          title={t(lang, "rider.searchTitle")}
-          hint={t(lang, "home.sheetHint")}
-          defaultOpen={justBooked || sheetOpen}
-          peek={
-            <>
-              <form className="home-search" action="/app/plan" method="get">
+      <HomeSheet
+        openLabel={t(lang, "home.sheetOpen")}
+        closeLabel={t(lang, "home.sheetClose")}
+        title={t(lang, "rider.searchTitle")}
+        hint={t(lang, "home.sheetHint")}
+        defaultOpen={justBooked || sheetOpen}
+        peek={
+          <>
+            <form className="home-search" action="/app/plan" method="get">
+              <input
+                id="from"
+                name="from"
+                className="home-search-pill"
+                placeholder={t(lang, "rider.fromPlaceholder")}
+                aria-label={t(lang, "rider.fromLabel")}
+                autoComplete="off"
+                required
+              />
+              <div className="home-search-row">
                 <input
-                  id="from"
-                  name="from"
+                  id="to"
+                  name="to"
                   className="home-search-pill"
-                  placeholder={t(lang, "rider.fromPlaceholder")}
-                  aria-label={t(lang, "rider.fromLabel")}
+                  placeholder={t(lang, "rider.toPlaceholder")}
+                  aria-label={t(lang, "rider.toLabel")}
                   autoComplete="off"
                   required
                 />
-                <div className="home-search-row">
-                  <input
-                    id="to"
-                    name="to"
-                    className="home-search-pill"
-                    placeholder={t(lang, "rider.toPlaceholder")}
-                    aria-label={t(lang, "rider.toLabel")}
-                    autoComplete="off"
-                    required
+                <button
+                  className="home-search-go touch-target"
+                  type="submit"
+                  aria-label={t(lang, "rider.planCta")}
+                >
+                  <ArrowIcon />
+                </button>
+              </div>
+            </form>
+            {corridorFare && corridorEta && (
+              <div className="peek-stats" data-testid="peek-stats">
+                <div>
+                  <p className="peek-label">{t(lang, "ticket.route")}</p>
+                  <p className="peek-route">{corridorFare.routes.name}</p>
+                  <span className="peek-route-sub">
+                    {t(lang, "home.peekFrom")} {corridorFirstStop}
+                  </span>
+                </div>
+                <div>
+                  <p className="peek-label">{t(lang, "home.peekArrives")}</p>
+                  <p className="peek-mono">
+                    {corridorEta.minutes} {t(lang, "common.minutes")}
+                  </p>
+                  <EtaBasis
+                    className="peek-route-sub"
+                    label={etaBasisLabel(lang, corridorEta)}
+                    card={etaBasisCard(lang, corridorEta)}
+                    moreHref="/app/intelligence"
+                    moreLabel={t(lang, "eta.cardMore")}
                   />
-                  <button
-                    className="home-search-go touch-target"
-                    type="submit"
-                    aria-label={t(lang, "rider.planCta")}
-                  >
-                    <ArrowIcon />
-                  </button>
                 </div>
-              </form>
-              {corridorFare && corridorEta && (
-                <div className="peek-stats" data-testid="peek-stats">
-                  <div>
-                    <p className="peek-label">{t(lang, "ticket.route")}</p>
-                    <p className="peek-route">{corridorFare.routes.name}</p>
-                    <span className="peek-route-sub">
-                      {t(lang, "home.peekFrom")} {corridorFirstStop}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="peek-label">{t(lang, "home.peekArrives")}</p>
-                    <p className="peek-mono">
-                      {corridorEta.minutes} {t(lang, "common.minutes")}
-                    </p>
-                    <EtaBasis
-                      className="peek-route-sub"
-                      label={etaBasisLabel(lang, corridorEta)}
-                      card={etaBasisCard(lang, corridorEta)}
-                      moreHref="/app/intelligence"
-                      moreLabel={t(lang, "eta.cardMore")}
-                    />
-                  </div>
-                  <div>
-                    <p className="peek-label">{t(lang, "ticket.fare")}</p>
-                    <p className="peek-mono">{formatUsd(corridorFare.fare_cents)}</p>
-                  </div>
+                <div>
+                  <p className="peek-label">{t(lang, "ticket.fare")}</p>
+                  <p className="peek-mono">{formatUsd(corridorFare.fare_cents)}</p>
                 </div>
-              )}
-            </>
-          }
-        >
-          {savedTrips.length > 0 && (
-            <section className="home-picks" aria-label={t(lang, "home.yourTrips")}>
-              <h2 className="svika-meta tickets-heading">
-                {t(lang, "home.yourTrips")}
-              </h2>
-              <ul className="home-pick-list">
-                {savedTrips.map((trip) => {
-                  const eta = etaByTrip.get(trip.id)!;
-                  // the pick stays one card: the trip link fills the left, the
-                  // basis label answers its own tap on the right
-                  return (
-                    <li key={trip.id} className="home-pick svika-card">
-                      <Link
-                        className="home-pick-link touch-target"
-                        href={`/app/plan?from=${trip.from_stop_id}&to=${trip.to_stop_id}`}
-                      >
-                        <span className="home-pick-body">
-                          <span className="svika-body home-pick-name">
-                            {trip.nickname}
-                          </span>
-                          <span className="svika-meta">
-                            {trip.from_stop?.name} {toWord} {trip.to_stop?.name}
-                          </span>
+              </div>
+            )}
+          </>
+        }
+      >
+        {savedTrips.length > 0 && (
+          <section className="home-picks" aria-label={t(lang, "home.yourTrips")}>
+            <h2 className="svika-meta tickets-heading">{t(lang, "home.yourTrips")}</h2>
+            <ul className="home-pick-list">
+              {savedTrips.map((trip) => {
+                const eta = etaByTrip.get(trip.id)!;
+                // the pick stays one card: the trip link fills the left, the
+                // basis label answers its own tap on the right
+                return (
+                  <li key={trip.id} className="home-pick svika-card">
+                    <Link
+                      className="home-pick-link touch-target"
+                      href={`/app/plan?from=${trip.from_stop_id}&to=${trip.to_stop_id}`}
+                    >
+                      <span className="home-pick-body">
+                        <span className="svika-body home-pick-name">
+                          {trip.nickname}
                         </span>
-                      </Link>
-                      <span className="home-pick-eta">
-                        <span className="svika-mono-code">
-                          ~{eta.minutes} {t(lang, "common.minutes")}
+                        <span className="svika-meta">
+                          {trip.from_stop?.name} {toWord} {trip.to_stop?.name}
                         </span>
-                        <EtaBasis
-                          className="svika-meta home-pick-demo"
-                          label={etaBasisLabel(lang, eta)}
-                          card={etaBasisCard(lang, eta)}
-                          moreHref="/app/intelligence"
-                          moreLabel={t(lang, "eta.cardMore")}
-                        />
                       </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+                    </Link>
+                    <span className="home-pick-eta">
+                      <span className="svika-mono-code">
+                        ~{eta.minutes} {t(lang, "common.minutes")}
+                      </span>
+                      <EtaBasis
+                        className="svika-meta home-pick-demo"
+                        label={etaBasisLabel(lang, eta)}
+                        card={etaBasisCard(lang, eta)}
+                        moreHref="/app/intelligence"
+                        moreLabel={t(lang, "eta.cardMore")}
+                      />
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
+        <section className="wallet-strip svika-card">
+          <div>
+            <p className="svika-meta tickets-heading">
+              {t(lang, "rider.walletBalance")}
+            </p>
+            <p className="wallet-amount svika-mono-code">{formatUsd(balance)}</p>
+          </div>
+          <Link className="inline-link touch-target" href="/app/wallet">
+            {t(lang, "wallet.open")}
+          </Link>
+        </section>
+
+        <nav className="picker-list" aria-label="sections">
+          <Link className="picker-item touch-target" href="/app/parcel">
+            {t(lang, "parcel.open")}
+          </Link>
+          {role === "owner" && (
+            <Link className="picker-item touch-target" href="/app/owner">
+              {t(lang, "owner.open")}
+            </Link>
           )}
-
-          <section className="wallet-strip svika-card">
-            <div>
-              <p className="svika-meta tickets-heading">
-                {t(lang, "rider.walletBalance")}
-              </p>
-              <p className="wallet-amount svika-mono-code">{formatUsd(balance)}</p>
-            </div>
-            <Link className="inline-link touch-target" href="/app/wallet">
-              {t(lang, "wallet.open")}
-            </Link>
-          </section>
-
-          <nav className="picker-list" aria-label="sections">
-            <Link className="picker-item touch-target" href="/app/parcel">
-              {t(lang, "parcel.open")}
-            </Link>
-            {role === "owner" && (
-              <Link className="picker-item touch-target" href="/app/owner">
-                {t(lang, "owner.open")}
-              </Link>
-            )}
-          </nav>
-
-          <section className="tickets-block">
-            <h2 className="svika-meta tickets-heading">{t(lang, "rider.tickets")}</h2>
-            {tickets.length === 0 ? (
-              <p className="svika-body empty-note">{t(lang, "rider.noTickets")}</p>
-            ) : (
-              <ul className="ticket-list">
-                {tickets.map((ticket) => {
-                  const status = statusByTicket.get(ticket.id) ?? "issued";
-                  const statusKey = `ticket.status.${status}` as DictKey;
-                  const code = boardCodesOf(ticket.board_codes)[0]?.code ?? "";
-                  return (
-                    <li key={ticket.id}>
-                      <Link
-                        href={`/app/ticket/${ticket.id}`}
-                        className={`ticket-item svika-card${status === "issued" ? "" : " ticket-item-done"}`}
-                      >
-                        <span className="ticket-item-code svika-mono-code">
-                          {status === "issued" ? code : "····"}
-                        </span>
-                        <span className="ticket-item-body">
-                          <span className="svika-body ticket-item-route">
-                            {ticket.from_stop && ticket.to_stop
-                              ? `${ticket.from_stop.name} ${toWord} ${ticket.to_stop.name}`
-                              : (ticket.routes?.name ?? "")}
-                          </span>
-                          <span className="svika-meta">
-                            <span className="svika-mono-code">
-                              {formatUsd(ticket.fare_cents)}
-                            </span>{" "}
-                            ·{" "}
-                            {t(
-                              lang,
-                              ticket.payment_method === "cash"
-                                ? "ticket.payCash"
-                                : "ticket.paidWallet",
-                            )}{" "}
-                            · {t(lang, statusKey)}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-
-          <footer className="home-sheet-footer">
-            <Link
-              className="auth-link touch-target"
-              href="/app/profile"
-              data-testid="profile-link"
-            >
-              {t(lang, "profile.open")}
-            </Link>
-            <Link className="auth-link touch-target" href="/app/privacy">
-              {t(lang, "privacy.yourDataLink")}
-            </Link>
-            <a
-              className="auth-link touch-target"
-              href={REPO_URL}
-              target="_blank"
-              rel="noreferrer noopener"
-              data-testid="repo-link"
-            >
-              {t(lang, "repo.link")}
-            </a>
-            <SignOutButton label={t(lang, "app.signOut")} />
-          </footer>
-        </HomeSheet>
-
-        <nav className="tab-nav tab-nav-fixed" aria-label="Primary">
-          <span className="tab-item tab-item-active" aria-current="page">
-            <HomeIcon active />
-            {t(lang, "nav.home")}
-          </span>
-          <Link className="tab-item" href="/app?sheet=open">
-            <RidesIcon />
-            {t(lang, "nav.rides")}
-          </Link>
-          <Link className="tab-item" href="/app/wallet">
-            <WalletIcon />
-            {t(lang, "nav.wallet")}
-          </Link>
-          <Link className="tab-item" href="/app/profile" data-testid="you-tab">
-            <YouIcon />
-            {t(lang, "nav.you")}
-          </Link>
         </nav>
-      </main>
-    </StoryStage>
+
+        <section className="tickets-block">
+          <h2 className="svika-meta tickets-heading">{t(lang, "rider.tickets")}</h2>
+          {tickets.length === 0 ? (
+            <p className="svika-body empty-note">{t(lang, "rider.noTickets")}</p>
+          ) : (
+            <ul className="ticket-list">
+              {tickets.map((ticket) => {
+                const status = statusByTicket.get(ticket.id) ?? "issued";
+                const statusKey = `ticket.status.${status}` as DictKey;
+                const code = boardCodesOf(ticket.board_codes)[0]?.code ?? "";
+                return (
+                  <li key={ticket.id}>
+                    <Link
+                      href={`/app/ticket/${ticket.id}`}
+                      className={`ticket-item svika-card${status === "issued" ? "" : " ticket-item-done"}`}
+                    >
+                      <span className="ticket-item-code svika-mono-code">
+                        {status === "issued" ? code : "····"}
+                      </span>
+                      <span className="ticket-item-body">
+                        <span className="svika-body ticket-item-route">
+                          {ticket.from_stop && ticket.to_stop
+                            ? `${ticket.from_stop.name} ${toWord} ${ticket.to_stop.name}`
+                            : (ticket.routes?.name ?? "")}
+                        </span>
+                        <span className="svika-meta">
+                          <span className="svika-mono-code">
+                            {formatUsd(ticket.fare_cents)}
+                          </span>{" "}
+                          ·{" "}
+                          {t(
+                            lang,
+                            ticket.payment_method === "cash"
+                              ? "ticket.payCash"
+                              : "ticket.paidWallet",
+                          )}{" "}
+                          · {t(lang, statusKey)}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <footer className="home-sheet-footer">
+          <Link
+            className="auth-link touch-target"
+            href="/app/profile"
+            data-testid="profile-link"
+          >
+            {t(lang, "profile.open")}
+          </Link>
+          <Link className="auth-link touch-target" href="/app/privacy">
+            {t(lang, "privacy.yourDataLink")}
+          </Link>
+          <a
+            className="auth-link touch-target"
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer noopener"
+            data-testid="repo-link"
+          >
+            {t(lang, "repo.link")}
+          </a>
+          <SignOutButton label={t(lang, "app.signOut")} />
+        </footer>
+      </HomeSheet>
+
+      <nav className="tab-nav tab-nav-fixed" aria-label="Primary">
+        <span className="tab-item tab-item-active" aria-current="page">
+          <HomeIcon active />
+          {t(lang, "nav.home")}
+        </span>
+        <Link className="tab-item" href="/app?sheet=open">
+          <RidesIcon />
+          {t(lang, "nav.rides")}
+        </Link>
+        <Link className="tab-item" href="/app/wallet">
+          <WalletIcon />
+          {t(lang, "nav.wallet")}
+        </Link>
+        <Link className="tab-item" href="/app/profile" data-testid="you-tab">
+          <YouIcon />
+          {t(lang, "nav.you")}
+        </Link>
+      </nav>
+    </main>
   );
 }

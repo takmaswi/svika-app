@@ -4,7 +4,6 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
 import { EtaBasis } from "@/components/home/EtaBasis";
-import { StoryStage } from "@/components/story/StoryStage";
 import { buildShareOverlay } from "@/lib/map/share-overlay";
 import { homeEtaProvider } from "@/lib/map/eta-home";
 import { CORRIDOR_ROUTE_CODE, corridorMetrics } from "@/lib/map/corridor-data";
@@ -29,14 +28,11 @@ interface ShareViewRow {
 // quiet state, so the URL space leaks nothing.
 export default async function SharePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const lang = await getLang();
   const { token } = await params;
-  const query = await searchParams;
   const supabase = await createClient();
 
   const { data } = await supabase.rpc("ride_share_view", { p_token: token });
@@ -49,7 +45,10 @@ export default async function SharePage({
           <img className="wordmark" src="/wordmark.svg" alt="Svika" height={24} />
           <LanguageToggle lang={lang} />
         </header>
-        <section className="svika-card wallet-panel svika-animate-fade-up" data-testid="share-dead">
+        <section
+          className="svika-card wallet-panel svika-animate-fade-up"
+          data-testid="share-dead"
+        >
           <h1 className="svika-headline">{t(lang, "share.deadH")}</h1>
           <p className="svika-body">{t(lang, "share.deadB")}</p>
         </section>
@@ -71,10 +70,7 @@ export default async function SharePage({
       .order("seq"),
   ]);
   const points = new Map(
-    (stopsRes.data ?? []).map((s) => [
-      s.id as string,
-      [s.lng, s.lat] as LngLat,
-    ]),
+    (stopsRes.data ?? []).map((s) => [s.id as string, [s.lng, s.lat] as LngLat]),
   );
   const from = view.from_stop_id ? (points.get(view.from_stop_id) ?? null) : null;
   const to = view.to_stop_id ? (points.get(view.to_stop_id) ?? null) : null;
@@ -97,8 +93,6 @@ export default async function SharePage({
   const onBoard = view.trip_status === "redeemed";
 
   return (
-    // Rudo's story steps onto this public page as the mother's view
-    <StoryStage params={query} lang={lang}>
     <main className="home-screen" data-testid="share-view">
       <div className="home-map">
         <LiveMapLazy
@@ -174,6 +168,5 @@ export default async function SharePage({
         </section>
       </HomeSheet>
     </main>
-    </StoryStage>
   );
 }

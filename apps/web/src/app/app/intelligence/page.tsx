@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLang, t } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
-import { StoryStage } from "@/components/story/StoryStage";
 import { BackIcon } from "@/components/icons";
 import metrics from "../../../../../../services/spine/metrics/metrics.json";
 
@@ -10,13 +9,8 @@ import metrics from "../../../../../../services/spine/metrics/metrics.json";
 // estimate. The table is the committed evaluation itself (imported from
 // services/spine/metrics/metrics.json, the same file the serving code
 // reads), never retyped numbers. Real data, no Simulation stamp.
-export default async function IntelligencePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function IntelligencePage() {
   const lang = await getLang();
-  const params = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -30,7 +24,6 @@ export default async function IntelligencePage({
   ).replace("{min}", String(metrics.minJourneysForPromotion));
 
   return (
-    <StoryStage params={params} lang={lang}>
     <main className="shell" data-testid="intelligence-eta">
       <header className="screen-head">
         <Link href="/app" className="back-btn" aria-label={t(lang, "common.back")}>
@@ -101,6 +94,5 @@ export default async function IntelligencePage({
         <p className="svika-meta empty-note">{t(lang, "intel.note")}</p>
       </section>
     </main>
-    </StoryStage>
   );
 }

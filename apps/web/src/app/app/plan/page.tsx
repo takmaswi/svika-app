@@ -7,7 +7,6 @@ import { bookTrip, saveTrip } from "@/lib/actions";
 import { buildPlanOverlay } from "@/lib/map/plan-overlay";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
-import { StoryStage } from "@/components/story/StoryStage";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 import {
   formatUsd,
@@ -118,7 +117,6 @@ export default async function PlanPage({
   const overlay = buildPlanOverlay(network, plan);
 
   return (
-    <StoryStage params={params} lang={lang}>
     <main className="home-screen">
       <div className="home-map">
         <LiveMapLazy
@@ -266,6 +264,5 @@ export default async function PlanPage({
         )}
       </HomeSheet>
     </main>
-    </StoryStage>
   );
 }

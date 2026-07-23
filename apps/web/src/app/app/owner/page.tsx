@@ -6,8 +6,6 @@ import { resolveRole } from "@/lib/roles";
 import { formatUsd } from "@svika/shared";
 import { RevenueBars, type DayNet } from "@/components/owner/RevenueBars";
 import { WatchdogNarratives } from "@/components/owner/WatchdogNarratives";
-import { StoryStage } from "@/components/story/StoryStage";
-import { resolveStoryParams } from "@/lib/stories";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 
 interface RevenueRow {
@@ -80,13 +78,8 @@ function routeTotals(rows: RevenueRow[]): RouteTotal[] {
 // The owner ledger view: settled digital fares aggregated per day and route,
 // every number derived from the double entry ledger at read time. Audit
 // language talks about patterns and totals, never about a named person.
-export default async function OwnerPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function OwnerPage() {
   const lang = await getLang();
-  const params = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -135,9 +128,6 @@ export default async function OwnerPage({
     year: "numeric",
   });
 
-  // while the watchdog story narrates this screen, its card leads so every
-  // step's subject is in view inside the stage
-  const watchdogFirst = resolveStoryParams(params)?.story.slug === "watchdog-leak";
   const watchdogCard = (
     <section className="svika-card wallet-panel" data-testid="owner-watchdog">
       <div className="watchdog-head">
@@ -176,7 +166,6 @@ export default async function OwnerPage({
   );
 
   return (
-    <StoryStage params={params} lang={lang}>
     <main className="shell">
       <header className="screen-head">
         <Link href="/app" className="back-btn" aria-label={t(lang, "common.back")}>
@@ -188,14 +177,9 @@ export default async function OwnerPage({
         </div>
       </header>
 
-      {watchdogFirst && watchdogCard}
-
       <section className="feature-card owner-hero svika-animate-fade-up">
         <p className="feature-label">{t(lang, "owner.balance")}</p>
-        <p
-          className="feature-amount amount-marigold"
-          data-testid="owner-balance"
-        >
+        <p className="feature-amount amount-marigold" data-testid="owner-balance">
           {formatUsd(balance)}
         </p>
         <dl className="owner-hero-figures">
@@ -209,9 +193,7 @@ export default async function OwnerPage({
       <section className="svika-card wallet-panel svika-animate-fade-up svika-rise-2">
         <div className="owner-chart-head">
           <h2 className="svika-meta tickets-heading">{t(lang, "owner.chartTitle")}</h2>
-          <p className="svika-mono-code owner-chart-net">
-            {formatUsd(windowNet)}
-          </p>
+          <p className="svika-mono-code owner-chart-net">{formatUsd(windowNet)}</p>
         </div>
         <RevenueBars days={days} ariaLabel={t(lang, "owner.chartTitle")} />
         {rows.length === 0 && (
@@ -251,7 +233,9 @@ export default async function OwnerPage({
                 </div>
                 <div>
                   <dt className="svika-meta">{t(lang, "owner.net")}</dt>
-                  <dd className="svika-mono-code owner-route-net">{formatUsd(r.net)}</dd>
+                  <dd className="svika-mono-code owner-route-net">
+                    {formatUsd(r.net)}
+                  </dd>
                 </div>
               </dl>
             </article>
@@ -260,7 +244,7 @@ export default async function OwnerPage({
         </section>
       )}
 
-      {!watchdogFirst && watchdogCard}
+      {watchdogCard}
 
       <section className="svika-card wallet-panel owner-tax">
         <div className="watchdog-head">
@@ -279,6 +263,5 @@ export default async function OwnerPage({
       </Link>
       <p className="owner-note">{t(lang, "owner.taxHint")}</p>
     </main>
-    </StoryStage>
   );
 }

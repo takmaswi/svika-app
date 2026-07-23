@@ -14,7 +14,7 @@ export interface DisclosureRow {
 }
 
 // The date the canonical register was last updated (docs/DISCLOSURE-REGISTER.md).
-export const DISCLOSURE_UPDATED = "2026-07-13";
+export const DISCLOSURE_UPDATED = "2026-07-23";
 
 export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
   {
@@ -146,28 +146,10 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real first use consent gate over every surface, recorded under RLS and proven by an e2e test that a fresh user cannot reach booking. Deleting anonymises through a security definer RPC because ticket and money history is append only, and the page says so plainly.",
   },
   {
-    feature: "Demo door (landing page)",
+    feature: "Intelligence page: how Svika knows your arrival",
     tier: 1,
     detail:
-      "Real. One tap signs a visitor in as a pooled demo persona (Tino) on the same live backend every user hits. Personas are real accounts flagged demo_sim, isolated from real rows by ordinary RLS; the pool is claimed least recently used and rate limited, and each visit resets the persona's fixture state through a security definer RPC with proper double entry. Every demo surface carries a permanent Demo account chip. The real phone sign in is untouched.",
-  },
-  {
-    feature: "Story mode",
-    tier: 2,
-    detail:
-      "The writes are real, the missing actors are simulated and say so in the caption. Bookings, transfers and money moves run through the same RPCs and ledger as production. The hwindi is the server signing in the demo conductor; Rudo's friend is the server signing in the demo rider. Every story ends back in free roam.",
-  },
-  {
-    feature: "Story preview layer",
-    tier: 2,
-    detail:
-      "Simulated presentation, labelled a preview on screen. The flagship and Rudo's night ride open with purpose built animated beats that write nothing and wait on no database, so the point reads at a glance on a cheap phone, each with a marigold Preview badge. The story then hands off to the real tail, where every real write still happens on the live ledger.",
-  },
-  {
-    feature: "Intelligence shelf: how Svika knows your arrival",
-    tier: 1,
-    detail:
-      "A two step story on a pooled persona: the live map's arrival number with its basis label, then a page that renders the honest ladder and the committed evaluation table imported from the metrics file itself, never retyped numbers.",
+      "The live map's arrival number carries its basis label, and the intelligence page renders the honest ladder and the committed evaluation table imported from the metrics file itself, never retyped numbers.",
   },
   {
     feature: "Share my ride",
@@ -182,33 +164,9 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real. The greeting is computed in Harare time; the name and avatar come from the rider's own profile row. The stats are derived from the same fare tickets the page loads under the rider's own RLS. A reused demo persona shows only the current judge's rides, not a stranger's.",
   },
   {
-    feature: "Landing page stat cards",
-    tier: 2,
-    detail:
-      "Illustrative product preview on the marketing surface: the change kept and boarding code cards show example values in the reference design's grammar, not any user's data. Everything behind the sign in shows real ledger figures.",
-  },
-  {
     feature: "Language support (English, Shona live; Ndebele roadmap)",
     tier: 1,
     detail:
       "English and Shona are the live languages: every rider facing string exists in both and the toggle switches the whole app. Ndebele is roadmap; the control renders it as a disabled coming soon chip that switches no strings, proven by unit and e2e tests.",
-  },
-  {
-    feature: "Vision scene: the crash flow (Tinashe)",
-    tier: 2,
-    detail:
-      "Simulated vision content on a public read only page, permanently stamped Simulation. No crash detection exists in this build; detection ships with the native app. The responder card renders emergency fields with fixture values because the real table is RLS locked and must never be publicly readable. Nothing reads or writes any account.",
-  },
-  {
-    feature: "Vision scene: Gogo's mbudzi (USSD)",
-    tier: 2,
-    detail:
-      "Simulated vision content, permanently stamped Simulation. The keypad drives a real tested menu state machine that waits on a telco aggregator agreement. The money menus run fixture twins that move nothing; the how far menu calls the live eta wiring through a read only server action.",
-  },
-  {
-    feature: "Vision scene: kombi capacity",
-    tier: 2,
-    detail:
-      "Simulated vision content, permanently stamped Simulation. Occupancy numbers are fixtures riding the simulated fleet; the card holds what a conductor declares against what redeemed tickets would prove, and drift is flagged as a pattern, never a person.",
   },
 ];

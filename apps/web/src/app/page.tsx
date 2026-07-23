@@ -5,17 +5,11 @@ import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { ArrowIcon } from "@/components/icons";
 import { REPO_URL } from "@/lib/site";
 
-// The landing (reference screen 1): the Kombi highlight headline, the live
-// map in a drawn card as the pitch, the change story as stat cards, one
-// primary CTA into the real door, and the demo doors below the fold line.
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+// The front door (screen 1 grammar): the Kombi highlight headline, the live
+// map grown into the hero, one primary CTA into sign in, and the quiet
+// register/privacy/repo footer. No theatre.
+export default async function LandingPage() {
   const lang = await getLang();
-  const params = await searchParams;
-  const demoErr = params.demoerr === "1";
 
   return (
     <main className="landing">
@@ -57,7 +51,9 @@ export default async function LandingPage({
         {t(lang, "landing.body")}
       </p>
 
-      <div className="landing-map svika-animate-fade-up svika-rise-4">
+      {/* The live map is the hero: the network moving right now, with its
+          provenance chip, before a single word of persuasion. */}
+      <div className="landing-map landing-map-hero svika-animate-fade-up svika-rise-4">
         <LiveMapLazy
           labels={{
             ariaLabel: t(lang, "map.ariaLabel"),
@@ -67,167 +63,20 @@ export default async function LandingPage({
         />
       </div>
 
-      <div className="stat-row svika-animate-fade-up svika-rise-5">
-        <div className="stat-card">
-          <p className="stat-label">{t(lang, "landing.statChange")}</p>
-          <p className="stat-value">
-            $1.50
-            <span className="stat-value-sub"> {t(lang, "landing.statWeek")}</span>
-          </p>
-        </div>
-        <div className="stat-card stat-ticket">
-          <span className="stat-stub" aria-hidden />
-          <span className="stat-ticket-body">
-            <p className="stat-label">{t(lang, "ticket.title")}</p>
-            <p className="stat-code">74 21</p>
-          </span>
-        </div>
-      </div>
-
-      <Link className="cta touch-target landing-cta svika-animate-fade-up svika-rise-6" href="/login">
+      <Link
+        className="cta touch-target landing-cta svika-animate-fade-up svika-rise-5"
+        href="/login"
+        data-testid="landing-cta"
+      >
         {t(lang, "landing.cta")}
         <span className="cta-chip" aria-hidden>
           <ArrowIcon />
         </span>
       </Link>
-      <p className="landing-signin svika-animate-fade-up svika-rise-7">
+      <p className="landing-signin svika-animate-fade-up svika-rise-6">
         {t(lang, "landing.signinHint")}{" "}
         <Link href="/login">{t(lang, "landing.signinLink")}</Link>
       </p>
-
-      <div className="landing-demo svika-animate-fade-up svika-rise-7" id="shelf">
-        <p className="svika-meta landing-demo-lead">{t(lang, "landing.demoLead")}</p>
-        {demoErr && (
-          <p className="auth-error svika-body">{t(lang, "landing.demoErr")}</p>
-        )}
-        <div className="landing-demo-doors">
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <button
-              className="landing-demo-btn touch-target"
-              type="submit"
-              data-testid="demo-door"
-            >
-              {t(lang, "landing.demoEnter")}
-            </button>
-          </form>
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="owner" />
-            <button className="landing-demo-btn touch-target" type="submit">
-              {t(lang, "landing.demoOwner")}
-            </button>
-          </form>
-        </div>
-        {/* The sandbox shelf: the honesty split is the design feature. Real
-            stories run real money on the live system; vision scenes are
-            stamped simulations of what ships next, entered by plain links
-            that sign nobody in. */}
-        <p className="svika-meta landing-demo-stories-lead">
-          {t(lang, "landing.shelfReal")}
-        </p>
-        <div className="landing-demo-doors">
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <input type="hidden" name="story" value="tino-town" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-town"
-            >
-              {t(lang, "landing.demoStory1")}
-            </button>
-          </form>
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <input type="hidden" name="story" value="transfer-trip" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-transfer"
-            >
-              {t(lang, "landing.demoStory2")}
-            </button>
-          </form>
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <input type="hidden" name="story" value="rudo-night" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-rudo"
-            >
-              {t(lang, "landing.demoStory4")}
-            </button>
-          </form>
-        </div>
-        {/* The intelligence: the three spines with their evidence. Real
-            stories on the live system (Takunda's alert moves here as spine 2
-            at work); nothing on these doors overclaims. */}
-        <p className="svika-meta landing-demo-stories-lead">
-          {t(lang, "landing.shelfIntel")}
-        </p>
-        <div className="landing-demo-doors">
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <input type="hidden" name="story" value="eta-knows" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-eta"
-            >
-              {t(lang, "landing.intelEta")}
-            </button>
-          </form>
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="rider" />
-            <input type="hidden" name="story" value="takunda-morning" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-takunda"
-            >
-              {t(lang, "landing.intelTakunda")}
-            </button>
-          </form>
-          <form action="/api/demo" method="post">
-            <input type="hidden" name="target" value="owner" />
-            <input type="hidden" name="story" value="watchdog-leak" />
-            <button
-              className="landing-story-btn touch-target"
-              type="submit"
-              data-testid="story-door-watchdog"
-            >
-              {t(lang, "landing.intelWatchdog")}
-            </button>
-          </form>
-        </div>
-        <p className="svika-meta landing-demo-stories-lead">
-          {t(lang, "landing.shelfVision")}
-        </p>
-        <div className="landing-demo-doors">
-          <Link
-            className="landing-vision-btn touch-target"
-            href="/vision/tinashe?view=alert&story=tinashe-crash&step=0"
-            data-testid="vision-door-tinashe"
-          >
-            {t(lang, "landing.visionTinashe")}
-          </Link>
-          <Link
-            className="landing-vision-btn touch-target"
-            href="/vision/gogo?story=gogo-ussd&step=0"
-            data-testid="vision-door-gogo"
-          >
-            {t(lang, "landing.visionGogo")}
-          </Link>
-          <Link
-            className="landing-vision-btn touch-target"
-            href="/vision/capacity?story=kombi-capacity&step=0"
-            data-testid="vision-door-capacity"
-          >
-            {t(lang, "landing.visionCapacity")}
-          </Link>
-        </div>
-      </div>
 
       <footer className="landing-foot svika-animate-fade-up svika-rise-7">
         <Link href="/register" data-testid="register-link">

@@ -4,8 +4,13 @@ import { getLang, t, type DictKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { sendCredit, claimCredit, cancelTransfer } from "@/lib/actions";
 import { formatUsd } from "@svika/shared";
-import { StoryStage } from "@/components/story/StoryStage";
-import { HomeIcon, KombiIcon, PlusIcon, RidesIcon, WalletIcon } from "@/components/icons";
+import {
+  HomeIcon,
+  KombiIcon,
+  PlusIcon,
+  RidesIcon,
+  WalletIcon,
+} from "@/components/icons";
 
 interface PostingRow {
   amount_cents: number;
@@ -69,7 +74,9 @@ export default async function WalletPage({
   const history = (postings ?? []) as unknown as PostingRow[];
   // the change story: every cent a hwindi could not hand back, kept as credit
   const changeTotal = history
-    .filter((h) => h.ledger_transactions?.kind === "change_credit" && h.amount_cents > 0)
+    .filter(
+      (h) => h.ledger_transactions?.kind === "change_credit" && h.amount_cents > 0,
+    )
     .reduce((sum, h) => sum + h.amount_cents, 0);
   const transfers = ((transfersRes.data ?? []) as unknown as TransferRow[]).filter(
     (tr) => {
@@ -92,7 +99,6 @@ export default async function WalletPage({
             : null;
 
   return (
-    <StoryStage params={params} lang={lang}>
     <main className="shell">
       <h1 className="svika-headline">{t(lang, "wallet.title")}</h1>
 
@@ -149,7 +155,9 @@ export default async function WalletPage({
                 <div>
                   <p className="svika-meta">
                     {t(lang, "wallet.sent")} ·{" "}
-                    <span className="svika-mono-code">{formatUsd(tr.amount_cents)}</span>{" "}
+                    <span className="svika-mono-code">
+                      {formatUsd(tr.amount_cents)}
+                    </span>{" "}
                     · {t(lang, "wallet.pending")}
                   </p>
                   <p className="transfer-code svika-mono-code" data-testid="claim-code">
@@ -237,6 +245,5 @@ export default async function WalletPage({
         </span>
       </nav>
     </main>
-    </StoryStage>
   );
 }
