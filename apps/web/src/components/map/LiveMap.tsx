@@ -81,6 +81,8 @@ export interface LiveMapLabels {
 /** A planned trip drawn over the corridor; see lib/map/plan-overlay.ts. */
 export interface LiveMapOverlay {
   legs: { kind: "ride" | "walk"; coordinates: LngLat[] }[];
+  /** A D1 destination point ends on the walk tone pin, not a stop pin. */
+  destinationKind?: "stop" | "place";
   origin: LngLat;
   destination: LngLat;
 }
@@ -221,12 +223,17 @@ function addOverlayLayers(
       features: [
         {
           type: "Feature" as const,
-          properties: { end: "origin" },
+          properties: { end: "origin", pin: "stop" },
           geometry: { type: "Point" as const, coordinates: overlay.origin },
         },
         {
           type: "Feature" as const,
-          properties: { end: "destination" },
+          properties: {
+            end: "destination",
+            // signal is for stops only (§2): a destination place ends the
+            // walking tail on the walk tone instead
+            pin: overlay.destinationKind === "place" ? "place" : "stop",
+          },
           geometry: { type: "Point" as const, coordinates: overlay.destination },
         },
       ],
@@ -264,7 +271,7 @@ function addOverlayLayers(
     source: "plan-ends",
     paint: {
       "circle-radius": 7,
-      "circle-color": c.stop,
+      "circle-color": ["match", ["get", "pin"], "place", c.walk, c.stop],
       "circle-stroke-width": 3,
       "circle-stroke-color": c.stopStroke,
       "circle-opacity": hidden ? 0 : 1,

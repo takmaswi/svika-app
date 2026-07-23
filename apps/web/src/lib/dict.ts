@@ -127,6 +127,25 @@ export const dict = {
     sn: "Mari muWallet haikwane. Bhuka wobhadhara cash mukombi.",
   },
 
+  // D1 destination first planning: the honest trade to a place, the plain
+  // no service line, and the picker's place kinds
+  "plan.dropAt": {
+    en: "Drop at {stop}, then a {meters} m walk.",
+    sn: "Buruka pa {stop}, wofamba {meters} m netsoka.",
+  },
+  "plan.noService": {
+    en: "No kombi reaches {place} yet. The closest drop is {stop}, then a {meters} m walk.",
+    sn: "Hapana kombi inosvika ku{place} parizvino. Chiteshi chiri pedyo ndi {stop}, wofamba {meters} m netsoka.",
+  },
+  "plan.walkArrive": {
+    en: "to {place}",
+    sn: "kusvika ku{place}",
+  },
+  "geo.kind.suburb": { en: "Suburb", sn: "Suburb" },
+  "geo.kind.place": { en: "Place", sn: "Nzvimbo" },
+  "geo.kind.poi": { en: "Landmark", sn: "Chiratidzo" },
+  "geo.kind.road": { en: "Road", sn: "Mugwagwa" },
+
   "ticket.title": { en: "Board code", sn: "Board code" },
   "ticket.screenTitle": { en: "Your ticket", sn: "Your ticket" },
   "ticket.showHwindi": {

@@ -6,7 +6,14 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fetchNetwork } from "@/lib/network";
-import { CONSENT_VERSION, dollarsToCents, planTrip, type RideLeg } from "@svika/shared";
+import { loadPlaces, resolvePlaceQuery } from "@/lib/geocode/search";
+import {
+  CONSENT_VERSION,
+  dollarsToCents,
+  planToPoint,
+  planTrip,
+  type RideLeg,
+} from "@svika/shared";
 
 /** Appends the accept record that opens the app (see the /app layout gate). */
 export async function acceptConsent(): Promise<void> {
@@ -49,13 +56,19 @@ export interface PurchasedTicket {
  * Buys one ticket per ride leg of the planned trip (wallet debit or cash
  * reservation), then lands on the rider home where the codes are shown.
  * Legs are re-planned server side from the stop pair: the client only sends
- * where it wants to go and how to pay, never fares or routes.
+ * where it wants to go and how to pay, never fares or routes. A destination
+ * first booking (D1) sends the place NAME instead of a stop id; the server
+ * re-resolves it against the local corpus and re-plans to the point, so
+ * coordinates and walking tails are never trusted from the client either.
+ * The tail is recorded against the final leg's ticket for the in ride walk
+ * cue and, later, D2's planned versus actual comparison.
  */
 export async function bookTrip(formData: FormData): Promise<void> {
   const fromStop = String(formData.get("from") ?? "");
   const toStop = String(formData.get("to") ?? "");
+  const destName = String(formData.get("dest") ?? "");
   const payment = String(formData.get("payment") ?? "wallet");
-  if (!fromStop || !toStop) redirect("/app");
+  if (!fromStop || (!toStop && !destName)) redirect("/app");
   if (payment !== "wallet" && payment !== "cash") redirect("/app");
 
   const supabase = await createClient();
@@ -65,12 +78,34 @@ export async function bookTrip(formData: FormData): Promise<void> {
   if (!user) redirect("/login");
 
   const network = await fetchNetwork(supabase);
-  const plan = planTrip(network, fromStop, toStop);
-  if (!plan) redirect(`/app/plan?from=${fromStop}&to=${toStop}&err=noroute`);
+  const back = destName
+    ? `/app/plan?from=${fromStop}&to=${encodeURIComponent(destName)}`
+    : `/app/plan?from=${fromStop}&to=${toStop}`;
+
+  let plan: ReturnType<typeof planTrip> = null;
+  let tail: { destName: string; lng: number; lat: number; meters: number } | null =
+    null;
+  if (destName) {
+    const place = resolvePlaceQuery(loadPlaces(), destName).match;
+    if (!place) redirect(`${back}&err=noroute`);
+    const pointPlan = planToPoint(network, fromStop, place);
+    if (!pointPlan) redirect(`${back}&err=noroute`);
+    plan = pointPlan.plan;
+    tail = {
+      destName: place.name,
+      lng: place.lng,
+      lat: place.lat,
+      meters: pointPlan.walkTail.meters,
+    };
+  } else {
+    plan = planTrip(network, fromStop, toStop);
+  }
+  if (!plan) redirect(`${back}&err=noroute`);
 
   const rideLegs = plan.legs.filter((l): l is RideLeg => l.type === "ride");
+  let lastTicketId: string | null = null;
   for (const leg of rideLegs) {
-    const { error } = await supabase.rpc("purchase_ticket", {
+    const { data, error } = await supabase.rpc("purchase_ticket", {
       p_route: leg.routeId,
       p_direction: leg.direction,
       p_from_stop: leg.boardStopId,
@@ -79,8 +114,23 @@ export async function bookTrip(formData: FormData): Promise<void> {
     });
     if (error) {
       const err = error.message.includes("insufficient") ? "balance" : "purchase";
-      redirect(`/app/plan?from=${fromStop}&to=${toStop}&err=${err}`);
+      redirect(`${back}&err=${err}`);
     }
+    lastTicketId =
+      (data as { ticket_id: string }[] | null)?.[0]?.ticket_id ?? lastTicketId;
+  }
+
+  // the walking tail rides the final leg's ticket; a failed insert never
+  // blocks the booked ride, the guidance just has no walk cue
+  if (tail && lastTicketId) {
+    await supabase.from("trip_walk_tails").insert({
+      ticket_id: lastTicketId,
+      rider_id: user.id,
+      dest_name: tail.destName,
+      dest_lng: tail.lng,
+      dest_lat: tail.lat,
+      walk_meters: tail.meters,
+    });
   }
 
   redirect("/app?booked=1");

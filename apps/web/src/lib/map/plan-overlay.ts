@@ -17,15 +17,25 @@ export interface PlanOverlay {
   legs: OverlayLeg[];
   origin: LngLat;
   destination: LngLat;
+  /** "stop" ends on a §11 stop pin; "place" (a D1 destination point) ends
+   *  on the walk tone pin, because signal is for stops only. */
+  destinationKind: "stop" | "place";
 }
 
-export function buildPlanOverlay(network: Network, plan: TripPlan): PlanOverlay | null {
+export function buildPlanOverlay(
+  network: Network,
+  plan: TripPlan,
+  /** D1: a destination point beyond the alight stop adds the walking tail
+   *  in the walk tone and moves the destination pin onto the place. */
+  destPoint?: LngLat,
+): PlanOverlay | null {
   const stopLngLat = new Map<string, LngLat>(
     network.stops.map((s) => [s.id, [s.lng, s.lat] as LngLat]),
   );
   const origin = stopLngLat.get(plan.originStopId);
-  const destination = stopLngLat.get(plan.destinationStopId);
-  if (!origin || !destination) return null;
+  const alight = stopLngLat.get(plan.destinationStopId);
+  if (!origin || !alight) return null;
+  const destination = destPoint ?? alight;
 
   const legs: OverlayLeg[] = [];
   for (const leg of plan.legs) {
@@ -53,5 +63,13 @@ export function buildPlanOverlay(network: Network, plan: TripPlan): PlanOverlay 
       legs.push({ kind: "ride", coordinates: [board, alight] });
     }
   }
-  return { legs, origin, destination };
+  if (destPoint) {
+    legs.push({ kind: "walk", coordinates: [alight, destPoint] });
+  }
+  return {
+    legs,
+    origin,
+    destination,
+    destinationKind: destPoint ? "place" : "stop",
+  };
 }

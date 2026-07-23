@@ -636,6 +636,11 @@ body:has(.home-screen) .demo-account-chip {
 .picker-item:active {
   transform: scale(0.99);
 }
+/* D1: a picker row for a geocoded place carries its kind on the right */
+.picker-kind {
+  margin-left: auto;
+  color: var(--color-ink-soft);
+}
 
 /* trip legs as route option rows (screen 3 route cards) */
 .plan-legs {
@@ -2227,6 +2232,15 @@ body:has(.home-screen) .demo-account-chip {
   flex-direction: column;
   gap: var(--space-1);
 }
+/* D1: the honest trade line under the fare (drop stop plus walking tail);
+   the no service variant stays soft ink, never signal (stops only) */
+.plan-trade {
+  margin: 0;
+}
+.plan-trade-noservice {
+  color: var(--color-ink-soft);
+}
+
 .plan-fare-row {
   display: flex;
   align-items: baseline;
