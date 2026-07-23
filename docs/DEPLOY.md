@@ -66,7 +66,7 @@ demo. The command above is the between sessions hard reset.
    | --- | --- | --- |
    | `NEXT_PUBLIC_SUPABASE_URL` | your Supabase URL | |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon key | public by design |
-   | `NEXT_PUBLIC_MAP_TILES_URL` | your raw MapTiler key | the key only, not a URL |
+   | `NEXT_PUBLIC_MAP_TILES_URL` | your raw MapTiler key | fallback tiles only since M0; the map is self hosted (tools/map-tiles). Hosting the PMTiles file for the deploy is a later decision: set `NEXT_PUBLIC_MAP_PMTILES_URL` when it moves off the static dir |
    | `DEMO_JUDGE_PASSWORD` | your demo pool password | signs judges in |
    | `DEMO_OWNER_EMAIL` | demo.owner@svika.app | owner demo door |
    | `DEMO_OWNER_PASSWORD` | your value | |

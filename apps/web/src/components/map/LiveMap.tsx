@@ -408,7 +408,9 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
     const chain = providerChain(MAP_ENV);
     let providerIdx = 0;
     let tileLoaded = false;
-    let providerSwitchedAt = 0;
+    // -Infinity so the very first error may advance immediately; after a
+    // switch the grace window keeps an error burst from racing to the end.
+    let providerSwitchedAt = Number.NEGATIVE_INFINITY;
     if (chain.includes("selfhosted")) ensurePmtilesProtocol();
     const styleForTheme = (t: MapTheme) =>
       buildMbareSunStyle(t, {
