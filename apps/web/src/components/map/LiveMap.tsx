@@ -76,6 +76,8 @@ export interface LiveMapLabels {
   /** 3D toggle copy; the toggle only renders when the device can hold it. */
   view3d?: string;
   viewFlat?: string;
+  /** Marker button copy; markers only become tappable when onKombiTap is set. */
+  kombiTap?: string;
 }
 
 /** A planned trip drawn over the corridor; see lib/map/plan-overlay.ts. */
@@ -90,6 +92,10 @@ export interface LiveMapOverlay {
 interface LiveMapProps {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
+  /** Batch K1: a tap on a kombi marker opens its card. The marker element
+   *  becomes a real button (role, tabindex, Enter and Space) so the card is
+   *  reachable without a pointer; the marker asset itself is untouched. */
+  onKombiTap?: (id: string) => void;
   /**
    * Camera policy (docs/MAP-CAMERA.md). "corridor" fits the whole route
    * (landing hero). "boarding" opens on the rank the home sheet quotes plus
@@ -365,8 +371,12 @@ function addCorridorLayers(
   });
 }
 
-export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) {
+export function LiveMap({ labels, overlay, camera = "corridor", onKombiTap }: LiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  // the map effect mounts once; the ref keeps the latest handler in reach
+  const onKombiTapRef = useRef<((id: string) => void) | undefined>(undefined);
+  onKombiTapRef.current = onKombiTap;
+  const kombiInteractive = Boolean(onKombiTap);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const feedRef = useRef<VehicleFeed | null>(null);
   const [failed, setFailed] = useState(false);
@@ -617,6 +627,21 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
                 .setRotation(pos.headingDeg)
                 .addTo(map);
               markers.set(pos.id, marker);
+              const el = marker.getElement();
+              el.dataset.kombiId = pos.id;
+              if (kombiInteractive) {
+                el.setAttribute("role", "button");
+                el.setAttribute("tabindex", "0");
+                if (labels.kombiTap) el.setAttribute("aria-label", labels.kombiTap);
+                const open = () => onKombiTapRef.current?.(pos.id);
+                el.addEventListener("click", open);
+                el.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    open();
+                  }
+                });
+              }
             } else {
               marker.setLngLat(pos.lngLat).setRotation(pos.headingDeg);
             }

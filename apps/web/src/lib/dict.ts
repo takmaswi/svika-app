@@ -527,6 +527,48 @@ export const dict = {
     sn: "Map yatadza kuvhurika. Nzendo dzako newallet zvichiri kushanda.",
   },
 
+  // kombi card and board (batch K1). Trust copy is rules and counts about a
+  // vehicle's fare ledger, never about a person. Shona is machine drafted
+  // pending the external translator pass, like the rest of this file.
+  "kombi.markerTap": { en: "Kombi details", sn: "Ruzivo rwekombi" },
+  "kombi.towards": { en: "Heading to {name}", sn: "Iri kuenda ku{name}" },
+  "kombi.arrives": { en: "At {stop} in", sn: "Pa{stop} mu" },
+  "kombi.away": {
+    en: "Not on the way to your stop this run.",
+    sn: "Haisi kuuya kuchiteshi chako parwendo urwu.",
+  },
+  "kombi.seats": { en: "Declared seats", sn: "Zvigaro zvakanyorwa" },
+  "kombi.seatsUnknown": { en: "Not declared yet", sn: "Hazvisati zvanyorwa" },
+  "kombi.plateUnknown": { en: "Not linked yet", sn: "Haisati yabatanidzwa" },
+  "kombi.trustTitle": { en: "Trust record", sn: "Rekodhi yekuvimbika" },
+  "kombi.trustUnverified": { en: "Unverified", sn: "Hakusati kwasimbiswa" },
+  "kombi.trustVerified": { en: "Verified fares", sn: "Mari dzakasimbiswa" },
+  "kombi.trustDrift": { en: "Seats drift", sn: "Musiyano wezvigaro" },
+  "kombi.trustNone": {
+    en: "No verified fares on this kombi yet. The record builds as conductors clear fares here.",
+    sn: "Hapasati pane mari dzakasimbiswa pakombi iyi. Rekodhi inovakwa apo makondakita anobhadharisa pano.",
+  },
+  "kombi.trustFares": {
+    en: "{count} verified fares across {days} days in the last 30.",
+    sn: "Mari {count} dzakasimbiswa pamazuva {days} mumazuva makumi matatu apfuura.",
+  },
+  "kombi.trustDriftLine": {
+    en: "On {days} days the busiest hour cleared more fares than the declared seats.",
+    sn: "Pamazuva {days} awa rakabatikana rakapfuura zvigaro zvakanyorwa.",
+  },
+  "kombi.trustLaw": {
+    en: "This record describes a vehicle's fare ledger, never a person.",
+    sn: "Rekodhi iyi inotaura nezvemari yekombi, kwete munhu.",
+  },
+  "kombi.provenance": {
+    en: "Position is demo movement. Plate, seats and counts come from the registry and the fare ledger.",
+    sn: "Nzvimbo ndeyekuratidzira. Nhamba, zvigaro nehuwandu zvinobva muregistry nemubhuku remari.",
+  },
+  "kombi.boardCta": { en: "All kombis", sn: "Makombi ese" },
+  "kombi.boardTitle": { en: "Kombis on the road", sn: "Makombi ari munzira" },
+  "kombi.boardChip": { en: "Kombis", sn: "Makombi" },
+  "kombi.boardBack": { en: "Back to the map", sn: "Dzokera kumepu" },
+
   // consent and privacy. Shona here is machine drafted and waits for the
   // external translator pass, like every other Shona string in this file.
   "consent.title": { en: "Before you ride", sn: "Before you ride" },

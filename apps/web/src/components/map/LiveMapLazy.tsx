@@ -15,10 +15,14 @@ export function LiveMapLazy({
   labels,
   overlay,
   camera,
+  onKombiTap,
 }: {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
   camera?: "corridor" | "boarding";
+  onKombiTap?: (id: string) => void;
 }) {
-  return <Inner labels={labels} overlay={overlay} camera={camera} />;
+  return (
+    <Inner labels={labels} overlay={overlay} camera={camera} onKombiTap={onKombiTap} />
+  );
 }

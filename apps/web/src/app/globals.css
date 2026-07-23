@@ -2462,3 +2462,160 @@ body:has(.home-screen) .demo-account-chip {
 .landing-foot a {
   color: var(--color-link);
 }
+
+/* --- kombi card and board (batch K1) ---------------------------------------- */
+/* The facts block shared by the marker card and the board rows. Card grammar
+   is §8 (the dialog reuses the eta-basis carrier, recorded deviation); the
+   trust chip colours are a recorded deviation: unverified is a quiet soft-ink
+   outline, verified fares take forest (marigold-edged by night), and seats
+   drift takes signal per Mhofu's K1 ruling that red means unverified against
+   facts — never a character score. */
+.kombi-facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.kombi-facts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.kombi-plate {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 19px;
+  color: var(--color-ink);
+}
+.kombi-trust-chip {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.kombi-trust-unverified {
+  border: 1.5px solid rgba(22, 29, 24, 0.25);
+  color: var(--color-ink-soft);
+}
+.kombi-trust-verified {
+  background: var(--color-forest);
+  color: #ffffff;
+}
+.kombi-trust-drift {
+  background: var(--color-signal);
+  color: #ffffff;
+}
+:root[data-theme="dark"] .kombi-trust-unverified {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.62);
+}
+:root[data-theme="dark"] .kombi-trust-verified {
+  background: none;
+  border: 1.5px solid rgba(245, 179, 1, 0.7);
+  color: var(--color-marigold);
+}
+:root[data-theme="dark"] .kombi-trust-drift {
+  background: none;
+  border: 1.5px solid rgba(232, 76, 48, 0.7);
+  color: var(--color-signal);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .kombi-trust-unverified {
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.62);
+  }
+  :root:not([data-theme="light"]) .kombi-trust-verified {
+    background: none;
+    border: 1.5px solid rgba(245, 179, 1, 0.7);
+    color: var(--color-marigold);
+  }
+  :root:not([data-theme="light"]) .kombi-trust-drift {
+    background: none;
+    border: 1.5px solid rgba(232, 76, 48, 0.7);
+    color: var(--color-signal);
+  }
+}
+.kombi-towards {
+  margin: 0;
+}
+.kombi-fact-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+.kombi-fact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.kombi-fact-row .peek-label {
+  margin: 0;
+}
+.kombi-eta-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.kombi-eta-value {
+  font-size: 15px;
+}
+.kombi-away {
+  text-align: right;
+  max-width: 60%;
+}
+.kombi-trust-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.kombi-trust-block .peek-label {
+  margin: 0;
+}
+.kombi-trust-line {
+  margin: 0;
+}
+.kombi-trust-law,
+.kombi-provenance {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+.kombi-card-cta {
+  margin-top: var(--space-2);
+}
+
+/* the board: one §8 card per vehicle, staggered in per §12 */
+.kombi-board-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+.kombi-board-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.kombi-board-row {
+  padding: var(--space-5);
+}
+
+/* the home board door: same glass chip row as its neighbours */
+.home-chip-kombis {
+  text-decoration: none;
+  color: var(--color-link);
+  font-weight: 600;
+  font-size: var(--text-meta);
+}

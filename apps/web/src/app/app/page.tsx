@@ -42,6 +42,11 @@ import {
   type RideFact,
 } from "@/lib/commute/patterns";
 import { homePeekState } from "@/lib/commute/home-peek";
+import { KombiMapHome } from "@/components/kombi/KombiMapHome";
+import { riderStopContext } from "@/lib/kombi/context";
+import { joinFleetProfiles, type KombiBoardRow } from "@/lib/kombi/fleet";
+import { kombiStrings } from "@/lib/kombi/strings";
+import { SIM_VEHICLES } from "@/lib/map/sim-config";
 
 interface SavedTripRow {
   id: string;
@@ -107,6 +112,7 @@ export default async function RiderHome({
     prefsRes,
     historyRes,
     profileRes,
+    kombiBoardRes,
   ] = await Promise.all([
     supabase
       .from("account_balances")
@@ -162,6 +168,8 @@ export default async function RiderHome({
       .select("full_name, demo_sim")
       .eq("id", user.id)
       .maybeSingle(),
+    // batch K1: registry facts and fare aggregates for the kombi card
+    supabase.rpc("kombi_board"),
   ]);
 
   const balance = balanceRes.data?.balance_cents ?? 0;
@@ -175,6 +183,15 @@ export default async function RiderHome({
   // the mock twin serves off corridor trips or a downed spine, labelled demo
   const corridorRows = (corridorRes.data ?? []) as unknown as CorridorStopRow[];
   const corridorStopIds = corridorRows.map((r) => r.stop_id);
+
+  // batch K1: which kombi is this, and can I trust it. Trust states derive
+  // by rules from the fare ledger (unverified is the default); the card and
+  // board always talk about the same rider stop (lib/kombi/context.ts).
+  const kombiContext = riderStopContext(corridorRows, savedTrips[0] ?? null);
+  const kombiProfiles = joinFleetProfiles(
+    SIM_VEHICLES.map((v) => v.id),
+    (kombiBoardRes.data ?? []) as KombiBoardRow[],
+  );
   const etaProvider = homeEtaProvider(corridorStopIds);
   const etaByTrip = new Map<string, EtaEstimate>();
   for (const trip of savedTrips) {
@@ -408,18 +425,40 @@ export default async function RiderHome({
   return (
     <main className="home-screen">
       <div className="home-map">
-        <LiveMapLazy
-          labels={{
-            ariaLabel: t(lang, "map.ariaLabel"),
-            demoChip: t(lang, "map.demoChip"),
-            unavailable: t(lang, "map.unavailable"),
-            viewWhole: t(lang, "map.viewWhole"),
-            viewNear: t(lang, "map.viewNear"),
-            view3d: t(lang, "map.view3d"),
-            viewFlat: t(lang, "map.viewFlat"),
-          }}
-          camera="boarding"
-        />
+        {kombiContext ? (
+          <KombiMapHome
+            labels={{
+              ariaLabel: t(lang, "map.ariaLabel"),
+              demoChip: t(lang, "map.demoChip"),
+              unavailable: t(lang, "map.unavailable"),
+              viewWhole: t(lang, "map.viewWhole"),
+              viewNear: t(lang, "map.viewNear"),
+              view3d: t(lang, "map.view3d"),
+              viewFlat: t(lang, "map.viewFlat"),
+              kombiTap: t(lang, "kombi.markerTap"),
+            }}
+            camera="boarding"
+            profiles={kombiProfiles}
+            stopId={kombiContext.stopId}
+            stopName={kombiContext.stopName}
+            direction={kombiContext.direction}
+            terminus={kombiContext.terminus}
+            strings={kombiStrings(lang)}
+          />
+        ) : (
+          <LiveMapLazy
+            labels={{
+              ariaLabel: t(lang, "map.ariaLabel"),
+              demoChip: t(lang, "map.demoChip"),
+              unavailable: t(lang, "map.unavailable"),
+              viewWhole: t(lang, "map.viewWhole"),
+              viewNear: t(lang, "map.viewNear"),
+              view3d: t(lang, "map.view3d"),
+              viewFlat: t(lang, "map.viewFlat"),
+            }}
+            camera="boarding"
+          />
+        )}
       </div>
 
       <header className="home-chips">
@@ -428,6 +467,13 @@ export default async function RiderHome({
           <img className="wordmark" src="/wordmark.svg" alt="Svika" height={22} />
         </span>
         <span className="home-chips-right">
+          <Link
+            className="home-chip svika-glass touch-target home-chip-kombis"
+            href="/app/kombis"
+            data-testid="kombis-chip"
+          >
+            {t(lang, "kombi.boardChip")}
+          </Link>
           <span className="home-chip svika-glass">
             <ThemeToggle
               initialTheme={theme}
