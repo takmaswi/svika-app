@@ -532,6 +532,63 @@ check(
   }
 }
 
+// ---- trip walk tails (0031): rider-owned, insert once, no rewrite ----
+{
+  const tail = {
+    ticket_id: tktA.ticket_id,
+    rider_id: A.uid,
+    dest_name: "University of Zimbabwe",
+    dest_lng: 31.05207,
+    dest_lat: -17.78536,
+    walk_meters: 400,
+  };
+  // tktA is a fresh ticket every run, so the one-shot insert path is real
+  const ins = await A.c.from("trip_walk_tails").insert(tail);
+  check(
+    "WT-1 rider A can record a walk tail on their own ticket",
+    !ins.error,
+    ins.error?.message,
+  );
+
+  const mine = await A.c.from("trip_walk_tails").select("ticket_id, walk_meters");
+  check(
+    "WT-2 rider A reads back their walk tail",
+    !mine.error && mine.data.some((r) => r.ticket_id === tktA.ticket_id),
+  );
+
+  const crossRead = await B.c.from("trip_walk_tails").select("ticket_id");
+  check("WT-3 rider B cannot read rider A's walk tails", deniedOrEmpty(crossRead));
+
+  const forge = await B.c.from("trip_walk_tails").insert({
+    ...tail,
+    ticket_id: tktA.ticket_id,
+  });
+  check("WT-4 rider B cannot plant a tail on rider A's ticket", !!forge.error);
+
+  const forgeOwn = await B.c.from("trip_walk_tails").insert({
+    ...tail,
+    rider_id: B.uid,
+  });
+  check("WT-5 rider B cannot claim rider A's ticket as their own tail", !!forgeOwn.error);
+
+  const rewrite = await A.c
+    .from("trip_walk_tails")
+    .update({ walk_meters: 1 })
+    .eq("ticket_id", tktA.ticket_id)
+    .select();
+  check("WT-6 the tail cannot be rewritten, even by its owner", deniedOrEmpty(rewrite));
+
+  const erase = await A.c
+    .from("trip_walk_tails")
+    .delete()
+    .eq("ticket_id", tktA.ticket_id)
+    .select();
+  check("WT-7 the tail cannot be deleted, even by its owner", deniedOrEmpty(erase));
+
+  const anonTails = await anon.from("trip_walk_tails").select("ticket_id");
+  check("WT-8 anon sees zero walk tails", deniedOrEmpty(anonTails));
+}
+
 // ---- watchdog synthetic history: owner read only, riders and anon blind ----
 {
   const anonDays = await anon.from("watchdog_vehicle_days").select("id");
