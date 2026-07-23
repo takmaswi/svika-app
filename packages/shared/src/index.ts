@@ -5,3 +5,5 @@ export * from "./types";
 export * from "./planner";
 export * from "./plan-to-point";
 export * from "./consent";
+export * from "./journey-trace";
+export * from "./trace-guide";
