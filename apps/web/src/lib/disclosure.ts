@@ -60,7 +60,7 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     feature: "Live map: corridor geometry and stops",
     tier: 1,
     detail:
-      "Real road line and 15 real stop names derived from field GPS rides on 2026-07-07. The map style is MapTiler tiles repainted to the Mbare Sun palette, day and night.",
+      "Real road line and 15 real stop names derived from field GPS rides on 2026-07-07. Map data is OpenStreetMap, self hosted: a Harare extract built by a committed pipeline, drawn by a native Mbare Sun style, day and night, with attribution on the map.",
   },
   {
     feature: "Live map: moving kombis",
@@ -89,7 +89,7 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     feature: "Day and night theme",
     tier: 1,
     detail:
-      "Real, cookie backed, follows the device by default. The map repaints to the Mbare Sun night palette in place when the theme flips.",
+      "Real, cookie backed, follows the device by default. The map swaps to the Mbare Sun night style in place when the theme flips.",
   },
   {
     feature: "Voice guidance: the trigger engine",
