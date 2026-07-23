@@ -145,6 +145,8 @@ Born from a real ride: Mhofu was given an address, did not know the alight stop 
 
 **Gate proof:** e2e from address search to plan with alight stop and walking tail; unit tests of candidate scoring including the no-connection case; video of alight guidance firing at the right stop on a trace replay; both languages, both themes.
 
+**Follow-up slice (ruled 2026-07-23, D1 gate):** saved trips to places. saved_trips is a stop pair table, so plans to a place ship without a save form; an additive schema extension (nicknamed place trips) is a later slice, not lost, not yet scheduled.
+
 ### D2 — Did we get you there right? (feedback loop)
 
 1. **Explicit:** after arrival, one tap: right kombi? right stop? too much walking? Three taps maximum, skippable, bilingual.

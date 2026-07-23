@@ -22,7 +22,13 @@ The home peek stops being a search box for a known commuter and becomes an answe
 - **Screenshots** (`docs/design-evidence/answer-home/`): all three peek states (usual, return, search) in both themes and both languages at the 360px reference viewport, 12 files, captured by `apps/web/scripts/answer-home-evidence.mjs`.
 - **Validation**: `pnpm typecheck`, `pnpm lint`, `pnpm test` green. Home touching e2e regressions rerun green (book, commute, saved trip, theme, intelligence; intelligence needed the playwright managed stack because it refuses the mock ETA label by design).
 
-## Decisions taken, flagged for Mhofu
+## Gate rulings (Mhofu, 2026-07-23)
+
+1. The commute alerts preference gating the answer peek is **approved as built**: one switch means "act on my patterns".
+2. The floating commute alert **hides whenever the peek already answers with the same trip**; the peek is the alert's home now. It still floats when it carries different information (the usual outbound kombi while the peek offers the ride back) and for riders whose peek has no answer. Implemented in this batch's follow up commit; commute.spec reworked to prove both sides.
+3. Goal 3 signed off and closed together with the D1 rulings.
+
+## Decisions taken, flagged for Mhofu (as submitted; rulings above)
 
 1. **The answer peek is gated by the existing commute alerts preference.** One switch means "act on my mined patterns". This keeps the promise that a rider who opted out sees no pattern driven surface, and it keeps every existing flow (and the pooled judge personas, whose prefs reset to off) on the plain search peek. Takunda has the pref on. If the answer home should instead be on for everyone with history, that is a one line change; say the word.
 2. **The commute alert stays.** The floating "your usual kombi is close" alert is unchanged and can appear above the answer peek. They answer different questions (supply now versus your next action), but on stage they show related copy twice; if that reads as noise, hiding the alert when the peek already answers is a small change awaiting a ruling.

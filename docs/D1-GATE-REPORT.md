@@ -25,7 +25,15 @@ Born from a real ride: given an address, the planner now resolves address to arr
 - **Evidence pack** (`docs/design-evidence/destination-plan/`): 8 screenshots (UZ trade and tail, Kuwadzana no service; both themes, both languages, 360px) plus two videos: `alight-guidance-replay.webm` (the cues firing) and `address-to-board-code.webm` (the search to code flow).
 - **Validation**: `pnpm typecheck`, `pnpm lint`, `pnpm test` green (335 tests); `pnpm db:security-test` 108 passed including the eight new trip_walk_tails checks; regression e2e green (saved trip, V1 answer home suite, book; book's wallet test showed its known baseline flake in a shared run and passed 4 of 4 in isolation, same as recorded at the M0 gate).
 
-## Decisions taken, flagged for Mhofu
+## Gate rulings (Mhofu, 2026-07-23)
+
+1. The D1 constants are **approved**: 1500 m service range, 1.25 street factor, 75 m per minute, documented where they live (`packages/shared/src/plan-to-point.ts`).
+2. The walk tone destination pin is **ratified** as DESIGN-DEVIATIONS.md deviation 5.
+3. No save form for place plans is **approved for now**; "saved trips to places" is logged in PRODUCTION-PUSH-PLAN.md under D1 as an additive follow up slice.
+4. The Shona worksheet and the untracked docs folders stay exactly as they are.
+5. Goal 3 signed off and closed together with the V1 rulings.
+
+## Decisions taken, flagged for Mhofu (as submitted; rulings above)
 
 1. **Service range 1500 m.** A stop within 1500 m straight line (about a twenty minute walk) "serves" a destination; beyond that the plan says no kombi reaches it. 1200 m was the first cut, but large places carry their centre point (the UZ campus centroid sits 1203 m from Pa Belgravia) and would have read as unserved while their gates are close. If 1500 feels wrong on the ground, it is one constant.
 2. **Walking maths**: straight line times 1.25 for streets, 75 m per minute. Two constants, documented; tune with field truth whenever.
