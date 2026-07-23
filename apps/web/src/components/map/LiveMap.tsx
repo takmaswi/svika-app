@@ -1,12 +1,17 @@
 "use client";
 
 // The live map: the visual heart of the rider app. Mbare Sun cartography
-// (DESIGN.md §11), the real Heights <-> Rezende road as the dotted route, the
-// 15 real stops, and kombis gliding along the actual line. Movement comes
-// from the VehicleFeed adapter; today that is the simulated mock twin
-// (declared in the disclosure register), and a real GPS feed swaps in
-// without touching this component. Camera policy lives in docs/MAP-CAMERA.md;
-// the movement pipeline is documented in docs/MAP-MOVEMENT.md.
+// (DESIGN.md §11) rendered natively from the checked in style (lib/map/
+// style.ts) over self hosted Harare tiles: no vendor style fetch, no
+// runtime repaint. Tiles come through the tile source adapter
+// (lib/map/tile-source.ts): the PMTiles extract by default, MapTiler as
+// fallback, a mock fixture in tests, and the chain advances by itself if a
+// provider cannot serve. The real Heights <-> Rezende road is the dotted
+// route, the 15 real stops, and kombis gliding along the actual line.
+// Movement comes from the VehicleFeed adapter; today that is the simulated
+// mock twin (declared in the disclosure register), and a real GPS feed
+// swaps in without touching this component. Camera policy lives in
+// docs/MAP-CAMERA.md; the movement pipeline in docs/MAP-MOVEMENT.md.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
@@ -18,8 +23,18 @@ import {
   type LngLat,
   type PolylineMetrics,
 } from "@/lib/map/geometry";
+import { ensurePmtilesProtocol } from "@/lib/map/pmtiles-protocol";
 import { SIM_EPOCH_MS, SIM_VEHICLES, simConfig } from "@/lib/map/sim-config";
-import { MAP_COLORS, mapStyleUrl, mbareSunStyle, type MapTheme } from "@/lib/map/style";
+import {
+  BUILDING_3D_LAYER_ID,
+  BUILDING_LAYER_ID,
+  buildMbareSunStyle,
+  MAP_COLORS,
+  MAP_SOURCE_ID,
+  type MapTheme,
+} from "@/lib/map/style";
+import { providerChain, tileSourceFor } from "@/lib/map/tile-source";
+import { canOffer3d, THREE_D_PITCH } from "@/lib/map/three-d";
 import {
   SimulatedVehicleFeed,
   type VehicleFeed,
@@ -39,6 +54,18 @@ const PINS_AT_MS = DRAW_DELAY_MS + DRAW_MS;
 const PIN_FADE_MS = 450;
 const KOMBIS_AT_MS = PINS_AT_MS + PIN_FADE_MS;
 
+// After the adapter chain advances, the new provider gets this long to land
+// a first tile before another error may advance the chain again.
+const PROVIDER_GRACE_MS = 2000;
+
+// NEXT_PUBLIC_ vars must be read as full static property accesses so Next
+// can inline them into the client bundle.
+const MAP_ENV = {
+  provider: process.env.NEXT_PUBLIC_MAP_PROVIDER,
+  maptilerKey: process.env.NEXT_PUBLIC_MAP_TILES_URL,
+  pmtilesUrl: process.env.NEXT_PUBLIC_MAP_PMTILES_URL,
+};
+
 export interface LiveMapLabels {
   ariaLabel: string;
   demoChip: string;
@@ -46,6 +73,9 @@ export interface LiveMapLabels {
   /** Camera toggle copy; required for the boarding camera. */
   viewWhole?: string;
   viewNear?: string;
+  /** 3D toggle copy; the toggle only renders when the device can hold it. */
+  view3d?: string;
+  viewFlat?: string;
 }
 
 /** A planned trip drawn over the corridor; see lib/map/plan-overlay.ts. */
@@ -149,6 +179,18 @@ function makeKombiElement(entering: boolean): HTMLDivElement {
       <img class="kombi-map-img" src="/map/kombi-marker.svg" alt="" width="44" height="44" draggable="false" />
     </div>`;
   return el;
+}
+
+// 3D buildings on or off: the extrusion layer and its flat twin swap so
+// footprints never double draw. Both layers ship in the style with the
+// extrusion hidden, so this survives any setStyle (theme swap) untouched.
+function apply3dLayers(map: maplibregl.Map, on: boolean) {
+  if (map.getLayer(BUILDING_3D_LAYER_ID)) {
+    map.setLayoutProperty(BUILDING_3D_LAYER_ID, "visibility", on ? "visible" : "none");
+  }
+  if (map.getLayer(BUILDING_LAYER_ID)) {
+    map.setLayoutProperty(BUILDING_LAYER_ID, "visibility", on ? "none" : "visible");
+  }
 }
 
 // The planned trip over the corridor: ride legs take THE route treatment,
@@ -323,23 +365,26 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [wide, setWide] = useState(false);
+  const [threeD, setThreeD] = useState(false);
+  const threeDRef = useRef(false);
+  const [offer3d, setOffer3d] = useState(false);
 
-  // Cache the corridor's MapTiler tiles so the map loads fast on a cheap phone
-  // and repeat views do not burn the MapTiler quota. The worker only ever
-  // touches MapTiler requests; Supabase, app pages and everything else pass
-  // straight through (see public/sw.js). Registered here so it only loads on
-  // map bearing screens.
+  // Cache the map's own assets so it loads fast on a cheap phone and keeps
+  // rendering offline after the first visit. The worker only ever touches
+  // map traffic: the PMTiles range requests, self hosted glyphs and
+  // sprites, and MapTiler when the fallback provider serves. Supabase, app
+  // pages and everything else pass straight through (see public/sw.js).
+  // Registered here so it only loads on map bearing screens.
   useEffect(() => {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
     navigator.serviceWorker.register("/sw.js").catch(() => {
-      // no cache is fine; the map still loads straight from MapTiler
+      // no cache is fine; the map still loads straight from the network
     });
   }, []);
 
   useEffect(() => {
     const container = containerRef.current;
-    const key = process.env.NEXT_PUBLIC_MAP_TILES_URL ?? "";
-    if (!container || key.trim() === "") {
+    if (!container) {
       setFailed(true);
       return;
     }
@@ -351,20 +396,42 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
     let entranceRaf = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
     let theme = currentMapTheme();
-    let rawStyle: unknown = null;
     let entrancePending = false;
     const markers = new Map<string, maplibregl.Marker>();
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const themeObserver = new MutationObserver(applyTheme);
 
+    // The adapter chain: configured provider first, fallbacks after, so the
+    // map keeps serving even when a tile source is down.
+    const origin = window.location.origin;
+    const chain = providerChain(MAP_ENV);
+    let providerIdx = 0;
+    let tileLoaded = false;
+    let providerSwitchedAt = 0;
+    if (chain.includes("selfhosted")) ensurePmtilesProtocol();
+    const styleForTheme = (t: MapTheme) =>
+      buildMbareSunStyle(t, {
+        source: tileSourceFor(chain[providerIdx]!, MAP_ENV, origin),
+        origin,
+      });
+
+    // 3D is offered only where it can hold frame rate: never under reduced
+    // motion, never on low memory devices (lib/map/three-d.ts).
+    setOffer3d(
+      canOffer3d({
+        deviceMemory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+        reducedMotion,
+      }),
+    );
+
     // Repaints the whole canvas when the theme flips; style.load re-adds the
     // corridor and plan layers, markers restyle through CSS tokens.
     function applyTheme() {
       const next = currentMapTheme();
-      if (disposed || !map || !rawStyle || next === theme) return;
+      if (disposed || !map || next === theme) return;
       theme = next;
-      map.setStyle(mbareSunStyle(rawStyle, theme) as maplibregl.StyleSpecification);
+      map.setStyle(styleForTheme(theme));
     }
 
     // §12: route draws (1.3s after a .4s beat), pins fade in, kombis arrive.
@@ -447,11 +514,8 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
       );
     }
 
-    async function start() {
-      const res = await fetch(mapStyleUrl(key));
-      if (!res.ok) throw new Error(`map style fetch failed: ${res.status}`);
-      rawStyle = await res.json();
-      if (disposed || !container) return;
+    function start() {
+      if (!container) return;
 
       // The fixed epoch keeps these markers in step with the server side
       // ETA caller, which measures from the same simulated fleet.
@@ -487,13 +551,14 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
       entrancePending = !reducedMotion;
       map = new maplibregl.Map({
         container,
-        style: mbareSunStyle(rawStyle, theme) as maplibregl.StyleSpecification,
+        style: styleForTheme(theme),
         bounds,
         fitBoundsOptions,
         // added by hand below: bottom right would hide under the peek sheet
         attributionControl: false,
       });
-      map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right");
+      // OSM attribution must stay readable (ODbL), so never collapse it.
+      map.addControl(new maplibregl.AttributionControl({ compact: false }), "top-right");
       mapRef.current = map;
       map.touchPitch.disable();
 
@@ -501,9 +566,16 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
       // swap mid entrance lands everything in its final state.
       map.on("style.load", () => {
         if (!map || disposed) return;
+        apply3dLayers(map, threeDRef.current);
         const hidden = entrancePending;
         addCorridorLayers(map, theme, Boolean(overlay), hidden);
         if (overlay) addOverlayLayers(map, overlay, theme, hidden);
+      });
+
+      map.on("sourcedata", (e) => {
+        if (e.sourceId === MAP_SOURCE_ID && (e as { tile?: unknown }).tile) {
+          tileLoaded = true;
+        }
       });
 
       themeObserver.observe(document.documentElement, {
@@ -577,14 +649,28 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
       });
 
       map.on("error", () => {
-        // Tile or glyph hiccups should never take the home page down; the
-        // map keeps whatever it has already drawn.
+        // Tile or glyph hiccups never take the home page down; the map
+        // keeps whatever it has already drawn. Before the FIRST tile has
+        // landed, an error usually means the provider itself cannot serve
+        // (missing file, dead bucket), so the adapter chain advances: self
+        // hosted -> MapTiler -> mock. Each new provider gets a grace window
+        // to land a tile before another error may advance the chain again.
+        if (disposed || !map || tileLoaded) return;
+        const now = performance.now();
+        if (now - providerSwitchedAt < PROVIDER_GRACE_MS) return;
+        if (providerIdx < chain.length - 1) {
+          providerIdx += 1;
+          providerSwitchedAt = now;
+          map.setStyle(styleForTheme(theme));
+        }
       });
     }
 
-    start().catch(() => {
+    try {
+      start();
+    } catch {
       if (!disposed) setFailed(true);
-    });
+    }
 
     return () => {
       disposed = true;
@@ -627,6 +713,25 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
     setWide((v) => !v);
   };
 
+  // 3D on: pitch the camera and raise the buildings; off: settle flat and
+  // face north again. Off is the default; the toggle only exists on devices
+  // the capability gate cleared, so easing here never fights reduced motion.
+  const toggle3d = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const next = !threeDRef.current;
+    threeDRef.current = next;
+    setThreeD(next);
+    apply3dLayers(map, next);
+    map.easeTo({
+      pitch: next ? THREE_D_PITCH : 0,
+      ...(next ? {} : { bearing: 0 }),
+      duration: 900,
+    });
+    if (next) map.touchPitch.enable();
+    else map.touchPitch.disable();
+  };
+
   if (failed) {
     return (
       <div className="live-map live-map-unavailable" data-testid="live-map">
@@ -658,6 +763,16 @@ export function LiveMap({ labels, overlay, camera = "corridor" }: LiveMapProps) 
           onClick={toggleView}
         >
           {wide ? labels.viewNear : labels.viewWhole}
+        </button>
+      )}
+      {ready && offer3d && labels.view3d && labels.viewFlat && (
+        <button
+          type="button"
+          className="live-map-3d-toggle svika-glass touch-target"
+          data-testid="map-3d-toggle"
+          onClick={toggle3d}
+        >
+          {threeD ? labels.viewFlat : labels.view3d}
         </button>
       )}
     </div>

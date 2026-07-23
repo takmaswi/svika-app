@@ -1,19 +1,19 @@
-// The Mbare Sun map. MapTiler's basic-v2 ships cool greys and blues;
-// mbareSunStyle re-paints it to DESIGN.md §11 for the active theme: calm
-// paper-toned ground by day, char by night, roads as casing + fill, parks in
-// park green, street labels in IBM Plex Mono. Pure functions, no map objects:
-// the transform is unit tested against style JSON shapes.
+// The Mbare Sun map, native. The style is authored here from the DESIGN.md
+// §2/§11 tokens instead of repainting a vendor style at runtime: the map
+// starts from a checked in style document, no style fetch, no transform.
+// Tiles follow the OpenMapTiles schema (Planetiler pipeline in
+// tools/map-tiles), so the same style renders over the self hosted Harare
+// PMTiles extract, the MapTiler fallback, or the mock fixture; the tile
+// source is injected by lib/map/tile-source.ts. Glyphs (IBM Plex, §11) and
+// the sprite sheet are self hosted under /map/. Pure functions, no map
+// objects: the style is unit tested as data (test/map-style.test.ts).
 
-const MAPTILER_STYLE = "basic-v2";
-
-export function mapStyleUrl(rawKey: string): string {
-  if (!rawKey || rawKey.trim() === "") {
-    throw new Error(
-      "NEXT_PUBLIC_MAP_TILES_URL is empty: it must hold the raw MapTiler key",
-    );
-  }
-  return `https://api.maptiler.com/maps/${MAPTILER_STYLE}/style.json?key=${encodeURIComponent(rawKey)}`;
-}
+import type {
+  ExpressionSpecification,
+  LayerSpecification,
+  StyleSpecification,
+  VectorSourceSpecification,
+} from "maplibre-gl";
 
 export type MapTheme = "day" | "night";
 
@@ -51,124 +51,295 @@ export const MAP_COLORS = {
   },
 } as const;
 
-// Street labels are IBM Plex Mono per §11; MapTiler serves these glyphs.
-const STREET_LABEL_FONT = ["IBM Plex Mono SemiBold"];
+// §11 type: street labels are IBM Plex Mono; places take the brand body
+// font. Both stacks are self hosted (tools/map-tiles/build-glyphs.mjs).
+export const STREET_LABEL_FONT = ["IBM Plex Mono SemiBold"];
+export const PLACE_LABEL_FONT = ["IBM Plex Sans Regular"];
 
-interface StyleLayerLike {
-  id?: unknown;
-  type?: unknown;
-  "source-layer"?: unknown;
-  paint?: Record<string, unknown>;
-  layout?: Record<string, unknown>;
+/** The id of the openmaptiles vector source every layer reads from. */
+export const MAP_SOURCE_ID = "openmaptiles";
+
+/** The flat building layer id and its 3D twin (toggled by LiveMap). */
+export const BUILDING_LAYER_ID = "building";
+export const BUILDING_3D_LAYER_ID = "building-3d";
+
+// OpenMapTiles `transportation` classes, grouped into the §11 families.
+const MAJOR_ROAD_CLASSES = ["motorway", "trunk", "primary", "secondary", "tertiary"];
+const MINOR_ROAD_CLASSES = ["minor", "service"];
+const PATH_CLASSES = ["path", "track"];
+
+// Road width curves. §11 fixes the street level ratio (casing 17 / fill 11 /
+// minor 5 at the reference screens' scale, which is ~z16); the curves land
+// on those values there and taper sanely when zoomed out. Casing is drawn
+// as a constant edge each side of the fill via line-gap-width, so it hugs
+// the fill's own curve at every zoom (same treatment the runtime repaint
+// proved).
+const MAJOR_ROAD_WIDTH: ExpressionSpecification = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  6, 0.6,
+  10, 1.2,
+  13, 3,
+  15, 7,
+  16, 11,
+  18, 20,
+];
+const MINOR_ROAD_WIDTH: ExpressionSpecification = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  12, 0.5,
+  14, 2,
+  16, 5,
+  18, 10,
+];
+const PATH_WIDTH: ExpressionSpecification = [
+  "interpolate", ["linear"], ["zoom"], 14, 1, 16, 2.5, 18, 5,
+];
+
+function roadFilter(classes: string[]): ExpressionSpecification {
+  return [
+    "all",
+    ["==", ["geometry-type"], "LineString"],
+    ["in", ["get", "class"], ["literal", classes]],
+  ];
 }
 
-function setPaint(layer: StyleLayerLike, key: string, value: unknown) {
-  layer.paint = { ...(layer.paint ?? {}), [key]: value };
+export interface MapStyleOptions {
+  /**
+   * The openmaptiles vector source, supplied by the tile source adapter
+   * (self hosted PMTiles by default, MapTiler fallback, mock in tests).
+   */
+  source: VectorSourceSpecification;
+  /**
+   * Absolute origin the glyph and sprite URLs hang off (MapLibre needs
+   * absolute URLs when the style is an object). window.location.origin in
+   * the app; any placeholder in tests.
+   */
+  origin: string;
 }
 
 /**
- * basic-v2 layer names → Mbare Sun families. Anything green or watery joins
- * the park family (water has no spec value of its own — flagged as a spec
- * gap; the corridor has no visible water), transport lines join the casing
- * family, labels join the street label family.
+ * The Mbare Sun style for a theme, layer order per §11: base → park →
+ * buildings → road casing → road fill → minor roads → street labels.
+ * Water joins the park family (no spec value of its own — recorded spec
+ * gap; the corridor has no visible water). The route, stop pins and kombi
+ * markers are runtime layers LiveMap draws on top.
  */
-function familyOf(layer: StyleLayerLike):
-  | "base"
-  | "park"
-  | "water"
-  | "building"
-  | "road"
-  | "minor-road"
-  | "transport-line"
-  | "label"
-  | "other" {
-  const id = String(layer.id ?? "").toLowerCase();
-  const type = String(layer.type ?? "");
-  if (type === "background") return "base";
-  if (type === "symbol") return "label";
-  if (id.includes("water") || id.includes("river")) return "water";
-  if (
-    id.includes("forest") ||
-    id.includes("grass") ||
-    id.includes("wood") ||
-    id.includes("park")
-  ) {
-    return "park";
-  }
-  if (id.includes("building")) return "building";
-  if (id.includes("path")) return "minor-road";
-  if (id.includes("road network")) return "road";
-  if (type === "line") return "transport-line";
-  if (type === "fill") return "base";
-  return "other";
-}
-
-/**
- * Takes the fetched MapTiler basic-v2 style and returns a Mbare Sun copy for
- * the given theme. Roads get the spec's casing + fill treatment (a casing
- * layer is inserted under the road layer, reusing the road's own width as
- * line-gap-width so the casing hugs any zoom curve). The input is never
- * mutated.
- */
-export function mbareSunStyle<T>(style: T, theme: MapTheme): T {
+export function buildMbareSunStyle(theme: MapTheme, opts: MapStyleOptions): StyleSpecification {
   const c = MAP_COLORS[theme];
-  const out = structuredClone(style) as { layers?: StyleLayerLike[] };
-  const layers: StyleLayerLike[] = [];
+  const layers: LayerSpecification[] = [
+    {
+      id: "background",
+      type: "background",
+      paint: { "background-color": c.base },
+    },
+    {
+      id: "landcover-green",
+      type: "fill",
+      source: MAP_SOURCE_ID,
+      "source-layer": "landcover",
+      filter: ["in", ["get", "class"], ["literal", ["grass", "wood"]]],
+      paint: { "fill-color": c.park },
+    },
+    {
+      id: "park",
+      type: "fill",
+      source: MAP_SOURCE_ID,
+      "source-layer": "park",
+      paint: { "fill-color": c.park },
+    },
+    {
+      id: "water",
+      type: "fill",
+      source: MAP_SOURCE_ID,
+      "source-layer": "water",
+      paint: { "fill-color": c.park },
+    },
+    {
+      id: "waterway",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "waterway",
+      paint: { "line-color": c.park, "line-width": 1.5 },
+    },
+    {
+      id: BUILDING_LAYER_ID,
+      type: "fill",
+      source: MAP_SOURCE_ID,
+      "source-layer": "building",
+      minzoom: 13,
+      paint: { "fill-color": c.building },
+    },
+    {
+      id: BUILDING_3D_LAYER_ID,
+      type: "fill-extrusion",
+      source: MAP_SOURCE_ID,
+      "source-layer": "building",
+      minzoom: 13,
+      // Off by default: 3D is a progressive enhancement LiveMap toggles on
+      // capable devices only. Heights come from OSM where mapped
+      // (render_height), with a modest single storey default where absent.
+      layout: { visibility: "none" },
+      paint: {
+        "fill-extrusion-color": c.building,
+        "fill-extrusion-height": ["coalesce", ["get", "render_height"], 8],
+        "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+      },
+    },
+    {
+      id: "road-minor-casing",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(MINOR_ROAD_CLASSES),
+      minzoom: 12,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": c.roadCasing,
+        "line-width": 2.5,
+        "line-gap-width": MINOR_ROAD_WIDTH,
+      },
+    },
+    {
+      id: "road-casing",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(MAJOR_ROAD_CLASSES),
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": c.roadCasing,
+        "line-width": 3,
+        "line-gap-width": MAJOR_ROAD_WIDTH,
+      },
+    },
+    {
+      id: "road-path",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(PATH_CLASSES),
+      minzoom: 14,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": c.minorRoad,
+        "line-width": PATH_WIDTH,
+        ...(theme === "day" ? { "line-opacity": 0.9 } : {}),
+      },
+    },
+    {
+      id: "road-minor",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(MINOR_ROAD_CLASSES),
+      minzoom: 12,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": c.minorRoad, "line-width": MINOR_ROAD_WIDTH },
+    },
+    {
+      id: "road",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(MAJOR_ROAD_CLASSES),
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": c.road, "line-width": MAJOR_ROAD_WIDTH },
+    },
+    {
+      id: "railway",
+      type: "line",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation",
+      filter: roadFilter(["rail", "transit"]),
+      minzoom: 12,
+      paint: { "line-color": c.roadCasing, "line-width": 1.5 },
+    },
+    {
+      id: "park-label",
+      type: "symbol",
+      source: MAP_SOURCE_ID,
+      "source-layer": "park",
+      minzoom: 13,
+      filter: ["has", "name"],
+      layout: {
+        "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
+        "text-font": [...PLACE_LABEL_FONT],
+        "text-size": 10.5,
+        "text-max-width": 8,
+      },
+      paint: {
+        "text-color": c.parkLabel,
+        "text-halo-color": c.base,
+        "text-halo-width": 1.2,
+      },
+    },
+    {
+      id: "street-label",
+      type: "symbol",
+      source: MAP_SOURCE_ID,
+      "source-layer": "transportation_name",
+      minzoom: 13,
+      layout: {
+        "symbol-placement": "line",
+        "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
+        "text-font": [...STREET_LABEL_FONT],
+        "text-size": 9,
+        "text-letter-spacing": 0.07,
+      },
+      paint: {
+        "text-color": c.streetLabel,
+        "text-halo-color": c.base,
+        "text-halo-width": 1.4,
+      },
+    },
+    {
+      id: "place-suburb",
+      type: "symbol",
+      source: MAP_SOURCE_ID,
+      "source-layer": "place",
+      minzoom: 11,
+      filter: ["in", ["get", "class"], ["literal", ["suburb", "neighbourhood", "village", "hamlet"]]],
+      layout: {
+        "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
+        "text-font": [...PLACE_LABEL_FONT],
+        "text-size": 10.5,
+        "text-max-width": 8,
+      },
+      paint: {
+        "text-color": c.streetLabel,
+        "text-halo-color": c.base,
+        "text-halo-width": 1.2,
+      },
+    },
+    {
+      id: "place-city",
+      type: "symbol",
+      source: MAP_SOURCE_ID,
+      "source-layer": "place",
+      filter: ["in", ["get", "class"], ["literal", ["city", "town"]]],
+      layout: {
+        "text-field": ["coalesce", ["get", "name:latin"], ["get", "name"]],
+        "text-font": [...PLACE_LABEL_FONT],
+        "text-size": 12.5,
+        "text-max-width": 8,
+      },
+      paint: {
+        "text-color": c.streetLabel,
+        "text-halo-color": c.base,
+        "text-halo-width": 1.2,
+      },
+    },
+  ];
 
-  for (const layer of out.layers ?? []) {
-    switch (familyOf(layer)) {
-      case "base":
-        setPaint(layer, layer.type === "background" ? "background-color" : "fill-color", c.base);
-        break;
-      case "park":
-      case "water":
-        setPaint(layer, layer.type === "line" ? "line-color" : "fill-color", c.park);
-        break;
-      case "building":
-        setPaint(layer, "fill-color", c.building);
-        break;
-      case "road": {
-        const width = layer.paint?.["line-width"] ?? 2;
-        layers.push({
-          ...structuredClone(layer),
-          id: `${String(layer.id)} casing`,
-          paint: {
-            ...structuredClone(layer.paint ?? {}),
-            "line-color": c.roadCasing,
-            "line-width": 3,
-            "line-gap-width": structuredClone(width),
-          },
-        });
-        setPaint(layer, "line-color", c.road);
-        break;
-      }
-      case "minor-road":
-        setPaint(layer, "line-color", c.minorRoad);
-        if (theme === "day") setPaint(layer, "line-opacity", 0.9);
-        break;
-      case "transport-line":
-        setPaint(layer, "line-color", c.roadCasing);
-        break;
-      case "label": {
-        setPaint(layer, "text-color", c.streetLabel);
-        setPaint(layer, "text-halo-color", c.base);
-        const id = String(layer.id ?? "").toLowerCase();
-        if (id.includes("road")) {
-          layer.layout = {
-            ...(layer.layout ?? {}),
-            "text-font": [...STREET_LABEL_FONT],
-            "text-size": 9,
-            "text-letter-spacing": 0.07,
-          };
-        }
-        break;
-      }
-      case "other":
-        break;
-    }
-    layers.push(layer);
-  }
-
-  out.layers = layers;
-  return out as T;
+  return {
+    version: 8,
+    name: `Svika Mbare Sun (${theme})`,
+    glyphs: `${opts.origin}/map/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${opts.origin}/map/sprite/sprite`,
+    sources: { [MAP_SOURCE_ID]: opts.source },
+    layers,
+  };
 }

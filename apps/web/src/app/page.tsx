@@ -59,6 +59,8 @@ export default async function LandingPage() {
             ariaLabel: t(lang, "map.ariaLabel"),
             demoChip: t(lang, "map.demoChip"),
             unavailable: t(lang, "map.unavailable"),
+            view3d: t(lang, "map.view3d"),
+            viewFlat: t(lang, "map.viewFlat"),
           }}
         />
       </div>

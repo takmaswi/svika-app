@@ -309,6 +309,8 @@ export default async function RiderHome({
             unavailable: t(lang, "map.unavailable"),
             viewWhole: t(lang, "map.viewWhole"),
             viewNear: t(lang, "map.viewNear"),
+            view3d: t(lang, "map.view3d"),
+            viewFlat: t(lang, "map.viewFlat"),
           }}
           camera="boarding"
         />

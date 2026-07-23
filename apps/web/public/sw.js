@@ -1,22 +1,59 @@
-// Svika map tile cache. This worker exists for one job: cache the corridor's
-// MapTiler tiles and style so the live map loads fast on a cheap Android and
-// repeat views do not spend the MapTiler quota again. It never touches
-// anything else. Supabase calls, app pages, _next assets and every non
-// MapTiler request are left entirely to the network, matching the conductor
-// PWA's rule that offline behaviour is explicit app logic, never a stale HTTP
-// cache of the API.
-const CACHE = "svika-maptiler-v1";
-const TILE_HOST = "api.maptiler.com";
-const MAX_ENTRIES = 500; // the corridor is a small bbox; this is a safety cap
+// Svika map cache (M0). One job: make the map fast on a cheap Android on
+// 3G and keep it rendering offline after the first visit. It touches map
+// traffic only:
+//
+//   - self hosted map assets (glyphs, sprites, mock fixture): precached on
+//     install, stale while revalidate afterwards
+//   - PMTiles range requests: each viewed byte range is cached and served
+//     stale while revalidate, so a repeat visit paints from disk and a
+//     visited area keeps rendering in airplane mode
+//   - MapTiler (fallback provider only): cache first, as before
+//
+// The style JSON itself ships inside the app bundle (lib/map/style.ts), so
+// there is nothing to precache for it. Supabase calls, app pages, _next
+// assets and every other request are left entirely to the network, matching
+// the conductor PWA's rule that offline behaviour is explicit app logic,
+// never a stale HTTP cache of the API.
 
-self.addEventListener("install", () => self.skipWaiting());
+const STATIC_CACHE = "svika-map-static-v2";
+const TILE_CACHE = "svika-map-tiles-v2";
+const KEEP = [STATIC_CACHE, TILE_CACHE];
+
+// The corridor is a small bbox; caps are safety rails, not budgets.
+const MAX_TILE_ENTRIES = 800;
+
+// Latin glyph ranges cover every label the Harare map draws day to day;
+// other ranges cache at runtime if ever requested.
+const PRECACHE = [
+  "/map/sprite/sprite.json",
+  "/map/sprite/sprite.png",
+  "/map/sprite/sprite@2x.json",
+  "/map/sprite/sprite@2x.png",
+  "/map/fonts/IBM Plex Mono SemiBold/0-255.pbf",
+  "/map/fonts/IBM Plex Mono SemiBold/256-511.pbf",
+  "/map/fonts/IBM Plex Sans Regular/0-255.pbf",
+  "/map/fonts/IBM Plex Sans Regular/256-511.pbf",
+].map((p) => encodeURI(p));
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(STATIC_CACHE);
+      // best effort: a missing asset must not block the worker install
+      await Promise.allSettled(PRECACHE.map((url) => cache.add(url)));
+      await self.skipWaiting();
+    })(),
+  );
+});
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const names = await caches.keys();
       await Promise.all(
-        names.filter((n) => n.startsWith("svika-maptiler") && n !== CACHE).map((n) => caches.delete(n)),
+        names
+          .filter((n) => (n.startsWith("svika-map") || n.startsWith("svika-maptiler")) && !KEEP.includes(n))
+          .map((n) => caches.delete(n)),
       );
       await self.clients.claim();
     })(),
@@ -25,9 +62,84 @@ self.addEventListener("activate", (event) => {
 
 async function trim(cache) {
   const keys = await cache.keys();
-  if (keys.length <= MAX_ENTRIES) return;
+  if (keys.length <= MAX_TILE_ENTRIES) return;
   // simple FIFO: drop the oldest overflow so the cache stays bounded
-  await Promise.all(keys.slice(0, keys.length - MAX_ENTRIES).map((k) => cache.delete(k)));
+  await Promise.all(keys.slice(0, keys.length - MAX_TILE_ENTRIES).map((k) => cache.delete(k)));
+}
+
+// Cache-first with network fallback and offline retry; the MapTiler path.
+async function cacheFirst(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  const hit = await cache.match(req);
+  if (hit) return hit;
+  const res = await fetch(req);
+  if (res && res.ok && res.status === 200) {
+    cache.put(req, res.clone()).then(() => trim(cache)).catch(() => {});
+  }
+  return res;
+}
+
+// Stale while revalidate for small static assets (glyphs, sprites).
+function staleWhileRevalidate(event, req) {
+  return (async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    const hit = await cache.match(req);
+    const refresh = fetch(req)
+      .then((res) => {
+        if (res && res.ok && res.status === 200) {
+          return cache.put(req, res.clone());
+        }
+        return undefined;
+      })
+      .catch(() => {});
+    if (hit) {
+      event.waitUntil(refresh);
+      return hit;
+    }
+    await refresh;
+    const fresh = await cache.match(req);
+    if (fresh) return fresh;
+    return fetch(req);
+  })();
+}
+
+// PMTiles range requests. Cache.put rejects 206 responses, so each byte
+// range is stored as a synthetic 200 under a range-keyed URL and rebuilt as
+// a 206 (headers preserved, Content-Range included) when served. Stale
+// while revalidate: a cached range answers instantly and refreshes in the
+// background, so regenerated tiles arrive on the next view.
+function rangeKey(req, range) {
+  const url = new URL(req.url);
+  url.searchParams.set("sw-range", range);
+  return new Request(url.toString());
+}
+
+async function storeRange(cache, key, res) {
+  if (!res || (res.status !== 206 && res.status !== 200)) return;
+  const body = await res.clone().arrayBuffer();
+  await cache.put(key, new Response(body, { status: 200, headers: res.headers }));
+  await trim(cache);
+}
+
+function serveRange(event, req) {
+  const range = req.headers.get("range");
+  if (!range) return fetch(req);
+  return (async () => {
+    const cache = await caches.open(TILE_CACHE);
+    const key = rangeKey(req, range);
+    const hit = await cache.match(key);
+    const refresh = fetch(req.clone())
+      .then((res) => storeRange(cache, key, res).then(() => res))
+      .catch(() => null);
+    if (hit) {
+      event.waitUntil(refresh.then(() => {}));
+      return new Response(await hit.arrayBuffer(), { status: 206, headers: hit.headers });
+    }
+    const res = await refresh;
+    if (res) return res;
+    // offline and never fetched: nothing to serve for this range
+    return new Response(null, { status: 504 });
+  })();
 }
 
 self.addEventListener("fetch", (event) => {
@@ -40,27 +152,36 @@ self.addEventListener("fetch", (event) => {
   } catch {
     return;
   }
-  // Only MapTiler. Everything else is none of this worker's business.
-  if (url.hostname !== TILE_HOST) return;
 
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE);
-      const hit = await cache.match(req);
-      if (hit) return hit;
-      try {
-        const res = await fetch(req);
-        // cache only real, cacheable responses (skip errors and opaque 0s)
-        if (res && res.ok && res.status === 200) {
-          cache.put(req, res.clone()).then(() => trim(cache)).catch(() => {});
+  // MapTiler: fallback provider traffic only.
+  if (url.hostname === "api.maptiler.com") {
+    event.respondWith(
+      (async () => {
+        try {
+          return await cacheFirst(req, TILE_CACHE);
+        } catch (err) {
+          const cache = await caches.open(TILE_CACHE);
+          const fallback = await cache.match(req);
+          if (fallback) return fallback;
+          throw err;
         }
-        return res;
-      } catch (err) {
-        // offline and never fetched: let the map handle the gap
-        const fallback = await cache.match(req);
-        if (fallback) return fallback;
-        throw err;
-      }
-    })(),
-  );
+      })(),
+    );
+    return;
+  }
+
+  // Everything else this worker touches is same origin under /map/.
+  if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith("/map/tiles/") && url.pathname.endsWith(".pmtiles")) {
+    event.respondWith(serveRange(event, req));
+    return;
+  }
+  if (
+    url.pathname.startsWith("/map/fonts/") ||
+    url.pathname.startsWith("/map/sprite/") ||
+    url.pathname.startsWith("/map/mock/")
+  ) {
+    event.respondWith(staleWhileRevalidate(event, req));
+  }
 });

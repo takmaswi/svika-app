@@ -473,6 +473,8 @@ export const dict = {
   "map.demoChip": { en: "Demo movement", sn: "Movement yedemo" },
   "map.viewWhole": { en: "Whole route", sn: "Route yese" },
   "map.viewNear": { en: "Boarding area", sn: "Paukukwirira" },
+  "map.view3d": { en: "3D buildings", sn: "Zvivako 3D" },
+  "map.viewFlat": { en: "Flat map", sn: "Mepu yakati sandara" },
   "map.unavailable": {
     en: "The map could not load. Your trips and wallet still work.",
     sn: "Map yatadza kuvhurika. Nzendo dzako newallet zvichiri kushanda.",
