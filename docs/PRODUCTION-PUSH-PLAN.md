@@ -88,7 +88,7 @@ Eleven days is tight for five batches. The mitigation is the batch order plus a 
 
 ## M4 — Speed and production polish (land in slices throughout)
 
-1. **Bundle discipline:** dynamic import MapLibre so non map routes never pay for it; verify with a bundle analyzer table in the gate report; route level code splitting audit; font subsetting for the three families.
+1. **Bundle discipline:** dynamic import MapLibre so non map routes never pay for it; verify with a bundle analyzer table in the gate report; route level code splitting audit; font subsetting for the three families. Added from the M0 gate (Mhofu, 2026-07-23): serve the self hosted glyph PBFs compressed; `next start` ships them raw today (75 KB vs MapTiler's 49 KB gzipped for the same range), so precompress or set the hosting header when the deploy story lands.
 2. **Perceived speed:** skeleton states on every data screen per Mbare Sun surfaces, optimistic UI on wallet and ticket actions, `preconnect` to Supabase, HTTP cache headers audited.
 3. **Data layer:** indexes for every new query in M1 to M3 (journey by rider, place names by location), Supabase advisors run and acted on.
 4. **Measured, not felt:** Lighthouse and Web Vitals on a throttled 360px profile, before and after table committed to the gate report. The rubric rewards evidence.

@@ -111,7 +111,22 @@ shows the full map, markers and both attribution credits in airplane mode.
   `taku-dzidza-ui` container squats host port 3000 and Playwright reuses
   it as if it were the dev server; stop that container first.
 
-## Decisions flagged for Mhofu (rule 4)
+## Rulings (Mhofu, 2026-07-23)
+
+1. 3D toggle on landing + app home only: **approved**.
+2. Worker caching page shells (never API data): **approved**.
+3. Attribution always expanded: **approved** (license law).
+4. IBM Plex Sans for place and suburb labels: **approved** as a spec gap
+   deviation, recorded as deviation 4 in `docs/DESIGN-DEVIATIONS.md`.
+5. 3D frame rate on the real 360px Android: **OPEN** — Mhofu tests it
+   himself and rules then; tracked as check 10 in
+   `docs/CHECKS-FOR-MHOFU.md`. The demote to roadmap rule stays armed.
+
+The uncompressed glyph asterisk (75 KB raw vs 49 KB gzipped) is logged as
+an M4 bundle discipline slice in `docs/PRODUCTION-PUSH-PLAN.md` so it is
+not forgotten. Goal 2 (batch M0) signed off and closed with these rulings.
+
+## Decisions flagged for Mhofu (rule 4, as raised at the gate)
 
 1. **3D toggle placement**: offered on the landing hero and the app home
    map only; the plan and share screens keep their trip framed camera and

@@ -100,3 +100,14 @@ the reference phone. The new mobile QA spec pins 360x740 on its own block so its
 proofs are honest. Fixing it globally would put every existing spec on 360 wide
 at once, which may surface unrelated layout failures, so that call is left to
 you: say the word and the project override gets the reference viewport back.
+
+## 10. 3D map frame rate on the reference device (opened 2026-07-23, OPEN)
+
+M0 shipped 3D buildings as a toggle, off by default, never offered under
+reduced motion or reported deviceMemory under 4 GB. It holds frame rate on
+the dev machine, but the ruling device is your real 360px Android. You
+ruled on the M0 gate that you will test it yourself: open the landing or
+home map, tap "3D buildings", pan and zoom around the CBD (buildings
+appear from zoom 13), and feel for stutter. If it stutters, say the word
+and 3D demotes to roadmap without argument (the toggle comes out, the
+style keeps the layer for later). Ruling lands back in M0-GATE-REPORT.md.

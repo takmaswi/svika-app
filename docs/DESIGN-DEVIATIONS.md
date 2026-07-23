@@ -1,8 +1,9 @@
 # Mbare Sun — agreed deviations from the reference screens
 
 The seven numbered screens in `Svika Mbare Sun/` are the visual truth for this
-app. Three deviations are agreed with Mhofu (1 and 2 on 2026-07-10, 3 on
-2026-07-11) and are deliberate. Everything else follows DESIGN.md verbatim.
+app. Four deviations are agreed with Mhofu (1 and 2 on 2026-07-10, 3 on
+2026-07-11, 4 on 2026-07-23) and are deliberate. Everything else follows
+DESIGN.md verbatim.
 
 ## 1. No fake status bar
 
@@ -32,3 +33,12 @@ with the road heading. The bob, the night glow and the night headlight beam
 from the spec are kept on the standalone kombi. The marigold box language
 stays everywhere that is not a live map marker (the landing kombi highlight,
 chips, cards).
+
+## 4. Place and suburb map labels use IBM Plex Sans Regular
+
+DESIGN.md section 11 rules street labels only: IBM Plex Mono 9px. The self
+hosted native map (M0) also draws place, suburb and park name labels, which
+the spec does not cover. Ruled with Mhofu on the M0 gate: those labels take
+IBM Plex Sans Regular (the brand body font) in the street label and park
+label colours from section 2. Street labels stay IBM Plex Mono SemiBold 9px
+per spec. Both stacks are self hosted (`tools/map-tiles/build-glyphs.mjs`).
