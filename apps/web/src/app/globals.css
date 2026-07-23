@@ -2592,6 +2592,19 @@ body:has(.home-screen) .demo-account-chip {
 .kombi-card-cta {
   margin-top: var(--space-2);
 }
+/* by night the card floats over the live map, so the section 8 overlay
+   tint would let the map bleed through the copy: the dialog takes the
+   section 9 night sheet surface instead (solid char, white-alpha border) */
+:root[data-theme="dark"] .kombi-card {
+  background: var(--color-char);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .kombi-card {
+    background: var(--color-char);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+}
 
 /* the board: one §8 card per vehicle, staggered in per §12 */
 .kombi-board-chip {

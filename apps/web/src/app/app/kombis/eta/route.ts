@@ -43,6 +43,11 @@ export async function GET(request: Request) {
     corridorMetrics,
     corridorStops[targetIndex]!.lngLat,
   );
+  // boarding at the direction's origin rank: kombis finishing the opposite
+  // leg are the next departures here (same terminus rule as eta-live.ts)
+  const originTerminus =
+    (direction === "outbound" && targetIndex === 0) ||
+    (direction === "inbound" && targetIndex === orderedStopIds.length - 1);
   const vehicles = await fleetEtasToStop(
     {
       routeCode: CORRIDOR_ROUTE_CODE,
@@ -55,6 +60,7 @@ export async function GET(request: Request) {
     stopId,
     targetMeters,
     direction,
+    { originTerminus },
   );
 
   return NextResponse.json(

@@ -78,25 +78,48 @@ async function spineMinutes(
   }
 }
 
-/** Every vehicle's honest answer for one stop and travel direction. */
+/**
+ * Every vehicle's honest answer for one stop and travel direction. At the
+ * direction's origin rank (originTerminus), a kombi still finishing the
+ * opposite leg is the next departure here, so its arrival at the rank is
+ * the honest wait — the same terminus rule the home estimate applies
+ * (eta-live.ts); the spine is then asked in the direction the kombi is
+ * actually travelling.
+ */
 export async function fleetEtasToStop(
   deps: FleetEtaDeps,
   targetStopId: string,
   targetMeters: number,
   direction: CorridorDirectionName,
+  opts: { originTerminus?: boolean } = {},
 ): Promise<VehicleEta[]> {
   const now = (deps.now ?? Date.now)();
   const elapsed = now - deps.epochMs;
   return Promise.all(
     deps.vehicles.map(async (v): Promise<VehicleEta> => {
       const travel = simulatedTravelAt(deps.simConfig, v, elapsed);
-      const simMs = simEtaMsToTarget(deps.simConfig, v, elapsed, targetMeters, direction);
+      let askDirection = direction;
+      let simMs = simEtaMsToTarget(deps.simConfig, v, elapsed, targetMeters, direction);
+      if (simMs === null && opts.originTerminus) {
+        const opposite = direction === "outbound" ? "inbound" : "outbound";
+        const arriving = simEtaMsToTarget(
+          deps.simConfig,
+          v,
+          elapsed,
+          targetMeters,
+          opposite,
+        );
+        if (arriving !== null) {
+          simMs = arriving;
+          askDirection = opposite;
+        }
+      }
       if (simMs === null) {
         return { id: v.id, direction: travel.direction, minutes: null, isMock: true, rides: 0 };
       }
       const spine = await spineMinutes(
         deps,
-        direction,
+        askDirection,
         targetStopId,
         pointAtDistance(deps.metrics, travel.meters),
       );
