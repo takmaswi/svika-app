@@ -12,6 +12,14 @@ export const CONSENT_VERSION = "v1";
  */
 export const EMERGENCY_CONSENT_VERSION = "emergency-v1";
 
+/**
+ * The journey recording consent stream (batch M1). Accepting it is what
+ * lets a recorded trace upload; without it the trace stays on the device.
+ * Same table, same append only records, and every gate query filters by
+ * its own version so the streams never move each other.
+ */
+export const JOURNEY_CONSENT_VERSION = "journey-v1";
+
 export interface ConsentRecord {
   action: "accepted" | "withdrawn";
   created_at: string;

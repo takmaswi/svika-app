@@ -1045,5 +1045,182 @@ check(
   );
 }
 
+// --- rider journeys (migration 0033) ---------------------------------------
+// A recorded trace is personal location data: consent gates the upload, RLS
+// scopes every read to the owner, the RPCs are the only doors, and a replayed
+// batch can never overwrite what already landed (first sync wins).
+{
+  const A = await signIn("RIDER_A");
+  const B = await signIn("RIDER_B");
+
+  const pts = (from, n) =>
+    Array.from({ length: n }, (_, i) => ({
+      seq: from + i,
+      lat: -17.78 - i * 0.0001,
+      lng: 31.05 + i * 0.0001,
+      accuracy_m: 8,
+      recorded_at: new Date(Date.now() + (from + i) * 5000).toISOString(),
+    }));
+
+  // stage "no consent": the newest journey stream record says withdrawn
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "withdrawn", version: "journey-v1" });
+  const jNoConsent = crypto.randomUUID();
+  const refused = await A.c.rpc("upsert_rider_journey", {
+    p_journey: jNoConsent,
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  check(
+    "JN-1 no journey consent means no upload",
+    (refused.error?.message ?? "").includes("journey consent missing"),
+    refused.error?.message,
+  );
+
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "accepted", version: "journey-v1" });
+  const jA = crypto.randomUUID();
+  const started = await A.c.rpc("upsert_rider_journey", {
+    p_journey: jA,
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  const batch1 = await A.c.rpc("append_rider_journey_points", {
+    p_journey: jA,
+    p_points: pts(0, 5),
+  });
+  check(
+    "JN-2 with consent the journey uploads and a batch of points lands",
+    !started.error && !batch1.error && batch1.data === 5,
+    started.error?.message ?? batch1.error?.message ?? String(batch1.data),
+  );
+
+  const replay = await A.c.rpc("append_rider_journey_points", {
+    p_journey: jA,
+    p_points: pts(0, 5),
+  });
+  check(
+    "JN-3 a replayed batch inserts nothing: first sync wins",
+    !replay.error && replay.data === 0,
+    replay.error?.message ?? String(replay.data),
+  );
+
+  const crossJourneys = await B.c.from("rider_journeys").select("id").eq("id", jA);
+  check("JN-4 rider B cannot read rider A's journey", deniedOrEmpty(crossJourneys));
+  const crossPoints = await B.c
+    .from("rider_journey_points")
+    .select("seq")
+    .eq("journey_id", jA);
+  check("JN-5 rider B cannot read rider A's trace points", deniedOrEmpty(crossPoints));
+
+  await B.c
+    .from("consent_records")
+    .insert({ user_id: B.uid, action: "accepted", version: "journey-v1" });
+  const crossAppend = await B.c.rpc("append_rider_journey_points", {
+    p_journey: jA,
+    p_points: pts(100, 1),
+  });
+  check(
+    "JN-6 rider B cannot append points to rider A's journey",
+    !!crossAppend.error,
+    crossAppend.error?.message,
+  );
+  const crossComplete = await B.c.rpc("complete_rider_journey", {
+    p_journey: jA,
+    p_name: "stolen",
+    p_mode: "walk",
+    p_ended_at: new Date().toISOString(),
+    p_distance_m: 1,
+  });
+  check(
+    "JN-7 rider B cannot complete rider A's journey",
+    !!crossComplete.error,
+    crossComplete.error?.message,
+  );
+
+  const forgeJourney = await A.c.from("rider_journeys").insert({
+    id: crypto.randomUUID(),
+    rider_id: A.uid,
+    consent_version: "journey-v1",
+    started_at: new Date().toISOString(),
+  });
+  check("JN-8 even the owner cannot write the journey table directly", !!forgeJourney.error);
+  const forgePoint = await A.c.from("rider_journey_points").insert({
+    journey_id: jA,
+    seq: 999,
+    lat: 0,
+    lng: 0,
+    recorded_at: new Date().toISOString(),
+  });
+  check("JN-9 even the owner cannot write points directly", !!forgePoint.error);
+
+  const complete = await A.c.rpc("complete_rider_journey", {
+    p_journey: jA,
+    p_name: "Walk to the shops",
+    p_mode: "walk",
+    p_ended_at: new Date().toISOString(),
+    p_distance_m: 420,
+  });
+  const afterComplete = await A.c.rpc("append_rider_journey_points", {
+    p_journey: jA,
+    p_points: pts(50, 1),
+  });
+  check(
+    "JN-10 a saved journey accepts no more points",
+    !complete.error &&
+      (afterComplete.error?.message ?? "").includes("journey is not recording"),
+    complete.error?.message ?? afterComplete.error?.message,
+  );
+  const mine = await A.c
+    .from("rider_journeys")
+    .select("id, name, status")
+    .eq("id", jA)
+    .single();
+  check(
+    "JN-11 the owner reads back their saved journey",
+    !mine.error && mine.data?.status === "complete" && mine.data?.name === "Walk to the shops",
+    mine.error?.message,
+  );
+
+  const jB = crypto.randomUUID();
+  await A.c.rpc("upsert_rider_journey", {
+    p_journey: jB,
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  await A.c.rpc("append_rider_journey_points", { p_journey: jB, p_points: pts(0, 3) });
+  const discard = await A.c.rpc("discard_rider_journey", { p_journey: jB });
+  const discardedPoints = await A.c
+    .from("rider_journey_points")
+    .select("seq")
+    .eq("journey_id", jB);
+  const discardedRow = await A.c
+    .from("rider_journeys")
+    .select("status")
+    .eq("id", jB)
+    .single();
+  check(
+    "JN-12 discarding deletes the trace and records the discard",
+    !discard.error &&
+      !discardedPoints.error &&
+      (discardedPoints.data ?? []).length === 0 &&
+      discardedRow.data?.status === "discarded",
+    discard.error?.message,
+  );
+
+  const anonJourneys = await anon.from("rider_journeys").select("id");
+  check("JN-13 anon sees zero journeys", deniedOrEmpty(anonJourneys));
+  const anonPoints = await anon.from("rider_journey_points").select("seq");
+  check("JN-14 anon sees zero trace points", deniedOrEmpty(anonPoints));
+  const anonUpsert = await anon.rpc("upsert_rider_journey", {
+    p_journey: crypto.randomUUID(),
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  check("JN-15 anon cannot open a journey", !!anonUpsert.error);
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);

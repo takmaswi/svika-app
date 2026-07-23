@@ -939,6 +939,88 @@ export type Database = {
           },
         ]
       }
+      rider_journey_points: {
+        Row: {
+          accuracy_m: number | null
+          journey_id: string
+          lat: number
+          lng: number
+          recorded_at: string
+          seq: number
+        }
+        Insert: {
+          accuracy_m?: number | null
+          journey_id: string
+          lat: number
+          lng: number
+          recorded_at: string
+          seq: number
+        }
+        Update: {
+          accuracy_m?: number | null
+          journey_id?: string
+          lat?: number
+          lng?: number
+          recorded_at?: string
+          seq?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_journey_points_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "rider_journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_journeys: {
+        Row: {
+          consent_version: string
+          created_at: string
+          distance_m: number | null
+          ended_at: string | null
+          id: string
+          mode: Database["public"]["Enums"]["journey_mode"]
+          name: string | null
+          rider_id: string
+          started_at: string
+          status: Database["public"]["Enums"]["journey_status"]
+        }
+        Insert: {
+          consent_version: string
+          created_at?: string
+          distance_m?: number | null
+          ended_at?: string | null
+          id: string
+          mode?: Database["public"]["Enums"]["journey_mode"]
+          name?: string | null
+          rider_id: string
+          started_at: string
+          status?: Database["public"]["Enums"]["journey_status"]
+        }
+        Update: {
+          consent_version?: string
+          created_at?: string
+          distance_m?: number | null
+          ended_at?: string | null
+          id?: string
+          mode?: Database["public"]["Enums"]["journey_mode"]
+          name?: string | null
+          rider_id?: string
+          started_at?: string
+          status?: Database["public"]["Enums"]["journey_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_journeys_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rider_prefs: {
         Row: {
           commute_alerts: boolean
@@ -1846,6 +1928,10 @@ export type Database = {
     }
     Functions: {
       anonymise_me: { Args: never; Returns: undefined }
+      append_rider_journey_points: {
+        Args: { p_journey: string; p_points: Json }
+        Returns: number
+      }
       assert_plausible_fare: { Args: { p_fare: number }; Returns: number }
       cancel_transfer: { Args: { p_transfer: string }; Returns: undefined }
       claim_credit: {
@@ -1856,6 +1942,16 @@ export type Database = {
         }[]
       }
       claim_demo_persona: { Args: never; Returns: string }
+      complete_rider_journey: {
+        Args: {
+          p_distance_m: number
+          p_ended_at: string
+          p_journey: string
+          p_mode: Database["public"]["Enums"]["journey_mode"]
+          p_name: string
+        }
+        Returns: undefined
+      }
       create_ride_share: {
         Args: { p_ticket: string }
         Returns: {
@@ -1876,6 +1972,7 @@ export type Database = {
         Args: { p_variant: string }
         Returns: string
       }
+      discard_rider_journey: { Args: { p_journey: string }; Returns: undefined }
       kombi_board: {
         Args: never
         Returns: {
@@ -2054,9 +2151,19 @@ export type Database = {
           ticket_id: string
         }[]
       }
+      upsert_rider_journey: {
+        Args: {
+          p_journey: string
+          p_mode: Database["public"]["Enums"]["journey_mode"]
+          p_started_at: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_language: "en" | "sn"
+      journey_mode: "kombi" | "walk" | "mixed"
+      journey_status: "recording" | "complete" | "discarded"
       ledger_account_kind:
         | "rider_wallet"
         | "conductor_wallet"
@@ -2213,6 +2320,8 @@ export const Constants = {
   public: {
     Enums: {
       app_language: ["en", "sn"],
+      journey_mode: ["kombi", "walk", "mixed"],
+      journey_status: ["recording", "complete", "discarded"],
       ledger_account_kind: [
         "rider_wallet",
         "conductor_wallet",
