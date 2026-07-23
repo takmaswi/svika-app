@@ -85,7 +85,14 @@ marigold CTA, night map palette and headlight beams; Shona strings render
 throughout; the Demo movement provenance chip stands on the map in both.
 Capture script: apps/web/scripts/front-door-screens.mjs.
 
-## Decisions taken inside the ruled scope (for Mhofu's review)
+## Decisions taken inside the ruled scope
+
+Ruled by Mhofu on 2026-07-23: all three APPROVED as taken. (1) Stat cards
+removed, no fabricated values to logged out visitors. (2) Register rows
+trimmed, this branch's register reflects this branch's surfaces and main
+keeps its own. (3) Demo account chip and takunda fixture retained, still
+true while the shared database holds those personas. Goal 1 is signed off
+and closed.
 
 1. The landing stat cards ($1.50 change kept, ticket 74 21) were removed
    with the theatre: they showed fabricated values to logged out visitors,
