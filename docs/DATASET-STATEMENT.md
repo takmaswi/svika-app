@@ -46,8 +46,21 @@ build is recorded by the pipeline in `tools/map-tiles/OSM-DATE.txt`; the
 extract in use was built 2026-07-23 from the Geofabrik extract stamped
 2026-07-22T20:21:25Z. OSM is (c) OpenStreetMap contributors, ODbL, and the
 tile schema is OpenMapTiles (CC-BY); both credits are rendered on the map
-itself. The tiles are display data only; nothing trains on them. MapTiler
-remains an env keyed fallback tile source only.
+itself. Nothing trains on the tiles. MapTiler remains an env keyed
+fallback tile source only.
+
+### Destination search corpus (derived from the same OSM extract)
+
+D1's destination search runs on a committed local corpus
+(`apps/web/src/lib/geocode/places.json`) extracted from the tiles above by
+`tools/geocode-index/` (`pnpm geocode:index`): every named suburb, place,
+point of interest and road inside the same Harare bounding box, 5,782
+entries in the current build (94 suburbs, 8 places, 1,999 POIs, 3,681
+roads), each carrying one representative point. Same provenance and
+licence as the tiles: OSM, ODbL, data date per `OSM-DATE.txt`. It is a
+lookup index for deterministic string scoring, not training data; rerun
+the tool after any tile refresh and commit the result so the app never
+geocodes through a vendor.
 
 ### What is deliberately not collected
 

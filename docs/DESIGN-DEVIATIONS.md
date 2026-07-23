@@ -42,3 +42,15 @@ the spec does not cover. Ruled with Mhofu on the M0 gate: those labels take
 IBM Plex Sans Regular (the brand body font) in the street label and park
 label colours from section 2. Street labels stay IBM Plex Mono SemiBold 9px
 per spec. Both stacks are self hosted (`tools/map-tiles/build-glyphs.mjs`).
+
+## 5. Destination place pin in the walk tone (D1, awaiting ratification)
+
+DESIGN.md section 2 rules signal `#E84C30` for live dots and stops ONLY,
+and no reference screen shows a destination that is not a stop. D1 lets a
+plan end at any named place, so its map needs a pin the spec does not
+have. Proposal, applied pending Mhofu's ruling: the destination place pin
+is the same 7px circle geometry as the section 11 stop pin but filled with
+the walk tone (`#575F53` day, `rgba(255,255,255,.55)` night), the same
+tone as the dashed walking tail it terminates, with the usual white
+stroke. Stops on the plan keep their signal pins untouched; a plan that
+ends at a stop is unchanged.

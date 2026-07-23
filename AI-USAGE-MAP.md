@@ -19,6 +19,9 @@ Each spine is a purpose built model measured against a named baseline. Do not re
 
 ## What is NOT AI at all
 - Trip planning: a route query over the seeded network (`lib/trip-planner`). Plain code.
+- Destination geocoding (D1): a local index query over a committed corpus of named suburbs, landmarks and roads extracted from the self hosted OSM tiles (`tools/geocode-index`, `apps/web/src/lib/geocode`). Deterministic string scoring, no Google, no vendor in the ride path. Not AI, and the UI never pretends otherwise.
+- Alight stop scoring (D1): candidate alight stops near a destination point are ranked by ride minutes plus boarding penalties plus an honest walking tail (`packages/shared/src/plan-to-point.ts`). Documented arithmetic rules; the no service case is stated plainly, never papered over.
+- Alight guidance (D1): the in ride "your stop is next" and "chiburuka" cues are the existing geofence trigger engine over vehicle positions, extended to destination trips by the recorded walking tail. Distance thresholds, not a model.
 - Remembering and saving trips: database storage.
 - Voice: ElevenLabs is a studio tool only. Phrases are generated once and shipped as cached audio. No live call in the ride path.
 

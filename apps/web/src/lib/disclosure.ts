@@ -74,6 +74,18 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     detail: "Real rider owned rows under RLS, proven by the security suite.",
   },
   {
+    feature: "Destination first planning",
+    tier: 1,
+    detail:
+      "Real. The search accepts any named place from a committed local corpus extracted from the self hosted OSM tiles (suburbs, landmarks, roads); no vendor in the ride path. Alight stops are scored by documented arithmetic rules and the trade is shown plainly, including the honest no service case. Not AI.",
+  },
+  {
+    feature: "Alight guidance on destination trips",
+    tier: 1,
+    detail:
+      "The existing geofence trigger engine armed for any booked corridor trip; a destination booking records its walking tail so the walk cue belongs to the ticket. Cues play from cached audio in both languages; the position driving live cues is still the simulated fleet.",
+  },
+  {
     feature: "Answer first home peek",
     tier: 1,
     detail:
