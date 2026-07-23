@@ -140,6 +140,35 @@ async function ensureConductor(uid, ownerId) {
   return ins.id;
 }
 
+// the staging vehicle registry (batch K1): four kombis for the demo fleet,
+// matching the four simulated map markers (apps/web/src/lib/kombi/fleet.ts).
+// Plates are staging inventions and the 16 seats mirror the watchdog
+// simulator's parked assumption (docs/CHECKS-FOR-MHOFU.md); real plates and
+// capacities arrive from fieldwork. No fare history is invented for them:
+// every kombi starts unverified, which is the trust surface's default truth.
+const STAGING_VEHICLES = [
+  { plate: "AEZ 4821", capacity: 16 },
+  { plate: "AFK 2903", capacity: 16 },
+  { plate: "AGT 1157", capacity: 16 },
+  { plate: "ADR 7346", capacity: 16 },
+];
+
+async function ensureVehicles(ownerId) {
+  for (const v of STAGING_VEHICLES) {
+    const { data } = await admin
+      .from("vehicles")
+      .select("id")
+      .eq("plate", v.plate)
+      .maybeSingle();
+    if (data) continue;
+    const { error } = await admin
+      .from("vehicles")
+      .insert({ owner_id: ownerId, plate: v.plate, capacity: v.capacity });
+    if (error) throw error;
+    console.log(`created vehicle ${v.plate}`);
+  }
+}
+
 // a conductor clears fares only on routes they are assigned to work
 // (migration 0018); assignments are service role writes, so the seed is
 // the only place they are created for rehearsal
@@ -484,6 +513,7 @@ await resetProfilePersonal(ids.RIDER);
 
 const ownerId = await ensureOwner(ids.OWNER, "Demo Fleet");
 const demoConductorId = await ensureConductor(ids.CONDUCTOR, ownerId);
+await ensureVehicles(ownerId);
 await resetAttemptLog(ids.CONDUCTOR);
 await topUpRider(ids.RIDER);
 await refillTestRiders();

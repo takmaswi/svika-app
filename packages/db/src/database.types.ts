@@ -1876,6 +1876,18 @@ export type Database = {
         Args: { p_variant: string }
         Returns: string
       }
+      kombi_board: {
+        Args: never
+        Returns: {
+          capacity: number
+          drift_days_30d: number
+          fare_days_30d: number
+          last_verified_at: string
+          peak_hour_load_30d: number
+          plate: string
+          verified_fares_30d: number
+        }[]
+      }
       log_offline_attempts: { Args: { p_attempts: Json }; Returns: number }
       owner_revenue_summary: {
         Args: never

@@ -1013,5 +1013,37 @@ check(
   }
 }
 
+// kombi board (K1): the trust surface reads aggregates, never people
+{
+  const anonBoard = await client().rpc("kombi_board");
+  check("KB-1 anon cannot call kombi_board", !!anonBoard.error);
+
+  const board = await A.c.rpc("kombi_board");
+  check(
+    "KB-2 a signed in rider can read the kombi board",
+    !board.error && Array.isArray(board.data) && board.data.length > 0,
+    board.error?.message,
+  );
+
+  const kbRow = (board.data ?? [])[0];
+  check(
+    "KB-3 board rows carry aggregates only, no person or row ids",
+    !!kbRow &&
+      !("id" in kbRow) &&
+      !("vehicle_id" in kbRow) &&
+      !("owner_id" in kbRow) &&
+      !("rider_id" in kbRow) &&
+      !("conductor_id" in kbRow) &&
+      !("ticket_id" in kbRow),
+    kbRow ? Object.keys(kbRow).join(",") : "no row",
+  );
+
+  const vehiclesDirect = await A.c.from("vehicles").select("id");
+  check(
+    "KB-4 the vehicles table itself stays closed to riders",
+    deniedOrEmpty(vehiclesDirect),
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
