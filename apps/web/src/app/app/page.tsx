@@ -210,6 +210,8 @@ export default async function RiderHome({
   const patterns = mineCommutePatterns(facts, new Date());
 
   let commuteAlert: {
+    fromStopId: string;
+    toStopId: string;
     fromName: string;
     toName: string;
     eta: EtaEstimate;
@@ -219,7 +221,13 @@ export default async function RiderHome({
     if (pattern) {
       const eta = await etaProvider.estimate(pattern.fromStopId, pattern.toStopId);
       if (etaSaysNear(eta.minutes)) {
-        commuteAlert = { fromName: pattern.fromName, toName: pattern.toName, eta };
+        commuteAlert = {
+          fromStopId: pattern.fromStopId,
+          toStopId: pattern.toStopId,
+          fromName: pattern.fromName,
+          toName: pattern.toName,
+          eta,
+        };
       }
     }
   }
@@ -261,6 +269,20 @@ export default async function RiderHome({
         covered: balance >= answerPlan.totalFareCents,
       };
     }
+  }
+
+  // Mhofu's V1 gate ruling (2026-07-23): when the peek already answers with
+  // the same trip, the peek is the alert's home and the floating alert
+  // hides. It still floats when it carries different information (the
+  // outbound kombi while the peek offers the ride back) and for riders
+  // whose peek has no answer.
+  if (
+    commuteAlert &&
+    answer &&
+    commuteAlert.fromStopId === answer.fromStopId &&
+    commuteAlert.toStopId === answer.toStopId
+  ) {
+    commuteAlert = null;
   }
 
   // the peek card (§9): route + arrival + fare, never behind a scroll

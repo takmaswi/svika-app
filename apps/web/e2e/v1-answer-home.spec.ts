@@ -42,6 +42,9 @@ test.describe("V1 answer first home", () => {
     await expect(answer).toContainText(/demo estimate|recorded ride/);
     // wallet honesty on the fare cell
     await expect(answer.getByTestId("answer-wallet")).toBeVisible();
+    // gate ruling: the peek is the alert's home for the same trip, so the
+    // floating alert stays hidden here
+    await expect(page.getByTestId("commute-alert")).toHaveCount(0);
 
     // one tap: rebook, land with a live board code on screen
     await waitForHydration(page);
