@@ -16,6 +16,9 @@ test.describe("kombi card and board", () => {
   });
 
   test("tap kombi opens the card, card walks to the board", async ({ page }) => {
+    // prime the board route so the dev server's first compile of it never
+    // races the navigation assertion mid suite
+    await page.request.get("/app/kombis");
     await page.goto("/app");
 
     const map = page.getByTestId("live-map");
@@ -44,9 +47,10 @@ test.describe("kombi card and board", () => {
     await expect(card.getByTestId("kombi-eta")).toBeVisible();
     await expect(card.getByTestId("kombi-provenance")).toBeVisible();
 
-    // one primary action: the board
+    // one primary action: the board. The generous timeout covers the dev
+    // server's first compile of the route mid suite.
     await card.getByTestId("kombi-card-board-link").click();
-    await expect(page).toHaveURL(/\/app\/kombis$/);
+    await expect(page).toHaveURL(/\/app\/kombis$/, { timeout: 20_000 });
 
     const rows = page.getByTestId("kombi-board-row");
     await expect(rows).toHaveCount(4);
@@ -64,7 +68,7 @@ test.describe("kombi card and board", () => {
   test("the board is one tap from the map home", async ({ page }) => {
     await page.goto("/app");
     await page.getByTestId("kombis-chip").click();
-    await expect(page).toHaveURL(/\/app\/kombis$/);
+    await expect(page).toHaveURL(/\/app\/kombis$/, { timeout: 20_000 });
     await expect(page.getByTestId("kombi-board-row")).toHaveCount(4);
   });
 });
