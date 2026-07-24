@@ -96,7 +96,7 @@ export function projectOnTrace(
   position: GuidePoint,
 ): TraceProjection | null {
   if (trace.length < 2) return null;
-  const ref = trace[0];
+  const ref = trace[0]!;
   const xy = trace.map((p) => toXY(p, ref));
   const pos = toXY(position, ref);
 
@@ -104,11 +104,11 @@ export function projectOnTrace(
   let alongBefore = 0;
   let totalLength = 0;
   for (let i = 0; i < xy.length - 1; i++) {
-    totalLength += dist(xy[i], xy[i + 1]);
+    totalLength += dist(xy[i]!, xy[i + 1]!);
   }
   for (let i = 0; i < xy.length - 1; i++) {
-    const a = xy[i];
-    const b = xy[i + 1];
+    const a = xy[i]!;
+    const b = xy[i + 1]!;
     const t = segmentT(pos, a, b);
     const proj = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
     const d = dist(pos, proj);
@@ -155,14 +155,14 @@ function simplify(points: readonly XY[], epsilon: number): number[] {
   const stack: Array<[number, number]> = [[0, points.length - 1]];
   while (stack.length > 0) {
     const [first, last] = stack.pop()!;
-    const a = points[first];
-    const b = points[last];
+    const a = points[first]!;
+    const b = points[last]!;
     let maxDist = 0;
     let maxIndex = -1;
     for (let i = first + 1; i < last; i++) {
-      const t = segmentT(points[i], a, b);
+      const t = segmentT(points[i]!, a, b);
       const proj = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
-      const d = dist(points[i], proj);
+      const d = dist(points[i]!, proj);
       if (d > maxDist) {
         maxDist = d;
         maxIndex = i;
@@ -207,7 +207,7 @@ function segmentMode(
 /** Steps derived from the trace by turns and mode changes: plain geometry. */
 export function deriveSteps(trace: readonly GuidePoint[]): GuideStep[] {
   if (trace.length < 2) return [];
-  const ref = trace[0];
+  const ref = trace[0]!;
   const xy = trace.map((p) => toXY(p, ref));
   const kept = simplify(xy, SIMPLIFY_EPSILON_METERS);
   if (kept.length < 2) return [];
@@ -216,12 +216,12 @@ export function deriveSteps(trace: readonly GuidePoint[]): GuideStep[] {
   let current: GuideStep | null = null;
   let prevBearing: number | null = null;
   for (let k = 0; k < kept.length - 1; k++) {
-    const i = kept[k];
-    const j = kept[k + 1];
-    const meters = dist(xy[i], xy[j]);
+    const i = kept[k]!;
+    const j = kept[k + 1]!;
+    const meters = dist(xy[i]!, xy[j]!);
     if (meters === 0) continue;
-    const bearing = bearingDeg(xy[i], xy[j]);
-    const mode = segmentMode(trace[i], trace[j], meters);
+    const bearing = bearingDeg(xy[i]!, xy[j]!);
+    const mode = segmentMode(trace[i]!, trace[j]!, meters);
 
     let turn: StepTurn | null = null;
     if (!current) {

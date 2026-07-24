@@ -77,8 +77,8 @@ export function shouldKeepPoint(
 export function traceDistanceMeters(points: readonly TracePoint[]): number {
   let total = 0;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const next = points[i];
+    const prev = points[i - 1]!;
+    const next = points[i]!;
     const hop = haversineMeters(prev.lng, prev.lat, next.lng, next.lat);
     const seconds = (next.recordedAt - prev.recordedAt) / 1000;
     if (seconds > 0 && hop / seconds > TELEPORT_SPEED_MPS) continue;

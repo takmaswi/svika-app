@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+﻿import { describe, expect, test } from "vitest";
 import {
   APPROACHING_METERS,
   ARRIVED_METERS,
@@ -32,20 +32,20 @@ const L_TRACE = [pt(0, 0, 0), pt(200, 0, 160), pt(400, 0, 320), pt(400, 150, 440
 
 describe("projection onto the trace", () => {
   test("a point on the line is at distance ~0", () => {
-    const p = projectOnTrace(L_TRACE, pt(100, 0));
+    const p = projectOnTrace(L_TRACE, pt(100, 0))!;
     expect(p.distanceMeters).toBeLessThan(1);
   });
 
   test("a point beside the line reports its offset", () => {
-    const p = projectOnTrace(L_TRACE, pt(100, 40));
+    const p = projectOnTrace(L_TRACE, pt(100, 40))!;
     expect(p.distanceMeters).toBeGreaterThan(35);
     expect(p.distanceMeters).toBeLessThan(45);
   });
 
   test("remaining distance shrinks along the walk", () => {
-    const start = projectOnTrace(L_TRACE, pt(0, 0));
-    const mid = projectOnTrace(L_TRACE, pt(400, 10));
-    const nearEnd = projectOnTrace(L_TRACE, pt(400, 280));
+    const start = projectOnTrace(L_TRACE, pt(0, 0))!;
+    const mid = projectOnTrace(L_TRACE, pt(400, 10))!;
+    const nearEnd = projectOnTrace(L_TRACE, pt(400, 280))!;
     expect(start.remainingMeters).toBeGreaterThan(mid.remainingMeters);
     expect(mid.remainingMeters).toBeGreaterThan(nearEnd.remainingMeters);
     expect(start.remainingMeters).toBeGreaterThan(650);
@@ -92,13 +92,13 @@ describe("derived steps", () => {
   test("the L shaped walk yields two steps with a left turn between", () => {
     const steps = deriveSteps(L_TRACE);
     expect(steps).toHaveLength(2);
-    expect(steps[0].turn).toBe("start");
-    expect(steps[0].meters).toBeGreaterThan(380);
-    expect(steps[0].meters).toBeLessThan(420);
+    expect(steps[0]!.turn).toBe("start");
+    expect(steps[0]!.meters).toBeGreaterThan(380);
+    expect(steps[0]!.meters).toBeLessThan(420);
     // walking east then turning north is a left turn
-    expect(steps[1].turn).toBe("left");
-    expect(steps[1].meters).toBeGreaterThan(280);
-    expect(steps[1].meters).toBeLessThan(320);
+    expect(steps[1]!.turn).toBe("left");
+    expect(steps[1]!.meters).toBeGreaterThan(280);
+    expect(steps[1]!.meters).toBeLessThan(320);
   });
 
   test("gentle wiggle below the turn threshold stays one step", () => {
@@ -113,7 +113,7 @@ describe("derived steps", () => {
     const rightTurn = [pt(0, 0, 0), pt(200, 0, 160), pt(200, -200, 320)];
     const steps = deriveSteps(rightTurn);
     expect(steps).toHaveLength(2);
-    expect(steps[1].turn).toBe("right");
+    expect(steps[1]!.turn).toBe("right");
   });
 
   test("steps carry the mode their speed implies", () => {
@@ -125,8 +125,8 @@ describe("derived steps", () => {
       pt(400, 3000, 620),
     ];
     const steps = deriveSteps(mixed);
-    expect(steps[0].mode).toBe("walk");
-    expect(steps[steps.length - 1].mode).toBe("ride");
+    expect(steps[0]!.mode).toBe("walk");
+    expect(steps[steps.length - 1]!.mode).toBe("ride");
     expect(RIDE_SPEED_MPS).toBeGreaterThan(2);
   });
 
