@@ -939,6 +939,51 @@ export type Database = {
           },
         ]
       }
+      journey_shares: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          journey_id: string
+          revoked_at: string | null
+          rider_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          journey_id: string
+          revoked_at?: string | null
+          rider_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          journey_id?: string
+          revoked_at?: string | null
+          rider_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journey_shares_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "rider_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journey_shares_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rider_journey_points: {
         Row: {
           accuracy_m: number | null
@@ -1952,6 +1997,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_journey_share: {
+        Args: { p_journey: string }
+        Returns: {
+          share_expires_at: string
+          share_token: string
+        }[]
+      }
       create_ride_share: {
         Args: { p_ticket: string }
         Returns: {
@@ -1973,6 +2025,7 @@ export type Database = {
         Returns: string
       }
       discard_rider_journey: { Args: { p_journey: string }; Returns: undefined }
+      journey_share_view: { Args: { p_token: string }; Returns: Json }
       kombi_board: {
         Args: never
         Returns: {
@@ -2083,6 +2136,7 @@ export type Database = {
         Args: { p_profile: string }
         Returns: number
       }
+      revoke_journey_share: { Args: { p_share: string }; Returns: undefined }
       revoke_ride_share: { Args: { p_share: string }; Returns: undefined }
       ride_share_view: {
         Args: { p_token: string }

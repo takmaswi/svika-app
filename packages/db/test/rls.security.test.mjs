@@ -1222,5 +1222,126 @@ check(
   check("JN-15 anon cannot open a journey", !!anonUpsert.error);
 }
 
+// --- journey shares (migration 0034) ----------------------------------------
+// The guide link: a saved journey shared as a 128 bit capability. The
+// anonymous viewer gets the trace with relative time offsets and nothing
+// about who recorded it; revocation kills the link instantly.
+{
+  const A = await signIn("RIDER_A");
+  const B = await signIn("RIDER_B");
+
+  // a saved journey to share (through the only doors there are)
+  const jShare = crypto.randomUUID();
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "accepted", version: "journey-v1" });
+  await A.c.rpc("upsert_rider_journey", {
+    p_journey: jShare,
+    p_mode: "walk",
+    p_started_at: new Date(Date.now() - 300_000).toISOString(),
+  });
+  await A.c.rpc("append_rider_journey_points", {
+    p_journey: jShare,
+    p_points: Array.from({ length: 4 }, (_, i) => ({
+      seq: i,
+      lat: -17.78 - i * 0.001,
+      lng: 31.05,
+      accuracy_m: 8,
+      recorded_at: new Date(Date.now() - 300_000 + i * 60_000).toISOString(),
+    })),
+  });
+
+  // an unsaved recording cannot be shared
+  const early = await A.c.rpc("create_journey_share", { p_journey: jShare });
+  check("JS-1 a recording that is not saved cannot be shared", !!early.error);
+
+  await A.c.rpc("complete_rider_journey", {
+    p_journey: jShare,
+    p_name: "Guide walk",
+    p_mode: "walk",
+    p_ended_at: new Date().toISOString(),
+    p_distance_m: 350,
+  });
+
+  const share = await A.c.rpc("create_journey_share", { p_journey: jShare });
+  const token = share.data?.[0]?.share_token ?? "";
+  check(
+    "JS-2 the rider mints a 128 bit guide token for their saved journey",
+    !share.error && /^[0-9a-f]{32}$/.test(token),
+    share.error?.message,
+  );
+
+  const again = await A.c.rpc("create_journey_share", { p_journey: jShare });
+  check(
+    "JS-3 minting twice returns the same live link",
+    !again.error && again.data?.[0]?.share_token === token,
+  );
+
+  const foreign = await B.c.rpc("create_journey_share", { p_journey: jShare });
+  check("JS-4 a rider cannot share someone else's journey", !!foreign.error);
+
+  const anonShares = await anon.from("journey_shares").select("token");
+  check("JS-5 anon cannot read the share table", deniedOrEmpty(anonShares));
+  const bShares = await B.c.from("journey_shares").select("token");
+  check(
+    "JS-6 another rider cannot read A's guide tokens",
+    !bShares.error && (bShares.data ?? []).every((r) => r.token !== token),
+  );
+
+  const view = await anon.rpc("journey_share_view", { p_token: token });
+  const doc = view.data;
+  check(
+    "JS-7 the anonymous viewer gets the trace for a live token",
+    !view.error &&
+      !!doc &&
+      doc.name === "Guide walk" &&
+      Array.isArray(doc.points) &&
+      doc.points.length === 4,
+    view.error?.message,
+  );
+  check(
+    "JS-8 the view carries no identity, ids or wall clock times",
+    !!doc &&
+      !("rider_id" in doc) &&
+      !("journey_id" in doc) &&
+      !("id" in doc) &&
+      // point rows are [lng, lat, offset_ms]; offsets start at zero
+      doc.points[0][2] === 0 &&
+      doc.points[3][2] === 180_000,
+    doc ? JSON.stringify(Object.keys(doc)) : "no doc",
+  );
+
+  const miss = await anon.rpc("journey_share_view", {
+    p_token: "0123456789abcdef0123456789abcdef",
+  });
+  check("JS-9 a wrong token answers with nothing", !miss.error && miss.data === null);
+
+  const { data: shareRow } = await A.c
+    .from("journey_shares")
+    .select("id")
+    .eq("token", token)
+    .single();
+  const foreignRevoke = await B.c.rpc("revoke_journey_share", {
+    p_share: shareRow.id,
+  });
+  check("JS-10 another rider cannot revoke A's guide link", !!foreignRevoke.error);
+
+  const revoke = await A.c.rpc("revoke_journey_share", { p_share: shareRow.id });
+  const afterRevoke = await anon.rpc("journey_share_view", { p_token: token });
+  check(
+    "JS-11 revoking kills the link for the viewer",
+    !revoke.error && !afterRevoke.error && afterRevoke.data === null,
+    revoke.error?.message,
+  );
+
+  const forge = await A.c.from("journey_shares").insert({
+    journey_id: jShare,
+    rider_id: A.uid,
+    token: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    expires_at: new Date(Date.now() + 3600_000).toISOString(),
+  });
+  check("JS-12 even the owner cannot write the share table directly", !!forge.error);
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
