@@ -2780,3 +2780,47 @@ body:has(.home-screen) .demo-account-chip {
   color: var(--color-ink-soft);
   margin: 0 0 var(--space-3);
 }
+
+/* --- journey guide viewer (batch M2) --------------------------------------
+   Cues never wear signal (section 2: live dots and stops only): the off
+   path warning takes marigold with char text (the pair), the good cues
+   take the park tone. */
+.guide-title {
+  margin: 0 0 var(--space-3);
+}
+.guide-cue {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--color-park, #d9e8cc);
+  color: #161d18;
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  font-weight: var(--weight-semibold);
+}
+.guide-cue-warn {
+  background: var(--color-marigold);
+  color: #161d18;
+}
+.guide-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.guide-steps-h {
+  margin: var(--space-4) 0 var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.guide-steps {
+  margin: 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.guide-not-ai {
+  margin: var(--space-4) 0 0;
+  color: var(--color-ink-soft);
+}

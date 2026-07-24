@@ -948,6 +948,54 @@ export const dict = {
   "journey.mode.kombi": { en: "Kombi", sn: "Kombi" },
   "journey.mode.mixed": { en: "Mixed", sn: "Zvakasanganiswa" },
 
+  // --- journey guide links (M2): share a trip to a friend. Shona is
+  // machine drafted, rides the standing external translator pass. ----------
+  "journey.shareH": { en: "Guide a friend", sn: "Tungamira shamwari" },
+  "journey.shareB": {
+    en: "Share this trip as a guide link. Whoever holds the link sees the path and their own position on it, no account needed, for seven days. Nothing says who recorded it.",
+    sn: "Govera rwendo urwu selink yenhungamiro. Ane link anoona nzira nepaanenge ari pairi, pasina akaundi, kwemazuva manomwe. Hapana chinotaura kuti ndiani akarekodha.",
+  },
+  "journey.shareCta": { en: "Create guide link", sn: "Gadzira link yenhungamiro" },
+  "journey.shareRevoke": { en: "Stop sharing", sn: "Misa kugovera" },
+  "journey.shareRevoked": { en: "The link is dead now.", sn: "Link yafa zvino." },
+  "guide.title": { en: "Trip guide", sn: "Nhungamiro yerwendo" },
+  "guide.sharedTrip": { en: "A shared trip", sn: "Rwendo rwakagoverwa" },
+  "guide.intro": {
+    en: "A path recorded by a friend. Follow the line; the dot is you.",
+    sn: "Nzira yakarekodhwa neshamwari. Tevera mutsara; dhoti ndiwe.",
+  },
+  "guide.locate": { en: "Show me on the path", sn: "Ndiratidze panzira" },
+  "guide.denied": {
+    en: "Svika cannot see your location. The path still shows; allow location to see yourself on it.",
+    sn: "Svika haikwanise kuona pauri. Nzira inoramba ichionekwa; bvumira nzvimbo kuti uzvione pairi.",
+  },
+  "guide.stepsH": { en: "The way", sn: "Nzira" },
+  "guide.step.startWalk": {
+    en: "Walk {m} m along the path",
+    sn: "Famba {m} m uchitevera nzira",
+  },
+  "guide.step.startRide": { en: "Ride {m} m", sn: "Kwira kombi {m} m" },
+  "guide.step.left": {
+    en: "Turn left and continue {m} m",
+    sn: "Kotamira kuruboshwe wofamba {m} m",
+  },
+  "guide.step.right": {
+    en: "Turn right and continue {m} m",
+    sn: "Kotamira kurudyi wofamba {m} m",
+  },
+  "guide.step.walk": { en: "Then walk {m} m", sn: "Wozofamba {m} m" },
+  "guide.step.ride": { en: "Then ride {m} m", sn: "Wozokwira kombi {m} m" },
+  "guide.cue.off-path": {
+    en: "You have left the path. Head back toward the line.",
+    sn: "Wabuda munzira. Dzokera kumutsara.",
+  },
+  "guide.cue.approaching": { en: "Nearly there", sn: "Wakusvika" },
+  "guide.cue.arrived": { en: "You have arrived", sn: "Wasvika" },
+  "guide.notAi": {
+    en: "These directions are the recorded path itself, replayed. Steps come from plain geometry. No routing engine, no AI.",
+    sn: "Nhungamiro idzi inzira yakarekodhwa pachayo. Nhanho dzinobva pageometry chaiyo. Hapana routing engine, hapana AI.",
+  },
+
   // --- the intelligence doors: the three spines with their evidence -------
 
   // --- vision scenes: simulations of what ships next, always stamped ------

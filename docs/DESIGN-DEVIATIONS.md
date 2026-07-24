@@ -115,3 +115,12 @@ The spec has no recording state grammar. The record screen wears a section
 Recording, then elapsed time and distance in IBM Plex Mono 600 (section 2:
 every time and count is mono). Same pill anatomy as the live pill on the
 reference landing. Proposed for ratification on the M1 gate.
+
+## 12. Guide cue banner (M2, proposed)
+
+The spec has no turn by turn or warning grammar. The guide viewer shows
+one cue line above the way card: off path takes marigold with char text
+(the section 2 pair; signal stays live dots and stops only, so the warning
+never wears red), approaching and arrived take the park tone with char
+text. Sentence case, aria-live, hidden while on the path. Proposed for
+ratification on the M2 gate.

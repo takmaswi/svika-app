@@ -13,6 +13,11 @@ import { getJourney, listPoints } from "@/lib/journey/store";
 import { TraceMap } from "@/components/map/TraceMap";
 import { BackIcon } from "@/components/icons";
 
+interface LiveShare {
+  id: string;
+  token: string;
+}
+
 interface Detail {
   name: string | null;
   mode: "kombi" | "walk" | "mixed";
@@ -43,6 +48,9 @@ export function JourneyDetail({
 }) {
   const supabase = useMemo(() => createClient(), []);
   const [detail, setDetail] = useState<Detail | null | "missing">(null);
+  const [share, setShare] = useState<LiveShare | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareRevoked, setShareRevoked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +70,19 @@ export function JourneyDetail({
       if (cancelled) return;
       const j = journeyRes.data;
       if (j) {
+        // an existing live guide link surfaces so the door reads its state
+        const { data: liveShare } = await supabase
+          .from("journey_shares")
+          .select("id, token")
+          .eq("journey_id", id)
+          .is("revoked_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!cancelled && liveShare) {
+          setShare({ id: liveShare.id as string, token: liveShare.token as string });
+        }
         setDetail({
           name: (j.name as string | null) ?? null,
           mode: j.mode as Detail["mode"],
@@ -98,6 +119,37 @@ export function JourneyDetail({
       cancelled = true;
     };
   }, [supabase, id]);
+
+  const createShare = async () => {
+    if (shareBusy) return;
+    setShareBusy(true);
+    const { data, error } = await supabase.rpc("create_journey_share", {
+      p_journey: id,
+    });
+    if (!error && data?.[0]?.share_token) {
+      const { data: row } = await supabase
+        .from("journey_shares")
+        .select("id, token")
+        .eq("token", data[0].share_token as string)
+        .single();
+      if (row) setShare({ id: row.id as string, token: row.token as string });
+      setShareRevoked(false);
+    }
+    setShareBusy(false);
+  };
+
+  const revokeShare = async () => {
+    if (!share || shareBusy) return;
+    setShareBusy(true);
+    const { error } = await supabase.rpc("revoke_journey_share", {
+      p_share: share.id,
+    });
+    if (!error) {
+      setShare(null);
+      setShareRevoked(true);
+    }
+    setShareBusy(false);
+  };
 
   if (detail === "missing") {
     return (
@@ -190,6 +242,50 @@ export function JourneyDetail({
               </dd>
             </div>
           </dl>
+        </section>
+      )}
+
+      {detail !== null && !detail.localOnly && (
+        <section
+          className="svika-card wallet-panel svika-animate-fade-up svika-rise-3"
+          data-testid="journey-share-section"
+        >
+          <h2 className="svika-title">{t(lang, "journey.shareH")}</h2>
+          <p className="svika-body">{t(lang, "journey.shareB")}</p>
+          {share ? (
+            <>
+              <p className="svika-meta">{t(lang, "share.linkLabel")}</p>
+              <p className="share-url svika-mono-code" data-testid="journey-share-url">
+                {typeof window !== "undefined"
+                  ? `${window.location.origin}/share/journey/${share.token}`
+                  : `/share/journey/${share.token}`}
+              </p>
+              <button
+                className="auth-link touch-target"
+                type="button"
+                disabled={shareBusy}
+                onClick={() => void revokeShare()}
+                data-testid="journey-share-revoke"
+              >
+                {t(lang, "journey.shareRevoke")}
+              </button>
+            </>
+          ) : (
+            <button
+              className="auth-submit touch-target"
+              type="button"
+              disabled={shareBusy}
+              onClick={() => void createShare()}
+              data-testid="journey-share-create"
+            >
+              {t(lang, "journey.shareCta")}
+            </button>
+          )}
+          {shareRevoked && (
+            <p className="wallet-ok svika-body" data-testid="journey-share-revoked">
+              {t(lang, "journey.shareRevoked")}
+            </p>
+          )}
         </section>
       )}
     </main>

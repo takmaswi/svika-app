@@ -188,6 +188,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real GPS journeys recorded on the rider's own phone. Accuracy gating and adaptive sampling are documented geometry rules, points queue offline in IndexedDB and sync in batches through consent gated RPCs with RLS proven isolation, and without the journey consent nothing uploads: the trip stays on the device. Server side is storage only, no map matching, no analysis, no AI.",
   },
   {
+    feature: "Share a trip as a guide link (M2)",
+    tier: 1,
+    detail:
+      "Real 128 bit capability links for a saved journey: token scoped, seven day expiry, revocable, viewable with no account. Walking directions are trace replay, not routing: the recorded points ARE the directions, shortcuts included. The viewer's off path, approaching and arrived cues are client side distance to the polyline, and the step list is derived by plain geometry (simplify, then split on turns and mode changes); the page itself says no routing engine, no AI. The viewer never learns who recorded the trip or when. A self hosted walking router for places with no trace is roadmap, slides only.",
+  },
+  {
     feature: "Profile welcome and ride stats",
     tier: 1,
     detail:
