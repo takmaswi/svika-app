@@ -1,10 +1,10 @@
-# Dataset statement
+﻿# Dataset statement
 
 What data Svika runs on, what is real, what is synthetic, and how the
 synthetic gets checked against the real. This file is maintained: it changes
 in the same commit as any change to the data. Rubric anchor: C3.
 
-Last updated: 2026-07-23.
+Last updated: 2026-07-24.
 
 ## Real data
 
@@ -62,13 +62,34 @@ lookup index for deterministic string scoring, not training data; rerun
 the tool after any tile refresh and commit the result so the app never
 geocodes through a vendor.
 
+### Rider recorded journeys (M1, 2026-07-24)
+
+Batch M1 lets a rider record their own trip: `rider_journeys` and
+`rider_journey_points` (migration 0033) hold GPS traces a rider chose to
+record and chose to upload. Two consents stand between a fix and the
+server: the recording is started by hand, and the upload happens only
+under an accepted `journey-v1` consent (the 0021 consent machinery, its
+own stream); without it the trace stays in the phone's IndexedDB and
+never leaves. Traces are personal data under RLS (a rider reads only
+their own, proven by the JN checks in the security suite) and are NOT
+training data: the server stores them and computes nothing. Any future
+use for the spines would go through the 0019 ingest pipeline with its
+source honesty flags and its own consent story, and this file would say
+so first. As of this date the table holds only team test artifacts:
+synthetic e2e walks (mocked browser geolocation, named as such) and the
+real 2026-07-07 walking leg replayed through the app for the M1 gate
+evidence (real geometry, replay timestamps).
+
 ### What is deliberately not collected
 
-No rider GPS, no location tracking of people, no data from anyone outside
-the team. The two traces above are the team riding its own corridor. Real
-riders enter the system only through the consent gate (migration 0021), and
+No background location tracking of people, no data from anyone outside
+the team. Journey traces exist only when a rider starts a recording by
+hand and end when they stop it; there is no passive collection. The two
+corridor traces above are the team riding its own corridor. Real riders
+enter the system only through the consent gate (migration 0021), and
 what Svika stores about them is listed on the privacy notice: profile,
-tickets, wallet ledger, saved trips.
+tickets, wallet ledger, saved trips, and (only with the journey consent)
+recorded journeys.
 
 ## Synthetic data
 

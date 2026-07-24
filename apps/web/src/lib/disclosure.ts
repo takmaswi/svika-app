@@ -14,7 +14,7 @@ export interface DisclosureRow {
 }
 
 // The date the canonical register was last updated (docs/DISCLOSURE-REGISTER.md).
-export const DISCLOSURE_UPDATED = "2026-07-23";
+export const DISCLOSURE_UPDATED = "2026-07-24";
 
 export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
   {
@@ -180,6 +180,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     tier: 1,
     detail:
       "Real 128 bit capability links minted server side from the rider's own live fare. The public viewer answers only for a live, unrevoked, unexpired token and shows route facts, the live map and the arrival estimate, never who is riding, their code or their money.",
+  },
+  {
+    feature: "Record my trip (M1)",
+    tier: 1,
+    detail:
+      "Real GPS journeys recorded on the rider's own phone. Accuracy gating and adaptive sampling are documented geometry rules, points queue offline in IndexedDB and sync in batches through consent gated RPCs with RLS proven isolation, and without the journey consent nothing uploads: the trip stays on the device. Server side is storage only, no map matching, no analysis, no AI.",
   },
   {
     feature: "Profile welcome and ride stats",

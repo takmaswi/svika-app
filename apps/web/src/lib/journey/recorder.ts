@@ -262,7 +262,9 @@ export class JourneyRecorder {
       });
       this.seq += 1;
       const hopSeconds = prev ? (candidate.recordedAt - prev.recordedAt) / 1000 : 0;
-      const teleport = hopSeconds > 0 && movedM / hopSeconds > TELEPORT_SPEED_MPS;
+      // replay compresses the clock, so every hop would read as a teleport
+      const teleport =
+        !this.replay && hopSeconds > 0 && movedM / hopSeconds > TELEPORT_SPEED_MPS;
       const distanceM = this.snapshot.distanceM + (prev && !teleport ? movedM : 0);
       this.lastAccepted = candidate;
       const journey = await getJourney(journeyId);
