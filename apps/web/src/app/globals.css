@@ -2632,3 +2632,151 @@ body:has(.home-screen) .demo-account-chip {
   font-weight: 600;
   font-size: var(--text-meta);
 }
+
+/* --- journey recording (batch M1): record my trip -------------------------
+   The recording chip is the §7 live pill grammar (glass pill, signal dot,
+   mono figures); the self position dot on the map is the same live dot
+   grown to a §11 pin size with the stop pin's white stroke (spec gap
+   flagged in the M1 gate report: DESIGN.md has no self position marker). */
+.record-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+.record-pill .svika-mono-code {
+  font-size: 12.5px;
+}
+.record-actions {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 18px;
+  z-index: 30;
+}
+.trace-self-dot {
+  width: 16px;
+  height: 16px;
+}
+.trace-self-dot .svika-pulse-dot {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 3px solid #ffffff;
+  box-sizing: border-box;
+}
+.trace-self-dot .svika-ripple-ring {
+  inset: -4px;
+}
+.record-mode-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.record-mode-chip {
+  flex: 1;
+  border-radius: var(--radius-full);
+  border: var(--border-card);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.record-mode-chip:active {
+  transform: scale(0.99);
+}
+/* selected chip takes the §8 selected badge grammar: marigold, char text */
+.record-mode-chip-on {
+  background: var(--color-marigold);
+  color: #161d18;
+  border-color: #161d18;
+}
+.record-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+.record-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.record-summary-row dd {
+  margin: 0;
+  font-size: 15px;
+}
+.journey-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.journey-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: var(--color-ink);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.journey-card:active {
+  transform: scale(0.99);
+}
+.journey-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.journey-card-name {
+  font-weight: var(--weight-semibold);
+  font-size: 14.5px;
+}
+.journey-card-chips {
+  display: flex;
+  gap: 6px;
+}
+.journey-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  border: var(--border-pill);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+.journey-card-distance {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.journey-map {
+  height: 300px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: var(--border-card);
+  margin-bottom: var(--space-4);
+}
+.journey-map .live-map,
+.journey-map .live-map-canvas {
+  height: 100%;
+}
+.journey-local-note {
+  color: var(--color-ink-soft);
+  margin: 0 0 var(--space-3);
+}

@@ -882,6 +882,72 @@ export const dict = {
     sn: "Rwendo rwapera kana kuti mufambi amisa kushera.",
   },
 
+  // --- journey recording (M1): record my trip. Shona here is machine
+  // drafted and rides the standing external translator pass. -----------------
+  "journey.recordTitle": { en: "Record my trip", sn: "Rekodha rwendo rwangu" },
+  "journey.start": { en: "Start recording", sn: "Tanga kurekodha" },
+  "journey.rec": { en: "Recording", sn: "Kurekodha" },
+  "journey.stop": { en: "Stop recording", sn: "Misa kurekodha" },
+  "journey.deniedH": {
+    en: "Svika cannot see your location",
+    sn: "Svika haikwanise kuona pauri",
+  },
+  "journey.deniedB": {
+    en: "Location permission is off for this site. Allow location in your browser settings, then try again.",
+    sn: "Mvumo yenzvimbo yakavharwa. Vhura mvumo yenzvimbo mubrowser yako, wozama zvakare.",
+  },
+  "journey.insecureB": {
+    en: "Location only works on a secure connection (https). Open Svika over https and try again.",
+    sn: "Nzvimbo inoshanda chete pahttps. Vhura Svika nehttps wozama zvakare.",
+  },
+  "journey.unsupportedB": {
+    en: "This browser does not offer location.",
+    sn: "Browser iyi haina nzvimbo.",
+  },
+  "journey.retry": { en: "Try again", sn: "Zama zvakare" },
+  "journey.finishTitle": { en: "Your trip", sn: "Rwendo rwako" },
+  "journey.distance": { en: "Distance", sn: "Daro" },
+  "journey.duration": { en: "Time", sn: "Nguva" },
+  "journey.points": { en: "GPS points", sn: "Mapoinzi eGPS" },
+  "journey.nameLabel": { en: "Name this trip", sn: "Tumidza rwendo urwu" },
+  "journey.namePh": { en: "Home to the shops", sn: "Kumba kuenda kuzvitoro" },
+  "journey.save": { en: "Save trip", sn: "Chengeta rwendo" },
+  "journey.discard": { en: "Discard this trip", sn: "Rasa rwendo urwu" },
+  "journey.consentH": {
+    en: "Save your trips to your account?",
+    sn: "Chengeta nzendo dzako muakaundi yako?",
+  },
+  "journey.consentB": {
+    en: "Saving uploads this trace to your Svika account so you can see and share it from any phone. Only you can see your trips. You can withdraw this and delete them any time on the privacy page.",
+    sn: "Kuchengeta kunoendesa rwendo urwu kuakaundi yako yeSvika kuti uone nekugovera kubva pafoni ipi zvayo. Iwe chete unoona nzendo dzako. Unogona kubvisa mvumo nekudzima nzendo papeji yeprivacy chero nguva.",
+  },
+  "journey.consentAgree": {
+    en: "I agree, save my trips",
+    sn: "Ndinobvuma, chengeta nzendo dzangu",
+  },
+  "journey.consentLocal": {
+    en: "Keep on this phone only",
+    sn: "Chengeta pafoni ino chete",
+  },
+  "journey.localNote": {
+    en: "This trip stays on this phone. Nothing was uploaded.",
+    sn: "Rwendo urwu runogara pafoni ino. Hapana chakaendeswa.",
+  },
+  "journey.listTitle": { en: "My trips", sn: "Nzendo dzangu" },
+  "journey.listEmpty": {
+    en: "No recorded trips yet. Start one from the plan screen or your ticket.",
+    sn: "Hapasati pane nzendo dzakarekodhwa. Tanga imwe papeji yekuronga kana patikiti rako.",
+  },
+  "journey.localChip": { en: "On this device", sn: "Pafoni ino" },
+  "journey.conflictChip": { en: "Sync conflict", sn: "Sync haina kuwirirana" },
+  "journey.record": { en: "Record this trip", sn: "Rekodha rwendo urwu" },
+  "journey.saved": { en: "Trip saved", sn: "Rwendo rwachengetwa" },
+  "journey.detailFallback": { en: "Recorded trip", sn: "Rwendo rwakarekodhwa" },
+  "journey.modeLabel": { en: "Mode", sn: "Mhando" },
+  "journey.mode.walk": { en: "Walking", sn: "Kufamba" },
+  "journey.mode.kombi": { en: "Kombi", sn: "Kombi" },
+  "journey.mode.mixed": { en: "Mixed", sn: "Zvakasanganiswa" },
+
   // --- the intelligence doors: the three spines with their evidence -------
 
   // --- vision scenes: simulations of what ships next, always stamped ------

@@ -204,6 +204,16 @@ export default async function TicketPage({
           )}
         </section>
       )}
+
+      {isLive && (
+        <Link
+          className="auth-link touch-target"
+          href="/app/record?mode=kombi"
+          data-testid="record-link"
+        >
+          {t(lang, "journey.record")}
+        </Link>
+      )}
     </main>
   );
 }

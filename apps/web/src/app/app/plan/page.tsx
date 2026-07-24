@@ -354,6 +354,14 @@ export default async function PlanPage({
               )}
             </form>
           ))}
+
+        <Link
+          className="auth-link touch-target"
+          href="/app/record?mode=kombi"
+          data-testid="record-link"
+        >
+          {t(lang, "journey.record")}
+        </Link>
       </HomeSheet>
     </main>
   );
