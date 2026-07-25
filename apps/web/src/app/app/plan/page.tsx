@@ -66,7 +66,10 @@ export default async function PlanPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // guest mode (batch V2): planning and fares are world readable network
+  // data, so a guest plans freely; the wall stands exactly at pay and save
+  const isGuest = !user;
+  const planUrl = `/app/plan?from=${encodeURIComponent(fromRaw)}&to=${encodeURIComponent(toRaw)}`;
 
   const network = await fetchNetwork(supabase);
   const from = resolveParam(network, fromRaw);
@@ -234,33 +237,51 @@ export default async function PlanPage({
             {err === "noroute" && (
               <p className="auth-error svika-body">{t(lang, "plan.noRoute")}</p>
             )}
-            <form action={bookTrip} className="plan-pay">
-              <input type="hidden" name="from" value={from.stop.id} />
-              {to.stop ? (
-                <input type="hidden" name="to" value={to.stop.id} />
-              ) : (
-                <input type="hidden" name="dest" value={destPlace!.name} />
-              )}
-              <button
-                className="cta touch-target"
-                type="submit"
-                name="payment"
-                value="wallet"
-              >
-                {t(lang, "plan.payWallet")}
-                <span className="cta-chip" aria-hidden>
-                  <ArrowIcon />
-                </span>
-              </button>
-              <button
-                className="pay-cash touch-target"
-                type="submit"
-                name="payment"
-                value="cash"
-              >
-                {t(lang, "plan.reserveCash")}
-              </button>
-            </form>
+            {isGuest ? (
+              // the OTP wall stands exactly here: the guest saw the route,
+              // the time and the fare; paying is the identity moment
+              <div className="plan-pay">
+                <Link
+                  className="cta touch-target"
+                  href={`/login?why=pay&next=${encodeURIComponent(planUrl)}`}
+                  data-testid="guest-pay-wall"
+                >
+                  {t(lang, "guest.planPayCta")}
+                  <span className="cta-chip" aria-hidden>
+                    <ArrowIcon />
+                  </span>
+                </Link>
+                <p className="svika-meta">{t(lang, "guest.why.pay")}</p>
+              </div>
+            ) : (
+              <form action={bookTrip} className="plan-pay">
+                <input type="hidden" name="from" value={from.stop.id} />
+                {to.stop ? (
+                  <input type="hidden" name="to" value={to.stop.id} />
+                ) : (
+                  <input type="hidden" name="dest" value={destPlace!.name} />
+                )}
+                <button
+                  className="cta touch-target"
+                  type="submit"
+                  name="payment"
+                  value="wallet"
+                >
+                  {t(lang, "plan.payWallet")}
+                  <span className="cta-chip" aria-hidden>
+                    <ArrowIcon />
+                  </span>
+                </button>
+                <button
+                  className="pay-cash touch-target"
+                  type="submit"
+                  name="payment"
+                  value="cash"
+                >
+                  {t(lang, "plan.reserveCash")}
+                </button>
+              </form>
+            )}
           </>
         }
       >
@@ -323,7 +344,17 @@ export default async function PlanPage({
           )}
         </ol>
 
+        {to.stop && isGuest && (
+          <Link
+            className="auth-link touch-target"
+            href={`/login?why=save&next=${encodeURIComponent(planUrl)}`}
+            data-testid="guest-save-wall"
+          >
+            {t(lang, "guest.saveLink")}
+          </Link>
+        )}
         {to.stop &&
+          !isGuest &&
           (justSaved ? (
             <p className="svika-body plan-saved" data-testid="trip-saved">
               {t(lang, "plan.savedNote")}
@@ -357,10 +388,10 @@ export default async function PlanPage({
 
         <Link
           className="auth-link touch-target"
-          href="/app/record?mode=kombi"
+          href={isGuest ? "/login?why=record" : "/app/record?mode=kombi"}
           data-testid="record-link"
         >
-          {t(lang, "journey.record")}
+          {t(lang, isGuest ? "guest.recordLink" : "journey.record")}
         </Link>
       </HomeSheet>
     </main>

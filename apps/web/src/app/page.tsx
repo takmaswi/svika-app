@@ -78,6 +78,10 @@ export default async function LandingPage() {
       <p className="landing-signin svika-animate-fade-up svika-rise-6">
         {t(lang, "landing.signinHint")}{" "}
         <Link href="/login">{t(lang, "landing.signinLink")}</Link>
+        {" · "}
+        <Link href="/app" data-testid="landing-guest-door">
+          {t(lang, "guest.exploreCta")}
+        </Link>
       </p>
 
       <footer className="landing-foot svika-animate-fade-up svika-rise-7">

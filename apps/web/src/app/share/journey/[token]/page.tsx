@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLang, t } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -58,6 +59,14 @@ export default async function JourneyGuidePage({
         distanceM={doc.distance_m ?? 0}
         points={doc.points}
       />
+      {/* every share is a door into the app: guest mode takes it from here */}
+      <Link
+        className="auth-link touch-target"
+        href="/app"
+        data-testid="share-guest-door"
+      >
+        {t(lang, "guest.shareDoor")}
+      </Link>
     </main>
   );
 }

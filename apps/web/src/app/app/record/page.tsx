@@ -24,7 +24,9 @@ export default async function RecordPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // recording is an identity moment (batch V2): the trace belongs to the
+  // rider, so the wall stands here and says why
+  if (!user) redirect("/login?why=record&next=%2Fapp%2Frecord");
 
   const { data: consents } = await supabase
     .from("consent_records")

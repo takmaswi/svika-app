@@ -200,6 +200,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real. A link exists only after both sides act: the guardian mints a rate limited invite code, the child enters it on their own phone, and either side ends it instantly. While a link is on, the child's app always shows a visible chip on every screen: no silent tracking, by design. The guardian sees the linked child's fare trips as status words only (booked, on the kombi, arrived), never board codes, fares, wallet or coordinates, RLS proven. Safe arrival is the rider's own tap appended to the event stream; the taking longer than usual flag is a plain timing rule over the route's typical duration and its copy flags trips, never people. No SMS or messaging vendor: the guardian contact link travels through the phone's own share sheet.",
   },
   {
+    feature: "Guest mode (V2)",
+    tier: 1,
+    detail:
+      "Real. Logged out, the map, live arrival estimates, trip planning and fares all work read only through the anon database role exactly as granted since the first network migration: world readable transit data, nothing personal, no policy widened for this feature (proven by the guest surface checks in the RLS suite). The sign in wall stands exactly at the identity moments (paying, saving a trip, recording a journey) and says why an account exists. The consent gate is untouched: it guards accounts, at account creation. Shared trip and guide links open in guest mode and carry a door into the app.",
+  },
+  {
     feature: "Profile welcome and ride stats",
     tier: 1,
     detail:

@@ -12,7 +12,13 @@ type Phase = "phone" | "code";
 // let Supabase do the authoritative check.
 const E164 = /^\+[1-9]\d{6,14}$/;
 
-export function LoginForm({ lang }: { lang: AppLanguage }) {
+export function LoginForm({
+  lang,
+  nextPath = "/app",
+}: {
+  lang: AppLanguage;
+  nextPath?: string;
+}) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -53,7 +59,7 @@ export function LoginForm({ lang }: { lang: AppLanguage }) {
       setError(t(lang, "login.errCode"));
       return;
     }
-    router.push("/app");
+    router.push(nextPath);
     router.refresh();
   }
 

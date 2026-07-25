@@ -1553,5 +1553,45 @@ check(
   check("GD-23 invite redemption is rate limited after five misses", limited);
 }
 
+// --- guest mode surface (batch V2): NO widening -----------------------------
+// Guests ride the anon role exactly as it has stood since 0002: the whole
+// transit network is world readable BY DESIGN and nothing personal answers.
+// V2 shipped zero migrations; these checks pin the exact guest surface so
+// any future widening fails loudly.
+{
+  for (const table of [
+    "stops",
+    "route_stops",
+    "route_fares",
+    "fare_segments",
+    "transfer_points",
+  ]) {
+    const res = await anon.from(table).select("*").limit(1);
+    check(
+      `GS anon reads the public ${table} (the guest planning surface)`,
+      !res.error && (res.data ?? []).length === 1,
+      res.error?.message,
+    );
+  }
+  for (const table of [
+    "saved_trips",
+    "rider_prefs",
+    "emergency_details",
+    "ride_shares",
+    "consent_records",
+    "trip_walk_tails",
+    "rider_journeys",
+    "guardian_links",
+  ]) {
+    const res = await anon.from(table).select("*").limit(1);
+    check(`GS anon sees zero ${table}`, deniedOrEmpty(res));
+  }
+  const anonBuy = await anon.rpc("purchase_ticket", {
+    p_route: routeId,
+    p_direction: "outbound",
+  });
+  check("GS anon cannot purchase a ticket (the pay wall is real)", !!anonBuy.error);
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);

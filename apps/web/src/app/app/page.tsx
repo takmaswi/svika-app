@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getLang, t, type DictKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { resolveRole } from "@/lib/roles";
@@ -10,6 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
+import { GuestHome } from "@/components/home/GuestHome";
 import { REPO_URL } from "@/lib/site";
 import { EtaBasis } from "@/components/home/EtaBasis";
 import { etaBasisCard, etaBasisLabel } from "@/lib/eta-provenance";
@@ -96,7 +96,9 @@ export default async function RiderHome({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // guest mode (batch V2): the same map and search, no personal panels,
+  // the sign in door says why an account exists
+  if (!user) return <GuestHome lang={lang} theme={theme} />;
 
   const role = await resolveRole(supabase, user.id);
 

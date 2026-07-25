@@ -1,8 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Refreshes the Supabase session on every request and guards the /app area.
-// Follows the official @supabase/ssr Next.js middleware pattern.
+// Refreshes the Supabase session on every request. Follows the official
+// @supabase/ssr Next.js middleware pattern. Since guest mode (batch V2)
+// /app is no longer blanket guarded here: the layout admits logged out
+// visitors to the read only surfaces and every personal page or identity
+// moment (pay, save, record) walls itself with the reason spelled out.
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -27,15 +30,8 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user && request.nextUrl.pathname.startsWith("/app")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  // the call refreshes the auth cookie even though the result is unused here
+  await supabase.auth.getUser();
 
   return response;
 }

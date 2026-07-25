@@ -1,3 +1,4 @@
+import NextLink from "next/link";
 import { getLang, t } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -177,6 +178,14 @@ export default async function SharePage({
           </ul>
           <p className="svika-meta">{t(lang, "share.expiryNote")}</p>
         </section>
+        {/* every share is a door into the app: guest mode takes it from here */}
+        <NextLink
+          className="auth-link touch-target"
+          href="/app"
+          data-testid="share-guest-door"
+        >
+          {t(lang, "guest.shareDoor")}
+        </NextLink>
       </HomeSheet>
     </main>
   );

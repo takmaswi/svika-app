@@ -1089,6 +1089,41 @@ export const dict = {
   },
   "family.doorLabel": { en: "Family", sn: "Mhuri" },
 
+  // --- guest mode (batch V2): look around first, sign in when it matters --
+  "guest.whyH": { en: "Why an account exists", sn: "Sei account iripo" },
+  "guest.why": {
+    en: "So Svika can remember you: your trips, your tickets, your wallet. Looking around needs none of that.",
+    sn: "Kuti Svika ikuyeuke: nzendo dzako, matikiti ako, chikwama chako. Kungotarisa hakudi chimwe chazvo.",
+  },
+  "guest.why.pay": {
+    en: "Paying needs an account: your ticket and your money have to belong to you.",
+    sn: "Kubhadhara kunoda account: tikiti rako nemari yako zvinofanira kuva zvako.",
+  },
+  "guest.why.save": {
+    en: "Saving a trip needs an account: it has to be remembered as yours.",
+    sn: "Kuchengeta rwendo kunoda account: runofanira kuyeukwa serwako.",
+  },
+  "guest.why.record": {
+    en: "Recording a journey needs an account: the trace belongs to you, and only you can delete it.",
+    sn: "Kurekodha rwendo kunoda account: nzira ndeyako, uye ndiwe chete unogona kuidzima.",
+  },
+  "guest.signInCta": { en: "Sign in with your phone", sn: "Pinda nefoni yako" },
+  "guest.signInChip": { en: "Sign in", sn: "Pinda" },
+  "guest.exploreCta": { en: "Look around first", sn: "Tanga watarisa" },
+  "guest.planPayCta": { en: "Sign in to pay", sn: "Pinda kuti ubhadhare" },
+  "guest.saveLink": {
+    en: "Sign in to save this trip",
+    sn: "Pinda kuti uchengete rwendo urwu",
+  },
+  "guest.recordLink": {
+    en: "Sign in to record a journey",
+    sn: "Pinda kuti urekodhe rwendo",
+  },
+  "guest.shareDoor": {
+    en: "Plan your own trip on Svika",
+    sn: "Ronga rwendo rwako paSvika",
+  },
+
   // --- the intelligence doors: the three spines with their evidence -------
 
   // --- vision scenes: simulations of what ships next, always stamped ------

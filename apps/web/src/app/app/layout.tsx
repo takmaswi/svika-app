@@ -20,7 +20,12 @@ export default async function ConsentGate({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  // Guest mode (batch V2): a logged out visitor may look around. The
+  // consent gate guards ACCOUNTS (it sits at account creation, unchanged);
+  // a guest holds no data to consent over, reads only the world readable
+  // network through the anon role, and every identity moment (pay, save,
+  // record, name) walls on its own page with the reason spelled out.
+  if (!user) return children;
 
   const [consentRes, profileRes, guardianRes] = await Promise.all([
     // scoped to the app consent stream: the profile's emergency details
