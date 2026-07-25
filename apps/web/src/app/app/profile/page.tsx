@@ -444,6 +444,18 @@ export default async function ProfilePage({
           {errKey && <p className="auth-error svika-body">{t(lang, errKey)}</p>}
         </section>
 
+        <section className="svika-card wallet-panel" data-testid="profile-family">
+          <h3 className="svika-title">{t(lang, "family.title")}</h3>
+          <p className="svika-body">{t(lang, "family.guardianB")}</p>
+          <Link
+            className="auth-link touch-target"
+            href="/app/family"
+            data-testid="profile-family-link"
+          >
+            {t(lang, "family.doorLabel")}
+          </Link>
+        </section>
+
         <section
           className="svika-card wallet-panel profile-signout"
           data-testid="profile-signout"

@@ -7,6 +7,8 @@ import { formatUsd } from "@svika/shared";
 import { BackIcon } from "@/components/icons";
 import { boardCodesOf, type BoardCodeEmbed } from "@/lib/tickets";
 import { createRideShare, revokeRideShare } from "@/lib/share-actions";
+import { markTicketArrived } from "@/lib/family-actions";
+import { ShareSheetButton } from "@/components/ticket/ShareSheetButton";
 
 interface TicketDetail {
   id: string;
@@ -40,7 +42,7 @@ export default async function TicketPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [ticketRes, statusRes, shareRes] = await Promise.all([
+  const [ticketRes, statusRes, shareRes, kinRes] = await Promise.all([
     supabase
       .from("tickets")
       .select(
@@ -57,6 +59,11 @@ export default async function TicketPage({
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false })
       .limit(1)
+      .maybeSingle(),
+    // the guardian contact (0023): own row only under RLS
+    supabase
+      .from("emergency_details")
+      .select("next_of_kin_name, next_of_kin_phone")
       .maybeSingle(),
   ]);
 
@@ -77,7 +84,9 @@ export default async function TicketPage({
       ? `${ticket.from_stop.name} ${t(lang, "common.to")} ${ticket.to_stop.name}`
       : "";
   const isLive = status === "issued";
-  const isStamped = status === "redeemed";
+  const isStamped = status === "redeemed" || status === "arrived";
+  const isArrived = status === "arrived";
+  const kinName = (kinRes.data?.next_of_kin_name ?? "").trim();
 
   // share my ride: only a running trip can be shared, and the link is shown
   // right here (never in a URL we control the logging of)
@@ -156,19 +165,57 @@ export default async function TicketPage({
         </div>
       </article>
 
+      {/* safe arrival: the rider's own tap, one shot, reaches the guardian
+          and any shared link (never taps itself, never asked of anyone) */}
+      {(isLive || status === "redeemed") && (
+        <form action={markTicketArrived} className="ticket-arrived-form">
+          <input type="hidden" name="ticket" value={id} />
+          <button
+            className={`${status === "redeemed" ? "auth-submit" : "auth-link"} touch-target`}
+            type="submit"
+            data-testid="ticket-arrived"
+          >
+            {t(lang, "ticket.arrivedCta")}
+          </button>
+        </form>
+      )}
+      {isArrived && (
+        <p className="wallet-ok svika-body" data-testid="ticket-arrived-note">
+          {t(lang, "ticket.arrivedNote")}
+        </p>
+      )}
+
       {(isLive || isStamped) && (
         <section
           className="svika-card wallet-panel svika-animate-fade-up svika-rise-3"
           data-testid="share-section"
         >
-          <h2 className="svika-title">{t(lang, "share.sectionH")}</h2>
-          <p className="svika-body">{t(lang, "share.sectionB")}</p>
+          {/* travel with me: the 0023 guardian contact fronts the 0026 link */}
+          <h2 className="svika-title">
+            {t(lang, kinName ? "ticket.guardianH" : "share.sectionH")}
+          </h2>
+          <p className="svika-body">
+            {kinName
+              ? t(lang, "ticket.guardianB").replace("{name}", kinName)
+              : t(lang, "share.sectionB")}
+          </p>
           {share ? (
             <>
               <p className="svika-meta">{t(lang, "share.linkLabel")}</p>
               <p className="share-url svika-mono-code" data-testid="share-url">
                 {shareUrl}
               </p>
+              <ShareSheetButton
+                url={shareUrl}
+                text={t(lang, "share.viewerTitle")}
+                sendLabel={
+                  kinName
+                    ? t(lang, "ticket.guardianCta").replace("{name}", kinName)
+                    : t(lang, "share.sendCta")
+                }
+                copyLabel={t(lang, "share.copyCta")}
+                copiedLabel={t(lang, "share.copiedNote")}
+              />
               <form action={revokeRideShare}>
                 <input type="hidden" name="ticket" value={id} />
                 <input type="hidden" name="share" value={share.id} />
@@ -193,6 +240,13 @@ export default async function TicketPage({
                 {t(lang, "share.createCta")}
               </button>
             </form>
+          )}
+          {!kinName && (
+            <p className="svika-meta">
+              <Link className="auth-link" href="/app/profile">
+                {t(lang, "ticket.guardianNone")}
+              </Link>
+            </p>
           )}
           {shareState === "revoked" && (
             <p className="wallet-ok svika-body" data-testid="share-revoked">

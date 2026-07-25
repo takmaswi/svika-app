@@ -996,6 +996,99 @@ export const dict = {
     sn: "Nhungamiro idzi inzira yakarekodhwa pachayo. Nhanho dzinobva pageometry chaiyo. Hapana routing engine, hapana AI.",
   },
 
+  // --- guardian mode (batch V3): family links and safe arrival ------------
+  // Copy law: every state flags a situation, never a person.
+  "ticket.status.arrived": { en: "Arrived safely", sn: "Wasvika zvakanaka" },
+  "ticket.arrivedCta": { en: "I have arrived safely", sn: "Ndasvika zvakanaka" },
+  "ticket.arrivedNote": {
+    en: "Anyone following your shared trip sees you arrived.",
+    sn: "Munhu wese ari kutevera rwendo rwako anoona kuti wasvika.",
+  },
+  "ticket.guardianH": { en: "Travel with me", sn: "Famba neni" },
+  "ticket.guardianB": {
+    en: "Let {name} follow this trip live and see you arrive. One tap makes the link; send it with any app.",
+    sn: "Rega {name} atevere rwendo urwu achiona kusvika kwako. Dzvanya kamwe kugadzira link; itumire neapp chero ipi.",
+  },
+  "ticket.guardianCta": { en: "Share with {name}", sn: "Shera na{name}" },
+  "ticket.guardianNone": {
+    en: "Add a guardian contact on your profile and every trip can reach them in one tap.",
+    sn: "Isa munhu wako wepedyo paprofile yako uye rwendo rwese runosvika kwaari nekudzvanya kamwe.",
+  },
+  "share.statusArrived": { en: "Arrived safely", sn: "Vasvika zvakanaka" },
+  "share.sendCta": { en: "Send the link", sn: "Tumira link" },
+  "share.copyCta": { en: "Copy the link", sn: "Kopa link" },
+  "share.copiedNote": { en: "Copied", sn: "Yakopwa" },
+
+  "family.title": { en: "Family", sn: "Mhuri" },
+  "family.chip": {
+    en: "Guardian sees your trips",
+    sn: "Muchengeti anoona nzendo dzako",
+  },
+  "family.asChildH": { en: "Who sees your trips", sn: "Ndiani anoona nzendo dzako" },
+  "family.asChildNone": {
+    en: "No one. A guardian only ever sees your trips after you both agree, and your app always shows a chip while it is on.",
+    sn: "Hapana. Muchengeti anoona nzendo dzako chete kana mabvumirana mese, uye app yako inogara ichiratidza chip kana zviri kushanda.",
+  },
+  "family.linkedSince": { en: "Linked", sn: "Yakabatanidzwa" },
+  "family.endCta": { en: "End this link", sn: "Gumisa kubatana uku" },
+  "family.acceptH": {
+    en: "Got a code from a guardian?",
+    sn: "Une code kubva kumuchengeti?",
+  },
+  "family.acceptB": {
+    en: "Entering it lets them see your trips: booked, on the kombi, arrived. Never where your phone is. You can end it at any time.",
+    sn: "Kuisa code kunovarega vachiona nzendo dzako: yabhukwa, mukombi, wasvika. Kwete pane foni yako. Unogona kuzvigumisa chero nguva.",
+  },
+  "family.codeLabel": { en: "Invite code", sn: "Code yekukoka" },
+  "family.acceptCta": { en: "Confirm the link", sn: "Simbisa kubatana" },
+  "family.acceptOk": {
+    en: "Linked. {name} now sees your trips, and this screen is where you end it.",
+    sn: "Zvabatana. {name} ava kuona nzendo dzako, uye peji rino ndipo paunozvigumisa.",
+  },
+  "family.errInvalid": {
+    en: "That code did not work.",
+    sn: "Code iyoyo haina kushanda.",
+  },
+  "family.errLimited": {
+    en: "Too many tries. Wait a few minutes.",
+    sn: "Waedza kakawanda. Mirira maminitsi mashoma.",
+  },
+  "family.guardianH": { en: "Watch over someone", sn: "Chengeta mumwe munhu" },
+  "family.guardianB": {
+    en: "Create a code and give it to them. The link only starts when they confirm it on their own phone, and their app always shows them it is on.",
+    sn: "Gadzira code wovapa. Kubatana kunotanga chete kana vakasimbisa pafoni yavo, uye app yavo inogara ichivaratidza kuti kuri kushanda.",
+  },
+  "family.inviteCta": { en: "Create an invite code", sn: "Gadzira code yekukoka" },
+  "family.inviteLabel": {
+    en: "Give this code to the person you will watch over",
+    sn: "Ipa code iyi kumunhu waunochengeta",
+  },
+  "family.inviteExpiry": {
+    en: "The code works for 7 days.",
+    sn: "Code inoshanda kwemazuva manomwe.",
+  },
+  "family.cancelInvite": { en: "Cancel this code", sn: "Kanzura code iyi" },
+  "family.tripsH": { en: "Their trips", sn: "Nzendo dzavo" },
+  "family.tripsNone": {
+    en: "No trips in the last day. When they ride, you see it here.",
+    sn: "Hapana nzendo muzuva rapfuura. Kana vakakwira, unozviona pano.",
+  },
+  "family.state.booked": {
+    en: "Booked, not boarded yet",
+    sn: "Yabhukwa, havasati vakwira",
+  },
+  "family.state.riding": { en: "On the kombi", sn: "Vari mukombi" },
+  "family.state.late": {
+    en: "Taking longer than usual. This flags the trip, not anyone on it.",
+    sn: "Rwendo ruri kutora nguva kupfuura zvakajairika. Izvi zvinoratidza rwendo, kwete munhu.",
+  },
+  "family.state.arrived": { en: "Arrived safely", sn: "Vasvika zvakanaka" },
+  "family.state.ended": {
+    en: "The trip ended without an arrival check-in. If you are unsure, reach them the way you usually would.",
+    sn: "Rwendo rwakapera pasina kusimbisa kusvika. Kana usina chokwadi, vabate nenzira yaunowanzoita.",
+  },
+  "family.doorLabel": { en: "Family", sn: "Mhuri" },
+
   // --- the intelligence doors: the three spines with their evidence -------
 
   // --- vision scenes: simulations of what ships next, always stamped ------

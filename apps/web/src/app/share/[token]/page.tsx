@@ -90,7 +90,15 @@ export default async function SharePage({
         )
       : null;
 
-  const onBoard = view.trip_status === "redeemed";
+  // three viewer states: waiting to board, on the kombi, arrived safely
+  // (the guardian's notify moment, park tone by class)
+  const statusKey =
+    view.trip_status === "arrived"
+      ? "share.statusArrived"
+      : view.trip_status === "redeemed"
+        ? "share.statusOnBoard"
+        : "share.statusWaiting";
+  const hasArrived = view.trip_status === "arrived";
 
   return (
     <main className="home-screen" data-testid="share-view">
@@ -131,11 +139,14 @@ export default async function SharePage({
               <div>
                 <p className="peek-label">{t(lang, "ticket.route")}</p>
                 <p className="peek-route">{view.route_name}</p>
-                <span className="peek-route-sub" data-testid="share-status">
-                  {t(lang, onBoard ? "share.statusOnBoard" : "share.statusWaiting")}
+                <span
+                  className={`peek-route-sub${hasArrived ? " share-status-arrived" : ""}`}
+                  data-testid="share-status"
+                >
+                  {t(lang, statusKey)}
                 </span>
               </div>
-              {eta && (
+              {!hasArrived && eta && (
                 <div>
                   <p className="peek-label">{t(lang, "share.arrives")}</p>
                   <p className="peek-mono" data-testid="share-eta">

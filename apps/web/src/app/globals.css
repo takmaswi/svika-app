@@ -318,6 +318,60 @@ body:has(.home-screen) .demo-account-chip {
   top: 62px;
 }
 
+/* --- guardian chip: park means watched-with-consent, tappable off switch --- */
+.guardian-chip {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 59;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-park, #d9e8cc);
+  color: #161d18;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.guardian-chip ~ .shell {
+  padding-top: 56px;
+}
+body:has(.home-screen) .guardian-chip {
+  top: 62px;
+}
+/* a demo persona who is also watched stacks both chips */
+.demo-account-chip ~ .guardian-chip {
+  top: 46px;
+}
+body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
+  top: 98px;
+}
+
+/* --- family page: invite code and neutral trip states ---------------------- */
+.family-invite-code {
+  letter-spacing: 2px;
+  word-break: break-all;
+}
+.family-state-plain {
+  background: var(--color-layer, rgba(22, 29, 24, 0.06));
+  color: inherit;
+  font-weight: var(--weight-semibold);
+}
+.share-status-arrived {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-park, #d9e8cc);
+  color: #161d18;
+  font-weight: var(--weight-bold);
+}
+
 /* --- the intelligence page: the honest ladder and its committed table ------- */
 .intel-intro {
   margin: var(--space-2) 0 0;
