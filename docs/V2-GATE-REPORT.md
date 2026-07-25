@@ -130,11 +130,13 @@ commit before touching anything:
   the guest home with the sign in chip AND that a personal page (wallet)
   still bounces: a stronger assertion of the actual V2 contract.
 - **"No recognised context" test** used DEMO_RIDER, whose suite made
-  bookings have become a minable pattern; when profile.spec's pref
-  toggle ran in a parallel worker the peek legitimately answered. The
+  bookings have become a minable pattern; once profile.spec's pref
+  toggle ran earlier in the same suite (the runner is single worker,
+  specs share demo users by design) the peek legitimately answered. The
   test now uses the owner account (zero fare history), which is the
   premise it always meant.
 - **Journey share vs journey recording**: both specs recorded as
-  DEMO_RIDER in parallel workers, racing the same profile's journey rows
-  and consent stream (a wandering full-suite red). The guide link spec
-  now records as the owner: distinct profile, zero shared state.
+  DEMO_RIDER, and the second run inherited the first's server side
+  journey rows and consent stream state (a wandering full-suite red).
+  The guide link spec now records as the owner: distinct profile, zero
+  shared state between the two specs.
