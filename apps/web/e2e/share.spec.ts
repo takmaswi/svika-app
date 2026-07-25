@@ -15,9 +15,19 @@ test.describe("share my ride", () => {
     await page.locator('.plan-pay button[value="wallet"]').click();
     await expect(page).toHaveURL(/booked=1/, { timeout: 15_000 });
 
-    // booked=1 opens the sheet by itself; the newest ticket sits on top
+    // booked=1 opens the sheet by itself; the newest ticket sits on top.
+    // Navigate by the link's own href: the rider account's home now answers
+    // with a mined commute peek (suite history finally minable, 2026-07-26),
+    // and the sheet re-laying out under a tap made the click path wander.
+    // Tapping list rows is covered by book and mobile-qa; the thing under
+    // test HERE is the share section on the ticket.
     await waitForHydration(page);
-    await page.locator(".ticket-item").first().click();
+    const ticketHref = await page
+      .locator(".ticket-item")
+      .first()
+      .getAttribute("href");
+    expect(ticketHref).toMatch(/\/app\/ticket\//);
+    await page.goto(ticketHref!);
     await expect(page.getByTestId("share-section")).toBeVisible();
 
     // mint the link
