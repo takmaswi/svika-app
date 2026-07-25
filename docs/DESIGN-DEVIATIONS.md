@@ -1,8 +1,9 @@
 # Mbare Sun — agreed deviations from the reference screens
 
 The seven numbered screens in `Svika Mbare Sun/` are the visual truth for this
-app. Nine deviations are agreed with Mhofu (1 and 2 on 2026-07-10, 3 on
-2026-07-11, 4 and 5 on 2026-07-23, 6 to 9 on the K1 gate 2026-07-24) and are
+app. Thirteen deviations are agreed with Mhofu (1 and 2 on 2026-07-10, 3 on
+2026-07-11, 4 and 5 on 2026-07-23, 6 to 9 on the K1 gate 2026-07-24, 10 to 12
+on the M1 and M2 gates 2026-07-25, 13 on the V3 gate 2026-07-26) and are
 deliberate. Everything else follows DESIGN.md verbatim.
 
 ## 1. No fake status bar
@@ -124,3 +125,14 @@ one cue line above the way card: off path takes marigold with char text
 never wears red), approaching and arrived take the park tone with char
 text. Sentence case, aria-live, hidden while on the path. Ratified by
 Mhofu on the M2 gate (2026-07-25).
+
+## 13. The guardian chip in park with char text (V3, ratified)
+
+The spec has no grammar for a standing consent state. The dignity law
+(batch V3) requires the child's app to wear a visible "Guardian sees your
+trips" chip on every screen while a family link is active. The chip takes
+park `#D9E8CC` with char text: calm information about a state both sides
+agreed to, never a warning colour, distinct from the marigold demo chip it
+stacks under. Same section 7 chip anatomy as its neighbours; tapping it
+opens the family page where the off switch lives. Ratified by Mhofu on the
+V3 gate (2026-07-26): the chip is calm information, never a warning.

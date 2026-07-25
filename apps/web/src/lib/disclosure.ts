@@ -203,7 +203,7 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     feature: "Guest mode (V2)",
     tier: 1,
     detail:
-      "Real. Logged out, the map, live arrival estimates, trip planning and fares all work read only through the anon database role exactly as granted since the first network migration: world readable transit data, nothing personal, no policy widened for this feature (proven by the guest surface checks in the RLS suite). The sign in wall stands exactly at the identity moments (paying, saving a trip, recording a journey) and says why an account exists. The consent gate is untouched: it guards accounts, at account creation. Shared trip and guide links open in guest mode and carry a door into the app.",
+      "Real. Logged out, the map, live arrival estimates, trip planning, fares and the kombi board all work read only through the anon database role: world readable transit data, nothing personal. The one ruled widening (2026-07-26) opens the aggregates only kombi board to guests because trust visibility is public value; the guest surface checks in the RLS suite pin exactly what anon can and cannot read, and the vehicles table stays closed. The sign in wall stands exactly at the identity moments (paying, saving a trip, recording a journey) and says why an account exists. The consent gate is untouched: it guards accounts, at account creation. Shared trip and guide links open in guest mode and carry a door into the app, and the landing's primary CTA is the guest door itself.",
   },
   {
     feature: "Profile welcome and ride stats",

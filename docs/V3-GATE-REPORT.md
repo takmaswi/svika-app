@@ -1,7 +1,7 @@
 # V3 gate report: guardian mode (travel with me, and family)
 
-Status: AWAITING RULINGS (built and proven 2026-07-25; open questions for
-Mhofu at the bottom).
+Status: PASSED AND CLOSED (built and proven 2026-07-25; all four open
+questions ruled by Mhofu 2026-07-26, rulings recorded at the bottom).
 
 Scope: docs/PRODUCTION-PUSH-PLAN.md batch V3, ruled 2026-07-16. Ties ride
 shares (0026), the emergency next of kin (0023) and the ticket event
@@ -126,17 +126,27 @@ book 15/15.
   skips the self-accept check with a named SKIP when re-run inside the
   window (same pattern as the conductor redemption checks).
 
-## Open questions for Mhofu (V3 rulings)
+## Rulings (Mhofu, 2026-07-26)
 
-1. The guardian chip wears park with char text (positive consented state,
-   distinct from the marigold demo chip): ratify as a DESIGN-DEVIATIONS
-   entry, or different tone?
-2. `demo_reset_mine` untouched leaves a possible stale guardian link on
-   pooled demo personas. Rule: extend the demo reset to revoke links (one
-   more delete in the frozen function), or accept the gap?
-3. The safe arrival tap doubles as the guardian notify moment. Good
-   enough for the pilot, or do you want an automatic arrival suggestion
-   when the alight guidance fires (still a tap, just prompted)?
-4. Family linking has no age semantics: any two accounts can link (a
-   worried spouse, an elder parent). The copy says "watch over someone".
-   Keep it relationship neutral, or name children specifically anywhere?
+1. **Chip tone RATIFIED as proposed.** The guardian chip is calm
+   information in the park/char info grammar, never a warning colour.
+   Recorded as deviation 13 in `docs/DESIGN-DEVIATIONS.md`.
+2. **Demo-pool guardian-link gap accepted as a PERMANENT gap.** Pooled
+   demo personas never guardian-link; `demo_reset_mine` stays frozen and
+   nothing is built. This paragraph is the documentation.
+3. **Arrival tap: YES, prompted.** When the alight guidance fires its
+   at-the-stop cue, the app now offers the one tap arrival confirm as a
+   skippable prompt (`voice-arrive` in `VoiceGuide.tsx`, positioned above
+   the peeking sheet like the commute alert; `promptsArrival` in
+   `lib/voice/triggers.ts`). Never auto confirmed: arrival stays the
+   rider's word, the prompt just makes it easy, and dismissing it skips
+   it for the whole ride. Proven in `e2e/d1-destination.spec.ts` (the
+   alight guidance test now walks through prompt, dismiss door visible,
+   confirm tap, ticket stamped arrived) plus a unit test on the cue rule.
+4. **Relationship neutral copy: YES, everywhere.** Audit result: every
+   family/guardian string already said "guardian" / "someone you trust" /
+   "the person you will watch over"; the one violation was the profile's
+   "Next of kin" labels, now "Guardian contact name/phone" in both
+   languages (`profile.kinName`/`profile.kinPhone`; the 0023 column names
+   are schema, not copy, and stay). The Rudo persona naming a mother
+   remains story flavour only.

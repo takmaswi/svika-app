@@ -1,7 +1,7 @@
 # V2 gate report: guest mode
 
-Status: AWAITING RULINGS (built and proven 2026-07-25; open questions for
-Mhofu at the bottom).
+Status: PASSED AND CLOSED (built and proven 2026-07-25; all three open
+questions ruled by Mhofu 2026-07-26, rulings recorded at the bottom).
 
 Scope: docs/PRODUCTION-PUSH-PLAN.md batch V2, ruled 2026-07-16. The map,
 live ETAs, trip planning and fares work logged out and read only. The OTP
@@ -86,32 +86,60 @@ Checks: `pnpm typecheck` green, `pnpm lint` green, `pnpm test` green
 
 ## Known limits, stated
 
-- The guest home's kombi board chip is absent: `kombi_board` is an
-  authenticated RPC and widening it to anon was not ruled. The moving
-  kombis on the map are visible to guests; the per vehicle card is not.
-  Flagged as an open question below.
+- ~~The guest home's kombi board chip is absent~~ RESOLVED by ruling 1
+  (2026-07-26): the board opened to guests through migration 0037 and the
+  chip shows. The paragraph stands as history of what shipped on
+  2026-07-25.
 - A guest who plans a transfer trip sees the whole plan; the wall only
   stands at pay. This is the ruled behaviour (read only planning).
 - `next` return after OTP is page level (back to the same plan); the
   chosen payment method is not carried through the wall.
 
-## Open questions for Mhofu (V2 rulings)
+## Rulings (Mhofu, 2026-07-26)
 
-1. Kombi board for guests: leave authenticated only (as shipped), or
-   rule a public read of the aggregates (would need a 0037 grant, a
-   deliberate widening with its own RLS checks)?
-2. The landing keeps "Enter Svika" as the primary CTA with "Look around
-   first" as a quiet second door. Right emphasis, or should the guest
-   door be louder?
-3. The guest home hides the Kombis header chip entirely. Alternative: show
-   it walling to sign in. Preference?
+1. **Kombi board for guests: OPEN.** Trust visibility is public value and
+   the RPC already returns aggregates only, so migration 0037 grants anon
+   execute on `kombi_board` (auth gate removed, everything else verbatim
+   from 0032). This is the ONE deliberate widening of the guest surface,
+   and it is pinned: three new GS checks prove anon reads the board, the
+   returned column set is exactly the seven aggregate columns and nothing
+   else, and the `vehicles` table underneath stays closed; the K1-era
+   KB-1 check flipped to the ruled behaviour with the ruling cited. The
+   board page drops its login redirect; the one identity shaped cell
+   ("your stop") degrades gracefully because a guest has no saved trips
+   under RLS, so the context falls back to the corridor's first rank
+   exactly as a new rider's does. Proven in `e2e/guest.spec.ts` (guest
+   opens the board from the chip, rows render, nothing personal on
+   screen).
+2. **Landing door emphasis: the guest door is PRIMARY.** The landing's
+   primary CTA is now "Open the live map" into /app with "No account
+   needed to look around." beneath it; sign in (rider, and hwindi/fleet
+   owner) drops to the secondary line. Value before the wall, always.
+3. **Kombis chip: SHOWN to guests**, consistent with ruling 1: the guest
+   home header carries the same deviation 9 chip a rider has, straight
+   into the now public board.
+
+Evidence refreshed for the changed surfaces: the new landing door, the
+guest home with the Kombis chip, and the guest board at 360px in both
+themes and languages (`docs/design-evidence/guest/`,
+`scripts/guest-evidence.mjs`).
 
 ## Honesty note: full e2e suite
 
 Final full runs land at **59 passed, 1 failed (9 min)**: the one red is
 the share mint spec under full parallel load, the SAME documented known
 baseline red carried since the product branch opened (it passed green in
-isolation twice today, including inside the V3 touched-suite run). Goal 6
+isolation twice today, including inside the V3 touched-suite run).
+
+**Update 2026-07-26 (rulings day): the known red is root caused and
+fixed.** The rider demo account's suite history finally became minable,
+so its home now renders the answer peek; the sheet re-laying out under
+the tap made the spec's ticket row click wander (it reproduced in
+isolation for the first time, which is what gave the cause away). The
+spec now navigates by the ticket link's own href: tapping list rows
+stays covered by the book and mobile-qa specs, and the thing under test
+here (the share section) is reached deterministically. Green in
+isolation and inside its suite chunk since. Goal 6
 also surfaced and fixed three pre-existing suite defects, each proven
 pre-existing by reproducing on a baseline worktree at the pre-Goal-6
 commit before touching anything:
