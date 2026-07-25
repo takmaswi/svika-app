@@ -1015,8 +1015,14 @@ check(
 
 // kombi board (K1): the trust surface reads aggregates, never people
 {
+  // KB-1 flipped by V2 ruling 5 (2026-07-26): the board opened to anon in
+  // 0037 because it serves aggregates only; the GS block pins that surface.
   const anonBoard = await client().rpc("kombi_board");
-  check("KB-1 anon cannot call kombi_board", !!anonBoard.error);
+  check(
+    "KB-1 anon reads the board (ruled open 2026-07-26, was closed at K1)",
+    !anonBoard.error && (anonBoard.data ?? []).length > 0,
+    anonBoard.error?.message,
+  );
 
   const board = await A.c.rpc("kombi_board");
   check(
@@ -1553,11 +1559,12 @@ check(
   check("GD-23 invite redemption is rate limited after five misses", limited);
 }
 
-// --- guest mode surface (batch V2): NO widening -----------------------------
-// Guests ride the anon role exactly as it has stood since 0002: the whole
-// transit network is world readable BY DESIGN and nothing personal answers.
-// V2 shipped zero migrations; these checks pin the exact guest surface so
-// any future widening fails loudly.
+// --- guest mode surface (batch V2) ------------------------------------------
+// Guests ride the anon role as it has stood since 0002: the whole transit
+// network is world readable BY DESIGN and nothing personal answers. The one
+// later widening is the kombi board (0037, ruled by Mhofu 2026-07-26);
+// everything else pins the original surface so accidental widening fails
+// loudly.
 {
   for (const table of [
     "stops",
@@ -1591,6 +1598,34 @@ check(
     p_direction: "outbound",
   });
   check("GS anon cannot purchase a ticket (the pay wall is real)", !!anonBuy.error);
+
+  // V2 ruling 5 (2026-07-26): the ONE deliberate widening, pinned. Trust
+  // visibility is public value, so the board's aggregates face guests; the
+  // column set is the proof no person ever leaves it, and the vehicles
+  // table underneath stays closed to everyone but owners.
+  const anonBoard = await anon.rpc("kombi_board");
+  check(
+    "GS anon reads the kombi board aggregates (0037, ruled widening)",
+    !anonBoard.error && (anonBoard.data ?? []).length >= 1,
+    anonBoard.error?.message,
+  );
+  const boardCols = Object.keys(anonBoard.data?.[0] ?? {}).sort();
+  check(
+    "GS the board serves exactly the aggregate columns, nothing personal",
+    JSON.stringify(boardCols) ===
+      JSON.stringify([
+        "capacity",
+        "drift_days_30d",
+        "fare_days_30d",
+        "last_verified_at",
+        "peak_hour_load_30d",
+        "plate",
+        "verified_fares_30d",
+      ]),
+    boardCols.join(","),
+  );
+  const anonVehicles = await anon.from("vehicles").select("id").limit(1);
+  check("GS the vehicles table stays closed to guests", deniedOrEmpty(anonVehicles));
 }
 
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);

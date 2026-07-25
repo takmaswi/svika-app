@@ -11,7 +11,12 @@ import { pickApproachingVehicle } from "@/lib/map/eta-live";
 import { SIM_EPOCH_MS, SIM_VEHICLES, simConfig } from "@/lib/map/sim-config";
 import { simulatedTravelAt } from "@/lib/map/vehicle-feed";
 import { VoiceAudioCache, type VoiceLang } from "@/lib/voice/audio-cache";
-import { VoiceTriggerEngine, type VoiceCue, type VoiceTrip } from "@/lib/voice/triggers";
+import {
+  promptsArrival,
+  VoiceTriggerEngine,
+  type VoiceCue,
+  type VoiceTrip,
+} from "@/lib/voice/triggers";
 
 const LIVE_TICK_MS = 1000;
 const REPLAY_TICK_MS = 400;
@@ -25,10 +30,24 @@ export interface VoiceGuideProps {
   trip: VoiceTrip;
   mode: "live" | "replay";
   captions: Record<VoiceCue, string>;
+  /**
+   * The skippable arrival confirm (V3 ruling 3): when guidance says the
+   * rider is there, one tap posts their own arrival. Dismiss skips it for
+   * the whole ride; nothing here ever confirms without the tap.
+   */
+  arrive?: {
+    ticketId: string;
+    prompt: string;
+    confirmLabel: string;
+    dismissLabel: string;
+    action: (formData: FormData) => Promise<void>;
+  };
 }
 
-export function VoiceGuide({ lang, trip, mode, captions }: VoiceGuideProps) {
+export function VoiceGuide({ lang, trip, mode, captions, arrive }: VoiceGuideProps) {
   const [caption, setCaption] = useState("");
+  const [arriveOpen, setArriveOpen] = useState(false);
+  const arriveSkipped = useRef(false);
   const trackedVehicle = useRef<number>(-1);
 
   useEffect(() => {
@@ -43,6 +62,9 @@ export function VoiceGuide({ lang, trip, mode, captions }: VoiceGuideProps) {
 
     const speak = (cue: VoiceCue) => {
       setCaption(captions[cue]);
+      if (arrive && promptsArrival(cue) && !arriveSkipped.current) {
+        setArriveOpen(true);
+      }
       const src = cache.src(cue);
       if (src) {
         // from the preloaded blob: no network between trigger and sound
@@ -92,12 +114,44 @@ export function VoiceGuide({ lang, trip, mode, captions }: VoiceGuideProps) {
 
   if (!lang) return null;
   return (
-    <div aria-live="assertive" role="status" className="voice-caption-region">
-      {caption && (
-        <p className="voice-caption svika-glass-strong" data-testid="voice-caption">
-          {caption}
-        </p>
+    <>
+      <div aria-live="assertive" role="status" className="voice-caption-region">
+        {caption && (
+          <p className="voice-caption svika-glass-strong" data-testid="voice-caption">
+            {caption}
+          </p>
+        )}
+      </div>
+      {arrive && arriveOpen && (
+        <div className="voice-arrive-region">
+          <form
+            action={arrive.action}
+            className="voice-arrive svika-glass-strong"
+            data-testid="voice-arrive"
+          >
+            <input type="hidden" name="ticket" value={arrive.ticketId} />
+            <p className="svika-body voice-arrive-prompt">{arrive.prompt}</p>
+            <button
+              className="auth-submit touch-target"
+              type="submit"
+              data-testid="voice-arrive-confirm"
+            >
+              {arrive.confirmLabel}
+            </button>
+            <button
+              className="auth-link touch-target"
+              type="button"
+              data-testid="voice-arrive-dismiss"
+              onClick={() => {
+                arriveSkipped.current = true;
+                setArriveOpen(false);
+              }}
+            >
+              {arrive.dismissLabel}
+            </button>
+          </form>
+        </div>
       )}
-    </div>
+    </>
   );
 }

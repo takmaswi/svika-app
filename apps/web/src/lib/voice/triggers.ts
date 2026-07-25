@@ -32,6 +32,15 @@ export function metersToStop(trip: VoiceTrip, travelMeters: number): number {
     : travelMeters - trip.targetMeters;
 }
 
+/**
+ * V3 ruling 3 (2026-07-26): the cues that mean "you are there" open the
+ * skippable one tap arrival confirm. The prompt only ever asks; arrival is
+ * the rider's word, never auto confirmed on their behalf.
+ */
+export function promptsArrival(cue: VoiceCue): boolean {
+  return cue === "getOff" || cue === "walk";
+}
+
 export class VoiceTriggerEngine {
   private fired = new Set<VoiceCue>();
 

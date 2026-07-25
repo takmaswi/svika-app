@@ -3,6 +3,7 @@ import {
   APPROACH_METERS,
   GET_OFF_METERS,
   metersToStop,
+  promptsArrival,
   VoiceTriggerEngine,
   WALK_PAST_METERS,
   type VoiceTrip,
@@ -58,5 +59,15 @@ describe("VoiceTriggerEngine", () => {
     // the bands must nest: walk past < get off < approach
     expect(WALK_PAST_METERS).toBeLessThan(GET_OFF_METERS);
     expect(GET_OFF_METERS).toBeLessThan(APPROACH_METERS);
+  });
+});
+
+describe("promptsArrival", () => {
+  // V3 ruling 3: the arrival cues open a skippable confirm prompt; the
+  // approach warning never does, and nothing ever confirms by itself.
+  test("the at-the-stop cues prompt, the approach warning does not", () => {
+    expect(promptsArrival("getOff")).toBe(true);
+    expect(promptsArrival("walk")).toBe(true);
+    expect(promptsArrival("approaching")).toBe(false);
   });
 });

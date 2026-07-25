@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getLang, t } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { BackIcon } from "@/components/icons";
@@ -20,11 +19,12 @@ import { SIM_VEHICLES } from "@/lib/map/sim-config";
 export default async function KombisPage() {
   const lang = await getLang();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
 
+  // V2 ruling 5 (2026-07-26): trust visibility is public value, so the board
+  // works logged out. The RPC serves aggregates only (0037), and the one
+  // identity shaped cell, "your stop", degrades on its own: a guest has no
+  // saved trips under RLS, so the context falls back to the corridor's first
+  // rank exactly as a new rider's does.
   const [corridorRes, savedRes, boardRes] = await Promise.all([
     supabase
       .from("route_stops")

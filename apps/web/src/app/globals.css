@@ -1558,6 +1558,35 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
     animation: none;
   }
 }
+/* the guidance prompted arrival confirm (V3 ruling 3): anchored above the
+   peeking sheet exactly like the commute alert (one slot higher so the two
+   never overlap), its own layer because the caption region swallows no taps */
+.voice-arrive-region {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: calc(396px + 84px);
+  z-index: 25;
+  display: flex;
+  justify-content: center;
+}
+.voice-arrive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  max-width: 320px;
+  text-align: center;
+  animation: svk-rise 0.6s var(--ease-standard) both;
+}
+.voice-arrive-prompt {
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-arrive {
+    animation: none;
+  }
+}
 
 /* commute alert (spine 2): floats just above the peeking sheet, built from
    the sheet surface and the live dot; the open sheet slides over it */

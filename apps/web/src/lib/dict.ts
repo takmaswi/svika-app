@@ -25,7 +25,13 @@ export const dict = {
     en: "Plan every trip, get smart suggestions before you leave, and ride with your safety looked after.",
     sn: "Ronga rwendo rwako, wana mazano usati wasimuka, uye famba wakachengeteka.",
   },
-  "landing.cta": { en: "Find your kombi", sn: "Tsvaga kombi yako" },
+  // V2 ruling 6 (2026-07-26): value before the wall. The primary door is
+  // the live map with no account; signing in is the second line.
+  "landing.cta": { en: "Open the live map", sn: "Vhura mepu live" },
+  "landing.guestNote": {
+    en: "No account needed to look around.",
+    sn: "Haudi account kuti utarise.",
+  },
   "landing.signinHint": {
     en: "Hwindi or fleet owner?",
     sn: "Hwindi or fleet owner?",
@@ -784,8 +790,16 @@ export const dict = {
     en: "If something happens on the road, the person you name here is who gets called, and your medical aid details speed up help. Svika asks so that help is one tap away, never for marketing. This is optional, only you can see it, and you can remove it any time.",
     sn: "Kana chimwe chikaitika murwendo, munhu waunonyora pano ndiye anofonerwa, uye ruzivo rwemedical aid rwako runokurumidzisa rubatsiro. Svika inokumbira kuti rubatsiro rive pedyo, kwete zvekushambadza. Izvi ndezvekuzvisarudzira, ndiwe wega unozviona, uye unogona kuzvibvisa chero nguva.",
   },
-  "profile.kinName": { en: "Next of kin name", sn: "Zita rehama yako wepedyo" },
-  "profile.kinPhone": { en: "Next of kin phone", sn: "Foni yehama yako wepedyo" },
+  // V3 ruling 4 (2026-07-26): relationship neutral everywhere. The contact
+  // is "your guardian contact" / someone you trust, never assumed a relative.
+  "profile.kinName": {
+    en: "Guardian contact name",
+    sn: "Zita remunhu wako wepedyo",
+  },
+  "profile.kinPhone": {
+    en: "Guardian contact phone",
+    sn: "Foni yemunhu wako wepedyo",
+  },
   "profile.aidName": { en: "Medical aid name", sn: "Zita re medical aid" },
   "profile.aidNumber": { en: "Medical aid number", sn: "Number ye medical aid" },
   "profile.emergencyConsent": {
@@ -1014,6 +1028,12 @@ export const dict = {
     en: "Add a guardian contact on your profile and every trip can reach them in one tap.",
     sn: "Isa munhu wako wepedyo paprofile yako uye rwendo rwese runosvika kwaari nekudzvanya kamwe.",
   },
+  // V3 ruling 3: the guidance prompted arrival confirm; it only ever asks
+  "voice.arrivedPrompt": {
+    en: "Arrived safely? One tap lets anyone following your trip know.",
+    sn: "Wasvika zvakanaka here? Dzvanya kamwe kuti vanotevera rwendo rwako vazive.",
+  },
+  "voice.arrivedDismiss": { en: "Not yet", sn: "Kwete izvozvi" },
   "share.statusArrived": { en: "Arrived safely", sn: "Vasvika zvakanaka" },
   "share.sendCta": { en: "Send the link", sn: "Tumira link" },
   "share.copyCta": { en: "Copy the link", sn: "Kopa link" },
@@ -1109,7 +1129,6 @@ export const dict = {
   },
   "guest.signInCta": { en: "Sign in with your phone", sn: "Pinda nefoni yako" },
   "guest.signInChip": { en: "Sign in", sn: "Pinda" },
-  "guest.exploreCta": { en: "Look around first", sn: "Tanga watarisa" },
   "guest.planPayCta": { en: "Sign in to pay", sn: "Pinda kuti ubhadhare" },
   "guest.saveLink": {
     en: "Sign in to save this trip",

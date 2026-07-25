@@ -24,6 +24,7 @@ import { InitialAvatar } from "@/components/profile/InitialAvatar";
 import { formatUsd, planTrip, type RideLeg } from "@svika/shared";
 import { fetchNetwork } from "@/lib/network";
 import { bookTrip } from "@/lib/actions";
+import { markTicketArrived } from "@/lib/family-actions";
 import { boardCodesOf, type BoardCodeEmbed } from "@/lib/tickets";
 import {
   CORRIDOR_ROUTE_CODE,
@@ -510,6 +511,15 @@ export default async function RiderHome({
             approaching: t(voiceLang!, "voice.approaching"),
             getOff: t(voiceLang!, "voice.getOff"),
             walk: t(voiceLang!, "voice.walk"),
+          }}
+          // V3 ruling 3: when guidance says arrived, offer the one tap
+          // confirm (skippable, never automatic); UI copy in the app language
+          arrive={{
+            ticketId: boarded!.id,
+            prompt: t(lang, "voice.arrivedPrompt"),
+            confirmLabel: t(lang, "ticket.arrivedCta"),
+            dismissLabel: t(lang, "voice.arrivedDismiss"),
+            action: markTicketArrived,
           }}
         />
       )}

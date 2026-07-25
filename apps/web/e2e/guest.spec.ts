@@ -7,10 +7,13 @@ import { waitForHydration } from "./helpers";
 
 test.describe("guest mode", () => {
   test("plan a trip logged out, hit the wall only at pay", async ({ page }) => {
-    // the landing offers the guest door
+    // the guest door is the landing's PRIMARY CTA (ruling 6: value before
+    // the wall); sign in waits on the line below it
     await page.goto("/");
-    await expect(page.getByTestId("landing-guest-door")).toBeVisible();
-    await page.getByTestId("landing-guest-door").click();
+    const door = page.getByTestId("landing-cta");
+    await expect(door).toHaveAttribute("href", "/app");
+    await expect(page.getByTestId("landing-signin")).toBeVisible();
+    await door.click();
 
     // the guest home: map, search, corridor fare; nothing personal
     await expect(page.getByTestId("guest-home")).toBeVisible();
@@ -59,6 +62,23 @@ test.describe("guest mode", () => {
       await page.goto(path);
       await expect(page).toHaveURL(/\/login/);
     }
+  });
+
+  test("the kombi board opens for guests (rulings 5 and 7)", async ({ page }) => {
+    // trust visibility is public value: the chip is on the guest home and
+    // the board renders logged out from the 0037 aggregates, identity cells
+    // degraded to the corridor's first rank
+    await page.goto("/app");
+    await expect(page.getByTestId("guest-home")).toBeVisible();
+    await waitForHydration(page);
+    await page.getByTestId("kombis-chip").click();
+    await expect(page).toHaveURL(/\/app\/kombis/);
+    await expect(page.getByTestId("kombi-board-row").first()).toBeVisible({
+      timeout: 15_000,
+    });
+    // aggregates only: nothing personal exists to leak on this screen
+    const body = await page.locator("body").innerText();
+    expect(body).not.toContain("Wallet");
   });
 
   test("the guest home speaks Shona too", async ({ page }) => {

@@ -65,9 +65,11 @@ export default async function LandingPage() {
         />
       </div>
 
+      {/* V2 ruling 6: the guest door is primary. Value before the wall:
+          the map opens with no account, and sign in waits on the next line */}
       <Link
         className="cta touch-target landing-cta svika-animate-fade-up svika-rise-5"
-        href="/login"
+        href="/app"
         data-testid="landing-cta"
       >
         {t(lang, "landing.cta")}
@@ -76,12 +78,13 @@ export default async function LandingPage() {
         </span>
       </Link>
       <p className="landing-signin svika-animate-fade-up svika-rise-6">
+        {t(lang, "landing.guestNote")}{" "}
+        <Link href="/login" data-testid="landing-signin">
+          {t(lang, "guest.signInCta")}
+        </Link>
+        {" · "}
         {t(lang, "landing.signinHint")}{" "}
         <Link href="/login">{t(lang, "landing.signinLink")}</Link>
-        {" · "}
-        <Link href="/app" data-testid="landing-guest-door">
-          {t(lang, "guest.exploreCta")}
-        </Link>
       </p>
 
       <footer className="landing-foot svika-animate-fade-up svika-rise-7">

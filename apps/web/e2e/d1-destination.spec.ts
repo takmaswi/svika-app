@@ -144,5 +144,19 @@ test.describe("D1 destination first planning", () => {
     await expect(caption).toContainText("Your walking leg starts here.", {
       timeout: 20_000,
     });
+
+    // V3 ruling 3: the at-the-stop cue opened the skippable arrival confirm.
+    // It only asks: the dismiss door is real, and only the rider's own tap
+    // posts the arrival (never a geofence acting for them).
+    const arrivePrompt = page.getByTestId("voice-arrive");
+    await expect(arrivePrompt).toBeVisible();
+    await expect(page.getByTestId("voice-arrive-dismiss")).toBeVisible();
+    await page.getByTestId("voice-arrive-confirm").click();
+    await page.waitForURL(/\/app\/ticket\//, { timeout: 20_000 });
+    await expect(page.locator(".boarding-card")).toHaveAttribute(
+      "data-status",
+      "arrived",
+    );
+    await expect(page.getByTestId("ticket-arrived-note")).toBeVisible();
   });
 });

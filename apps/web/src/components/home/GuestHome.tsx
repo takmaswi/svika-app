@@ -93,6 +93,15 @@ export async function GuestHome({
           >
             {t(lang, "guest.signInChip")}
           </Link>
+          {/* V2 ruling 7: the board is public trust value, guests get the
+              same door a rider has (deviation 9 anatomy) */}
+          <Link
+            className="home-chip svika-glass touch-target home-chip-kombis"
+            href="/app/kombis"
+            data-testid="kombis-chip"
+          >
+            {t(lang, "kombi.boardChip")}
+          </Link>
           <span className="home-chip svika-glass">
             <ThemeToggle
               initialTheme={theme}

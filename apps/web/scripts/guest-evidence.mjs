@@ -25,10 +25,24 @@ for (const theme of ["light", "dark"]) {
     ]);
     const page = await context.newPage();
 
+    // ruling 6: the landing's primary CTA is the guest door
+    await page.goto(`${BASE}/`);
+    await page.getByTestId("landing-cta").waitFor();
+    await page.waitForTimeout(1500); // map settle
+    await page.screenshot({
+      path: join(OUT, `landing-guest-door-${theme}-${lang}.png`),
+    });
+
     await page.goto(`${BASE}/app`);
     await page.getByTestId("guest-home").waitFor();
     await page.waitForTimeout(1500); // map settle
     await page.screenshot({ path: join(OUT, `guest-home-${theme}-${lang}.png`) });
+
+    // rulings 5 and 7: the kombi board open to guests, aggregates only
+    await page.goto(`${BASE}/app/kombis`);
+    await page.getByTestId("kombi-board-row").first().waitFor();
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: join(OUT, `guest-kombis-${theme}-${lang}.png`) });
 
     if (theme === "light") {
       await page.goto(`${BASE}/app/plan?from=heights&to=rezende`);
