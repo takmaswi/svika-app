@@ -83,7 +83,11 @@ test.describe("V1 answer first home", () => {
   });
 
   test("a rider with no recognised context keeps the search peek", async ({ page }) => {
-    await loginAs(page, "RIDER");
+    // the owner account: signed in, zero fare history, no commute pref.
+    // DEMO_RIDER no longer works here: the suite's own bookings gave it a
+    // minable pattern, so whenever profile.spec's pref toggle runs in a
+    // parallel worker the peek starts answering and this test raced it.
+    await loginAs(page, "OWNER");
     await page.goto("/app");
     await expect(page.getByTestId("home-sheet")).toBeVisible();
     await expect(page.getByTestId("peek-answer")).toHaveCount(0);

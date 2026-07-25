@@ -31,7 +31,11 @@ test.describe("journey guide links", () => {
     context,
     browser,
   }) => {
-    await loginAs(page, "RIDER");
+    // the OWNER account records here: journey.spec records as RIDER in a
+    // parallel worker, and two recordings against the same profile's
+    // journey rows and consent stream raced (a wandering full-suite red,
+    // 2026-07-25). Recording is profile agnostic, so the owner walks.
+    await loginAs(page, "OWNER");
 
     // record and save the walk to share
     await page.goto("/app/record?gps=replay");

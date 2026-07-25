@@ -8,7 +8,16 @@
 import { createClient } from "@supabase/supabase-js";
 
 const TAKUNDA_EMAIL = "demo.takunda@svika.app";
-const HISTORY_DAYS = 14;
+// Two rides per day across the miner's whole 28 day lookback (56 rides,
+// the RPC caps at 60). Density matters, not just coverage: every e2e run
+// books a REAL ticket as Takunda that can never be deleted (wallet paid,
+// ledger FK), so those strays accumulate at arbitrary times of day and
+// drag the mined median off "now" once they outnumber the fixture. 56
+// fresh fixture rides keep the median inside the staged window against
+// any realistic stray mass in a 28 day window (found 2026-07-25 when 43
+// strays broke the 14 ride fixture; reproduced on baseline).
+const HISTORY_DAYS = 28;
+const RIDES_PER_DAY = 2;
 
 export async function rebuildTakundaHistory(offsetMinutes: number): Promise<void> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -43,17 +52,25 @@ export async function rebuildTakundaHistory(offsetMinutes: number): Promise<void
   const from = stops[0]!.stop_id as string;
   const to = stops[stops.length - 1]!.stop_id as string;
 
-  // one ride per day, same jitter shape as the seed, shifted by the offset
+  // same jitter shape as the seed, shifted by the offset; the second ride
+  // of each day sits a few minutes on the other side of the anchor so the
+  // median stays pinned to the staged moment
   const rides = [];
   for (let d = 0; d < HISTORY_DAYS; d++) {
-    const jitterMinutes = 6 + ((d * 7) % 20);
-    const at = new Date(
-      Date.now() -
-        offsetMinutes * 60_000 -
-        d * 24 * 60 * 60_000 -
-        jitterMinutes * 60_000,
-    );
-    rides.push({ at: at.toISOString() });
+    for (let r = 0; r < RIDES_PER_DAY; r++) {
+      const jitterMinutes = (r === 0 ? 6 : -14) + (((d + r) * 7) % 20);
+      const at = new Date(
+        Date.now() -
+          offsetMinutes * 60_000 -
+          d * 24 * 60 * 60_000 -
+          jitterMinutes * 60_000,
+      );
+      // fixture rides must sit in the past (RPC law): clamp the negative
+      // jitter side just behind now
+      rides.push({
+        at: (at.getTime() >= Date.now() ? new Date(Date.now() - 60_000) : at).toISOString(),
+      });
+    }
   }
   const { error: histErr } = await supabase.rpc("reset_demo_commute_history", {
     p_profile: auth.user.id,

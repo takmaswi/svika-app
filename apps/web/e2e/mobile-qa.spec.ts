@@ -59,8 +59,12 @@ test.describe("mobile QA", () => {
     await expect(page).toHaveURL(/localhost:3000\/(\?.*)?$/, { timeout: 15_000 });
     await expect(page.getByTestId("landing-cta")).toBeVisible();
 
-    // the session is truly gone: the guarded app bounces to login
+    // the session is truly gone: /app now serves the guest home (batch V2,
+    // read only, sign in chip showing), and a personal page still bounces
     await page.goto("/app");
+    await expect(page.getByTestId("guest-home")).toBeVisible();
+    await expect(page.getByTestId("guest-signin-chip")).toBeVisible();
+    await page.goto("/app/wallet");
     await expect(page).toHaveURL(/\/login/);
   });
 });
