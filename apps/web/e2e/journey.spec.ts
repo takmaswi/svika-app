@@ -24,6 +24,22 @@ test.describe("journey recording", () => {
   test.use({ geolocation: WALK_START, permissions: ["geolocation"] });
 
   test("record a walk, save it, reload, see the trip", async ({ page, context }) => {
+    // Playwright 1.49 has no screen-wake-lock permission name; grant it
+    // through CDP, scoped to this test's browser context (an unscoped grant
+    // lands on the default context and headless still denies the lock)
+    const cdp = await context.browser()!.newBrowserCDPSession();
+    const { browserContextIds } = (await cdp.send("Target.getBrowserContexts")) as {
+      browserContextIds: string[];
+    };
+    for (const browserContextId of browserContextIds) {
+      // the CDP grant replaces the context's whole permission set, so the
+      // test.use geolocation grant must ride along or it is wiped
+      await cdp.send("Browser.grantPermissions", {
+        permissions: ["wakeLockScreen", "geolocation"],
+        browserContextId,
+      } as never);
+    }
+
     await loginAs(page, "RIDER");
 
     await page.goto("/app/record?gps=replay");
@@ -39,6 +55,12 @@ test.describe("journey recording", () => {
       "recording",
     );
     await expect(page.getByTestId("record-chip")).toBeVisible();
+
+    // the screen wake lock is held while recording (the M1 wake lock slice)
+    await expect(page.getByTestId("record-screen")).toHaveAttribute(
+      "data-wake",
+      "held",
+    );
 
     // walk the line: each fix ~40 m on, all inside the replay sample gate
     for (const step of WALK_STEPS) {

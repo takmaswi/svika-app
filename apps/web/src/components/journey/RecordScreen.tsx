@@ -14,6 +14,7 @@ import { JOURNEY_CONSENT_VERSION, type AppLanguage } from "@svika/shared";
 import { t } from "@/lib/dict";
 import { createClient } from "@/lib/supabase/client";
 import { JourneyRecorder, type RecorderSnapshot } from "@/lib/journey/recorder";
+import { RecordingWakeLock } from "@/lib/journey/wake-lock";
 import { syncJourney } from "@/lib/journey/sync";
 import {
   deleteJourney,
@@ -62,6 +63,7 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
   const [consented, setConsented] = useState(hasConsent);
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [wakeHeld, setWakeHeld] = useState(false);
   const endedAtRef = useRef<number | null>(null);
 
   // recorder -> UI: snapshots carry counts; the trace grows point by point
@@ -99,6 +101,16 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
       cancelled = true;
     };
   }, [recorder]);
+
+  // the screen stays awake while recording: a sleeping screen kills GPS.
+  // Held for the recording state only, released the moment it leaves;
+  // browsers without the API record exactly as before, screen may sleep.
+  useEffect(() => {
+    if (screen !== "recording") return;
+    const lock = new RecordingWakeLock({ onChange: setWakeHeld });
+    void lock.acquire();
+    return () => void lock.release();
+  }, [screen]);
 
   // the chip clock
   useEffect(() => {
@@ -227,7 +239,12 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
   if (screen === "recording") {
     const startedAt = snap?.startedAt ?? now;
     return (
-      <main className="home-screen" data-testid="record-screen" data-state="recording">
+      <main
+        className="home-screen"
+        data-testid="record-screen"
+        data-state="recording"
+        data-wake={wakeHeld ? "held" : "off"}
+      >
         <div className="home-map">
           <TraceMap
             labels={{
