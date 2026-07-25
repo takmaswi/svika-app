@@ -14,7 +14,7 @@ export interface DisclosureRow {
 }
 
 // The date the canonical register was last updated (docs/DISCLOSURE-REGISTER.md).
-export const DISCLOSURE_UPDATED = "2026-07-24";
+export const DISCLOSURE_UPDATED = "2026-07-25";
 
 export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
   {
@@ -192,6 +192,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     tier: 1,
     detail:
       "Real 128 bit capability links for a saved journey: token scoped, seven day expiry, revocable, viewable with no account. Walking directions are trace replay, not routing: the recorded points ARE the directions, shortcuts included. The viewer's off path, approaching and arrived cues are client side distance to the polyline, and the step list is derived by plain geometry (simplify, then split on turns and mode changes); the page itself says no routing engine, no AI. The viewer never learns who recorded the trip or when. A self hosted walking router for places with no trace is roadmap, slides only.",
+  },
+  {
+    feature: "Guardian mode: family links and safe arrival (V3)",
+    tier: 1,
+    detail:
+      "Real. A link exists only after both sides act: the guardian mints a rate limited invite code, the child enters it on their own phone, and either side ends it instantly. While a link is on, the child's app always shows a visible chip on every screen: no silent tracking, by design. The guardian sees the linked child's fare trips as status words only (booked, on the kombi, arrived), never board codes, fares, wallet or coordinates, RLS proven. Safe arrival is the rider's own tap appended to the event stream; the taking longer than usual flag is a plain timing rule over the route's typical duration and its copy flags trips, never people. No SMS or messaging vendor: the guardian contact link travels through the phone's own share sheet.",
   },
   {
     feature: "Profile welcome and ride stats",
