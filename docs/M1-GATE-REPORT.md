@@ -1,7 +1,8 @@
 # M1 gate report: journey tracking (record my trip)
 
-Status: AWAITING RULINGS (built and proven 2026-07-24; open questions for
-Mhofu at the bottom).
+Status: PASSED (built and proven 2026-07-24; all four rulings landed
+2026-07-25, recorded at the bottom; the wake lock slice built and green
+the same day; Goal 5 signed off and closed with M2).
 
 Scope: docs/PRODUCTION-PUSH-PLAN.md batch M1, ruled 2026-07-16. Riders
 record real journeys from their own phones: schema with RLS from birth,
@@ -113,9 +114,10 @@ Checks: `pnpm typecheck` green, `pnpm lint` green, `pnpm test` green
 ## Known limits, stated
 
 - Backgrounding the browser tab can suspend GPS delivery; the recorder
-  resumes on return and loses nothing already captured, but a screen wake
-  lock (the gps-logger tool has one) is not wired yet. Flagged, not built
-  silently.
+  resumes on return and loses nothing already captured. A screen wake lock
+  now holds the screen awake while recording (ruled on this gate, built
+  2026-07-25; see the rulings below), but a rider who backgrounds the app
+  anyway still pauses GPS delivery until they return.
 - Withdrawing the journey consent alone has no dedicated control yet; the
   privacy page's delete everything removes journeys and appends the
   journey withdrawal (proven in 0033). A per stream withdrawal toggle is a
@@ -135,3 +137,30 @@ Checks: `pnpm typecheck` green, `pnpm lint` green, `pnpm test` green
 3. Wake lock while recording: build now or roadmap?
 4. Per stream consent withdrawal control on the privacy page: follow up
    slice or before submission?
+
+## Rulings (Mhofu, 2026-07-25)
+
+1. **Deviations 10 and 11: RATIFIED.** Self position dot and recording
+   chip recorded as ratified in DESIGN-DEVIATIONS.md.
+2. **Real time phone walk: wanted, no deadline.** The replay evidence
+   stands for the pack. The challenge phase is over, so there is no
+   bootcamp date to beat; Mhofu will record a real walk on his own phone
+   as a field test whenever he next walks the corridor. Logged as
+   CHECKS-FOR-MHOFU item 12.
+3. **Wake lock: build now.** Built the same day as the closing M1 slice:
+   `apps/web/src/lib/journey/wake-lock.ts` holds a Screen Wake Lock while
+   the recording state is on screen, releases it the moment recording
+   stops or the screen unmounts, re-requests it when a hidden tab returns
+   (the browser auto releases on hide), and a browser without the API or
+   a denied request (low battery) is a clean no-op: the recording never
+   depends on the lock. Proof: 7 unit tests
+   (`apps/web/test/journey-wake-lock.test.ts`, web suite 202/202) and the
+   journey e2e now asserts `data-wake="held"` on the recording screen
+   (lock granted to the test's browser context over CDP because Playwright
+   1.49 has no screen-wake-lock permission name). Commit 5206ba4.
+4. **Per stream consent withdrawal: approved as built.** The conservative
+   reading stands; delete everything on the privacy page covers journeys,
+   and a dedicated per stream toggle stays a follow up slice.
+
+With the wake lock slice green, Goal 5 (M1 + M2) is signed off and
+closed.

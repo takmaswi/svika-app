@@ -4,7 +4,7 @@ Open questions and numbers that need your eyes. None of them block the build.
 Work continues on documented assumptions; you review this list when phase 1
 is done. Each item says what was assumed and what changes if you disagree.
 
-Last updated: 2026-07-14.
+Last updated: 2026-07-25.
 
 ## 1. Watchdog simulator numbers (task 5)
 
@@ -130,3 +130,25 @@ substrate). Original items for the record:
   across 3 distinct days in 30 days before "verified fares" shows; 1 day of
   hourly load above declared seats flips the drift state. All my invention;
   the rules are named constants and change in one place.
+
+## 12. Real time recorded walk on your own phone (M1/M2 rulings, OPEN)
+
+Your own field test, ruled on the M1 and M2 gates (2026-07-25). The M1
+evidence walk is the real 2026-07-07 pings replayed through the shipping
+record screen, so its geometry is real but its clock is compressed; the
+M2 follow video's viewer is a mocked position on the same pings. You
+want a walk recorded live on a phone, and there is no deadline: the
+challenge phase is over, so this happens whenever you next walk the
+corridor. What to do when you are there:
+
+- Open /app/record on your phone (https, signed in), start a walking
+  recording, walk a few hundred metres, stop, name it and save with the
+  journey consent. The screen should stay awake the whole walk (the wake
+  lock built on this ruling).
+- Optionally share the saved trip as a guide link and have a second
+  phone follow it on the same street.
+
+That gives the evidence pack a real time recording (true duration, true
+clock) and a real hand held guide follow. The engine is identical to the
+replay either way, so nothing blocks on this; it upgrades the evidence,
+it does not gate a feature.

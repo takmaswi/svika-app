@@ -18,3 +18,18 @@ signed consent replace these in P5, same file names, no code change.
 Declared in the disclosure register. Audio is preloaded when a ride starts
 and played from memory: zero network calls at play time (proven in
 `apps/web/test/voice-audio-cache.test.ts`).
+
+## The P5 recording list
+
+Every line above gets recorded by a consenting Zimbabwean voice artist in
+P5, plus the two guide mode phrases approved on the M2 gate (2026-07-25).
+The guide phrases are screen only until their audio exists; the copy below
+is the dict.ts `guide.cue.*` text verbatim (Shona rides the standing
+external translator pass before any studio session).
+
+| Future file | Cue | Line |
+| --- | --- | --- |
+| `en/guide-off-path.wav` | guide: off path | You have left the path. Head back toward the line. |
+| `en/guide-arrived.wav` | guide: arrived | You have arrived |
+| `sn/guide-off-path.wav` | guide: off path | Wabuda munzira. Dzokera kumutsara. |
+| `sn/guide-arrived.wav` | guide: arrived | Wasvika |

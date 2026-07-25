@@ -1,7 +1,8 @@
 # M2 gate report: share a trip to a friend (guide mode)
 
-Status: AWAITING RULINGS (built and proven 2026-07-24; open questions for
-Mhofu at the bottom).
+Status: PASSED (built and proven 2026-07-24; all three rulings landed
+2026-07-25, recorded at the bottom; Goal 5 signed off and closed with
+M1).
 
 Scope: docs/PRODUCTION-PUSH-PLAN.md batch M2, ruled 2026-07-16. A saved
 journey becomes a guide link: token scoped, expiring, revocable, viewable
@@ -103,3 +104,21 @@ Checks: `pnpm typecheck` green, `pnpm lint` green, `pnpm test` green,
 3. The two extra guide phrases (off path, arrived) for the P5 voice
    recording list: approve the copy in dict.ts (`guide.cue.*`) as the
    phrases to record?
+
+## Rulings (Mhofu, 2026-07-25)
+
+1. **Deviation 12: RATIFIED.** Guide cue banner grammar recorded as
+   ratified in DESIGN-DEVIATIONS.md.
+2. **Seven day expiry: APPROVED** as the default; no sharer picker.
+3. **The two extra guide phrases: APPROVED.** The `guide.cue.off-path`
+   and `guide.cue.arrived` copy in dict.ts is the text to record; both
+   added to the P5 recording list in `apps/web/public/voice/README.md`
+   (Shona lines still ride the standing external translator pass before
+   any studio session).
+
+Note on the follow video's mocked viewer (known limits above): the real
+hand held walk is now CHECKS-FOR-MHOFU item 12, Mhofu's own field test
+with no deadline; the challenge phase is over, so nothing waits on it.
+
+With the M1 wake lock slice green the same day, Goal 5 (M1 + M2) is
+signed off and closed.

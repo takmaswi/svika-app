@@ -97,7 +97,7 @@ header chip row (theme, language, profile), same section 7 chip anatomy as
 its neighbours, linking to /app/kombis. Ratified by Mhofu on the K1 gate
 (2026-07-24).
 
-## 10. Self position dot on the recording map (M1, proposed)
+## 10. Self position dot on the recording map (M1, ratified)
 
 DESIGN.md has no marker for the rider's own live position; section 7 rules
 the signal live dot for live pills, and section 2 rules signal for live
@@ -105,22 +105,22 @@ dots and stops only. The record my trip screen (batch M1) needs the rider
 to see themselves move, so the trace map grows the section 7 live dot to a
 16px map marker with the stop pin's 3px white stroke (section 11 grammar).
 The rider's own live position is literally a live dot, so this reads as an
-application of the signal rule, not a breach; proposed for ratification on
-the M1 gate.
+application of the signal rule, not a breach. Ratified by Mhofu on the M1
+gate (2026-07-25).
 
-## 11. The recording chip (M1, proposed)
+## 11. The recording chip (M1, ratified)
 
 The spec has no recording state grammar. The record screen wears a section
 7 glass pill in the map header: signal live dot with ripple, the word
 Recording, then elapsed time and distance in IBM Plex Mono 600 (section 2:
 every time and count is mono). Same pill anatomy as the live pill on the
-reference landing. Proposed for ratification on the M1 gate.
+reference landing. Ratified by Mhofu on the M1 gate (2026-07-25).
 
-## 12. Guide cue banner (M2, proposed)
+## 12. Guide cue banner (M2, ratified)
 
 The spec has no turn by turn or warning grammar. The guide viewer shows
 one cue line above the way card: off path takes marigold with char text
 (the section 2 pair; signal stays live dots and stops only, so the warning
 never wears red), approaching and arrived take the park tone with char
-text. Sentence case, aria-live, hidden while on the path. Proposed for
-ratification on the M2 gate.
+text. Sentence case, aria-live, hidden while on the path. Ratified by
+Mhofu on the M2 gate (2026-07-25).
