@@ -1343,5 +1343,215 @@ check(
   check("JS-12 even the owner cannot write the share table directly", !!forge.error);
 }
 
+// --- guardian links (migrations 0035 + 0036, batch V3) -----------------------
+// The family matrix: a guardian sees exactly the linked child's trips and
+// nothing else; the child always sees the link (the chip's data source);
+// either side ends it instantly; invites are rate limited and logged; safe
+// arrival reaches the guardian and the shared link, never the reverse.
+{
+  const A = await signIn("RIDER_A"); // guardian
+  const B = await signIn("RIDER_B"); // child
+
+  // start clean: end any link left by a previous run (idempotent re-runs)
+  for (const s of [A, B]) {
+    const { data: links } = await s.c.rpc("my_family_links");
+    for (const l of links ?? []) {
+      await s.c.rpc("revoke_guardian_link", { p_link: l.link_id });
+    }
+  }
+
+  const invite = await A.c.rpc("create_guardian_invite");
+  const code = invite.data?.[0]?.invite_code ?? "";
+  check(
+    "GD-1 the guardian mints a 12 hex invite code",
+    !invite.error && /^[0-9a-f]{12}$/.test(code),
+    invite.error?.message,
+  );
+
+  const again = await A.c.rpc("create_guardian_invite");
+  check(
+    "GD-2 minting twice returns the same pending code",
+    !again.error && again.data?.[0]?.invite_code === code,
+  );
+
+  const anonLinks = await anon.from("guardian_links").select("invite_code");
+  check("GD-3 anon cannot read guardian links", deniedOrEmpty(anonLinks));
+  const anonMint = await anon.rpc("create_guardian_invite");
+  check("GD-4 anon cannot mint an invite", !!anonMint.error);
+
+  const wrong = await B.c.rpc("accept_guardian_invite", {
+    p_code: "000000000000",
+  });
+  const { data: attempts } = await B.c
+    .from("guardian_link_attempts")
+    .select("outcome")
+    .order("attempted_at", { ascending: false })
+    .limit(1);
+  check(
+    "GD-5 a wrong code fails and the attempt is logged",
+    !wrong.error &&
+      wrong.data?.[0]?.outcome === "invalid_code" &&
+      attempts?.[0]?.outcome === "invalid_code",
+    wrong.error?.message,
+  );
+
+  // GD-23's rate limit probe leaves the guardian limited for ten minutes;
+  // a quick re-run must skip the self-accept check, not misread it (the
+  // conductor suite's own pattern)
+  const { data: aMisses } = await A.c
+    .from("guardian_link_attempts")
+    .select("outcome, attempted_at")
+    .neq("outcome", "success")
+    .gt("attempted_at", new Date(Date.now() - 600_000).toISOString());
+  if ((aMisses ?? []).length >= 5) {
+    skip(
+      "GD-6 guardian self-accept check",
+      "guardian is rate limited from a previous run; re-run in 10 minutes",
+    );
+  } else {
+    const selfAccept = await A.c.rpc("accept_guardian_invite", { p_code: code });
+    check(
+      "GD-6 a guardian cannot accept their own invite",
+      selfAccept.data?.[0]?.outcome === "invalid_code",
+    );
+  }
+
+  const accept = await B.c.rpc("accept_guardian_invite", { p_code: code });
+  check(
+    "GD-7 the child confirms and the link is active (mutual confirm)",
+    !accept.error &&
+      accept.data?.[0]?.outcome === "success" &&
+      !!accept.data?.[0]?.link_id,
+    accept.error?.message,
+  );
+
+  const childView = await B.c.rpc("my_family_links");
+  const childRow = (childView.data ?? []).find((l) => l.role === "child");
+  check(
+    "GD-8 the child always sees the link (the chip's data source)",
+    !childView.error && !!childRow && childRow.status === "active",
+  );
+  check(
+    "GD-9 the invite code is never shown to the child",
+    !!childRow && childRow.invite_code === null,
+  );
+
+  // the child rides: buy a fare through the only door there is
+  const ride = await B.c.rpc("purchase_ticket", {
+    p_route: routeId,
+    p_direction: "outbound",
+  });
+  const childTicket = ride.data?.[0]?.ticket_id;
+  check("GD-10 the child can still buy their own ticket", !!childTicket);
+
+  const trips = await A.c.rpc("guardian_child_trips");
+  const tripRows = trips.data ?? [];
+  const childName = (
+    await B.c.from("profiles").select("full_name").eq("id", B.uid).single()
+  ).data?.full_name;
+  check(
+    "GD-11 the guardian sees the linked child's live trip",
+    !trips.error &&
+      tripRows.length > 0 &&
+      tripRows[0].trip_status === "issued" &&
+      typeof tripRows[0].route_name === "string",
+    trips.error?.message,
+  );
+  check(
+    "GD-12 the guardian sees ONLY the linked child's trips",
+    tripRows.every((r) => r.child_name === childName),
+    JSON.stringify([...new Set(tripRows.map((r) => r.child_name))]),
+  );
+  check(
+    "GD-13 the guardian window carries no code, fare or wallet fields",
+    tripRows.length > 0 &&
+      !("board_code" in tripRows[0]) &&
+      !("fare_cents" in tripRows[0]) &&
+      !("ticket_id" in tripRows[0]),
+    tripRows[0] ? JSON.stringify(Object.keys(tripRows[0])) : "no rows",
+  );
+
+  // the link widens NOTHING else: direct reads stay walled
+  const crossTickets = await A.c
+    .from("tickets")
+    .select("id")
+    .eq("id", childTicket);
+  check(
+    "GD-14 the guardian still cannot read the child's ticket rows",
+    deniedOrEmpty(crossTickets),
+  );
+  const crossJourneys = await A.c
+    .from("rider_journeys")
+    .select("id")
+    .eq("rider_id", B.uid);
+  check(
+    "GD-15 the guardian still cannot read the child's journeys",
+    deniedOrEmpty(crossJourneys),
+  );
+
+  // safe arrival: only the rider marks it, and it reaches the guardian
+  const foreignArrive = await A.c.rpc("mark_ticket_arrived", {
+    p_ticket: childTicket,
+  });
+  check(
+    "GD-16 the guardian cannot mark the child arrived",
+    !!foreignArrive.error,
+  );
+
+  // share the live trip first (the guardian-contact link), then arrive
+  const share = await B.c.rpc("create_ride_share", { p_ticket: childTicket });
+  const shareToken = share.data?.[0]?.share_token ?? "";
+
+  const arrive = await B.c.rpc("mark_ticket_arrived", { p_ticket: childTicket });
+  check("GD-17 the rider marks their own arrival", !arrive.error, arrive.error?.message);
+  const arriveTwice = await B.c.rpc("mark_ticket_arrived", {
+    p_ticket: childTicket,
+  });
+  check("GD-18 arrival is one shot, never twice", !!arriveTwice.error);
+
+  const tripsAfter = await A.c.rpc("guardian_child_trips");
+  check(
+    "GD-19 the guardian sees the safe arrival",
+    !tripsAfter.error && tripsAfter.data?.[0]?.trip_status === "arrived",
+  );
+  const sharedView = await anon.rpc("ride_share_view", { p_token: shareToken });
+  check(
+    "GD-20 the shared link shows arrived instead of dying",
+    !sharedView.error && sharedView.data?.[0]?.trip_status === "arrived",
+    sharedView.error?.message,
+  );
+
+  // no direct write path, even for the people on the link
+  const forge = await A.c.from("guardian_links").insert({
+    guardian_id: A.uid,
+    child_id: B.uid,
+    invite_code: "aaaaaaaaaaaa",
+    status: "active",
+  });
+  check("GD-21 no direct writes to guardian links", !!forge.error);
+
+  // the child ends it and the window closes instantly
+  const revoke = await B.c.rpc("revoke_guardian_link", {
+    p_link: accept.data[0].link_id,
+  });
+  const tripsGone = await A.c.rpc("guardian_child_trips");
+  check(
+    "GD-22 the child revokes and the guardian window closes",
+    !revoke.error && !tripsGone.error && (tripsGone.data ?? []).length === 0,
+    revoke.error?.message,
+  );
+
+  // rate limiting: five misses in ten minutes shuts the door (probed with
+  // the guardian's account so re-runs never lock the child's accept path)
+  let limited = false;
+  for (let i = 0; i < 7 && !limited; i++) {
+    const miss = await A.c.rpc("accept_guardian_invite", {
+      p_code: "ffffffffffff",
+    });
+    limited = miss.data?.[0]?.outcome === "rate_limited";
+  }
+  check("GD-23 invite redemption is rate limited after five misses", limited);
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
