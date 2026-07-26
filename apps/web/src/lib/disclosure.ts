@@ -81,6 +81,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real, and a count rather than an estimate. The hwindi declares which kombi the shift is on, every fare cleared from that shift is stamped with the vehicle, and the card shows how many fares that kombi cleared in the last 20 minutes against its declared seats. The card names what it counted and over how long, so it can never read as a departure time; a kombi with no declared seats is counted but not measured. The declaration is skippable and stays a shift fact: no crew record, no roster, no assignment. Not AI.",
   },
   {
+    feature: "Last kombi countdown",
+    tier: 2,
+    detail:
+      "Mixed and labelled on the card itself. The rule is real: a percentile over the evenings a route was last seen running, with the warning shown only while a rider can still act, the copy always saying usually and never a departure time, and thin history saying nothing at all. The evenings themselves are mostly generated, because the corridor has run for days rather than months: a committed generator writes a labelled synthetic evening history that the card counts alongside real observations, and the card prints how many of the evenings it counted are generated. Real fares replace them day by day with no code change. Not AI.",
+  },
+  {
     feature: "Saved trips (nickname a trip)",
     tier: 1,
     detail: "Real rider owned rows under RLS, proven by the security suite.",

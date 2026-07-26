@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { VoiceAudioCache } from "../src/lib/voice/audio-cache";
+import { CachedPhrase, VoiceAudioCache } from "../src/lib/voice/audio-cache";
 
 function fakeFetch(ok = true) {
   return vi.fn(async (input: RequestInfo | URL) => ({
@@ -45,5 +45,44 @@ describe("VoiceAudioCache", () => {
     });
     await cache.preload("en");
     expect(cache.src("approaching")).toBeNull();
+  });
+});
+
+describe("CachedPhrase (the last kombi cue, V7)", () => {
+  test("however many times the rider listens, the network is touched once", async () => {
+    const fetchFn = fakeFetch();
+    let minted = 0;
+    const phrase = new CachedPhrase("/voice/sn/last-kombi.wav", {
+      fetchFn,
+      createObjectUrl: () => `blob:mock-${++minted}`,
+    });
+
+    const first = await phrase.load();
+    const second = await phrase.load();
+    const third = await phrase.load();
+    expect(first).toBe("blob:mock-1");
+    expect(second).toBe(first);
+    expect(third).toBe(first);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  test("two loads racing each other still make one request", async () => {
+    const fetchFn = fakeFetch();
+    const phrase = new CachedPhrase("/voice/en/last-kombi.wav", {
+      fetchFn,
+      createObjectUrl: () => "blob:mock",
+    });
+    const [a, b] = await Promise.all([phrase.load(), phrase.load()]);
+    expect(a).toBe("blob:mock");
+    expect(b).toBe("blob:mock");
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  test("a missing recording mutes the button instead of breaking the screen", async () => {
+    const phrase = new CachedPhrase("/voice/en/last-kombi.wav", {
+      fetchFn: fakeFetch(false),
+      createObjectUrl: () => "blob:never",
+    });
+    expect(await phrase.load()).toBeNull();
   });
 });

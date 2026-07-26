@@ -189,6 +189,38 @@ full, in `services/spine/src/watchdog`:
   are what the detector evaluation scores against
   (`services/spine/metrics/WATCHDOG-METRICS.md`).
 
+### Evening service history (V7, 2026-07-26)
+
+The last kombi countdown answers "when does this route's service usually
+die?" from one observation per day: the local minute the last fare
+cleared. The corridor has run for days, so most of those evenings do not
+exist yet. `packages/db/seed/service-days.mjs` generates them, and that
+file IS the method, committed and readable:
+
+- one row per route, direction and day over the last 90 days, written to
+  `public.synthetic_service_days` where every row is stamped
+  `data_source = 'synthetic'`, and which no client can read or write
+  (RLS proven in the security suite, LK-4 to LK-6)
+- a base last-fare minute per ISO weekday, assumed rather than measured:
+  around 20:35 to 20:45 on weekdays, later on Friday and Saturday,
+  earliest on Sunday. Those five numbers are an assumption about Harare
+  evenings and are flagged for Mhofu on the V7 gate, not presented as
+  fieldwork
+- a per day jitter of up to 22 minutes either side, seeded from the route
+  id and the date so a rerun reproduces the same history. The jitter
+  exists because a flat number would make the card's own spread reading
+  a lie
+- a fares count per day above the three fare observation floor
+
+Nothing in this generator touches `tickets`, `ticket_events` or the
+ledger: it is not money and not a ticket. The RPC that feeds the card
+returns real observations and generated ones separately labelled, a real
+day always displaces a generated one for the same date, and the card on
+screen prints how many of the evenings it counted are generated. As real
+evenings accumulate they replace the generated ones day by day with no
+code change, and the generated rows can be deleted outright without
+breaking anything.
+
 ### Simulated kombi movement
 
 The live map's moving kombis are a mock vehicle feed moving along the real

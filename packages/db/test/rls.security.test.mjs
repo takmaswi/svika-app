@@ -1091,6 +1091,62 @@ check(
     myFleet.error?.message ?? `${minePlates.length} own of ${registryPlates.size}`,
   );
 
+  // last kombi countdown (V7, migration 0042): the evening history is an
+  // aggregate about a route, so it faces guests too; the generated table
+  // underneath it faces nobody.
+  const { data: routeForEvenings } = await anon
+    .from("routes")
+    .select("id")
+    .eq("code", "HEIGHTS-REZENDE")
+    .maybeSingle();
+  if (routeForEvenings) {
+    const anonEvenings = await client().rpc("service_day_ends", {
+      p_route: routeForEvenings.id,
+      p_direction: "outbound",
+    });
+    check(
+      "LK-1 anon reads a route's observed evenings (the countdown works logged out)",
+      !anonEvenings.error && Array.isArray(anonEvenings.data),
+      anonEvenings.error?.message,
+    );
+    const eveningCols = Object.keys(anonEvenings.data?.[0] ?? {}).sort();
+    check(
+      "LK-2 an evening is a date, a weekday, a minute, a count and a source",
+      JSON.stringify(eveningCols) ===
+        JSON.stringify(["data_source", "day", "fares", "last_fare_minute", "weekday"]),
+      eveningCols.join(","),
+    );
+    check(
+      "LK-3 every evening carries enough fares to not be one person's trip home",
+      (anonEvenings.data ?? []).every((r) => r.fares >= 3),
+      `min ${Math.min(...(anonEvenings.data ?? []).map((r) => r.fares), Infinity)}`,
+    );
+  } else {
+    skip("LK-1 anon reads a route's observed evenings", "corridor route not seeded");
+  }
+
+  const anonSynthetic = await client().from("synthetic_service_days").select("id");
+  check("LK-4 anon sees zero generated service days", deniedOrEmpty(anonSynthetic));
+  const riderSynthetic = await A.c.from("synthetic_service_days").select("id");
+  check(
+    "LK-5 a signed in rider sees zero generated service days either",
+    deniedOrEmpty(riderSynthetic),
+  );
+  const riderWriteSynthetic = await A.c
+    .from("synthetic_service_days")
+    .insert({
+      route_id: routeForEvenings?.id ?? null,
+      direction: "outbound",
+      day: "2020-01-01",
+      last_fare_minute: 1200,
+      fares: 9,
+    });
+  check(
+    "LK-6 nobody but the service role writes generated history",
+    !!riderWriteSynthetic.error,
+    riderWriteSynthetic.error?.message,
+  );
+
   check(
     "KB-9 a fleet row is plate and seats only, never an owner or a person",
     (myFleet.data ?? []).every(
