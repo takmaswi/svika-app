@@ -4,7 +4,7 @@ Open questions and numbers that need your eyes. None of them block the build.
 Work continues on documented assumptions; you review this list when phase 1
 is done. Each item says what was assumed and what changes if you disagree.
 
-Last updated: 2026-07-26.
+Last updated: 2026-07-27.
 
 ## 1. Watchdog simulator numbers (task 5)
 
@@ -206,3 +206,88 @@ on the back of a report. It also wants a number from you (how many recent
 traces are worth keeping) that no test can supply. Nothing breaks in the
 meantime; this is a wall a heavy partner meets after many days, not a bug a
 demo hits.
+
+## 15. The PMTiles file is not hosted, so the live map rides MapTiler (opened 2026-07-27, OPEN)
+
+Logged on your instruction at the main merge and first production deploy.
+Nothing is broken: this is the adapter chain doing exactly what it was
+designed to do, and the live map renders.
+
+The Harare extract `apps/web/public/map/tiles/harare.pmtiles` is a generated
+binary and is git ignored by design (`.gitignore` line 33), so it is not in
+the repo and therefore not in the deployment. On the live site the chain
+tries self hosted first, takes a 404, and advances to MapTiler, which serves
+the tiles. Verified on the deploy: the map reaches `data-map-ready=true`,
+four kombis ride the corridor, and the attribution reads OpenMapTiles,
+OpenStreetMap and MapTiler.
+
+What this costs today: every first map load spends one wasted round trip on
+a 404 before the fallback takes over, and the corridor rides a vendor we said
+we would not depend on rather than the file we built ourselves. The M0 reason
+for self hosting (no vendor in the ride path, and no key that can be revoked
+or rate limited mid demo) is not being served in production right now.
+
+The fix is a hosting decision, not code. The adapter already takes it:
+`NEXT_PUBLIC_MAP_PMTILES_URL` points the self hosted provider at any URL that
+serves HTTP range requests. Options, in the order I would try them:
+
+- object storage with range support (Supabase Storage, Cloudflare R2, S3),
+  URL set in the Vercel environment; the 8 MB file is served once and cached,
+- or commit the extract with Git LFS so the deploy carries it, which keeps
+  everything in one place but puts a binary in the repo history.
+
+Deliberately not done tonight: hosting the file moves a demo critical asset
+onto a bucket that needs its own access rules and its own uptime, and that is
+your call rather than a thing to improvise during a deploy.
+
+One trap to know about when this is done: do NOT set
+`NEXT_PUBLIC_MAP_PROVIDER=maptiler` to skip the 404. I set it during the
+deploy while chasing what turned out to be a false alarm, and removed it
+again, because that value pins MapTiler to the FRONT of the chain: once the
+PMTiles file is hosted, the self hosted file would silently never be used and
+this item would look fixed while nothing changed. The variable is now unset,
+which is the documented default.
+
+## 16. The V1 answer home e2e test is outvoted by the demo account's own history (opened 2026-07-27, OPEN)
+
+The one red in the wall at the main merge, ruled by you as "merge now, log it
+for a proper fix". It is a test staging problem, not a product defect, and it
+touches nothing that is deployed.
+
+`v1-answer-home.spec.ts:27` stages Takunda's commute so the mined window
+contains "now" and asserts the peek says "Your usual trip". It now reads
+"Your ride back", and the app is right to say so. Measured at the merge:
+
+- the miner sees 98 rides on the corridor pair, median 22:06, so the usual
+  window is 21:21 to 22:51, and the suite ran at 23:59, past it,
+- the fixture stages 56 rides at "now", but the account carries 72 stray
+  rides, 42 of them on that same pair at 19:00 to 23:00, and they drag the
+  median an hour and a half off the staged moment.
+
+Those strays are real tickets from every past e2e run: the wallet paid and
+the ledger holds a foreign key to each one, so they can never be deleted.
+The sibling test at line 58 already skips itself by name on exactly this
+condition (`stray >= fixture`, 72 against 56) and did skip on this run. Test
+27 has no such guard, so it fails instead of skipping.
+
+The lever used last time is exhausted. On 2026-07-25 the fixture was raised
+from 14 rides to 56 to beat 43 strays; the RPC caps the fixture at 60, and
+there are already 72 strays. Every further e2e run makes it worse, because
+each run adds more.
+
+Three ways out, and the choice is yours because two of them change what the
+V1 gate evidence claims:
+
+- a fresh demo account for Takunda, which restores the staged assertion
+  exactly as written and is what `takunda-fixtures.ts` itself names as the
+  real remedy,
+- stage the fixture on a stop pair the specs never book, so strays cannot
+  contaminate it; this keeps real coverage and needs test 58's stop name
+  assertion updated with it,
+- or give test 27 the same named skip test 58 already has, which makes the
+  wall green but stops exercising V1's main assertion until the account is
+  fixed.
+
+Deliberately not chosen tonight: the first two are fixture harness surgery on
+a shared database, and the third quietly retires a gate assertion. None of
+them belonged in a deploy window.
