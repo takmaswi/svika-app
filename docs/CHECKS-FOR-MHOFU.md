@@ -152,3 +152,22 @@ That gives the evidence pack a real time recording (true duration, true
 clock) and a real hand held guide follow. The engine is identical to the
 replay either way, so nothing blocks on this; it upgrades the evidence,
 it does not gate a feature.
+
+## 13. Place name wordlist draft (batch M3, OPEN)
+
+Approved on the M3 gate as an interim draft, and parked here because it
+owes two signatures before submission. The bilingual blocklist that screens
+a place name before it can even be saved personally lives in two places
+that must stay in step: `private.place_name_is_clean()` in migration 0038
+(the server side word, which has the last word) and
+`packages/shared/src/place-wordlist.ts` (the phone side twin that fails
+fast). Both lists are machine drafted. They need:
+
+- your own sign off on the Shona entries, since a wrong word here either
+  blocks an honest name or lets a slur through, and
+- the standing external translator pass every Shona string in this batch is
+  waiting on (see item 5).
+
+Deliberately not hand polished in the meantime: guessing at this list is
+exactly the failure mode the pass exists to catch. Growing the list is a
+migration by design, so its history stays reviewable.

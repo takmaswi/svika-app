@@ -136,3 +136,17 @@ agreed to, never a warning colour, distinct from the marigold demo chip it
 stacks under. Same section 7 chip anatomy as its neighbours; tapping it
 opens the family page where the off switch lives. Ratified by Mhofu on the
 V3 gate (2026-07-26): the chip is calm information, never a warning.
+
+## 14. The personal place chip in soft ink (M3, ratified)
+
+DESIGN.md section 7 has one map place chip: the char rectangle with mono
+white text. The places layer (batch M3) needs two readings of the same
+thing, because a name the city agreed on and a name only you can see are
+not the same claim. Community names keep the spec chip exactly. A rider's
+own personal name takes the same anatomy with a soft ink `#575F53` fill by
+day and a muted stroke with 70% white text by night, so it reads quieter
+than an agreed name without inventing a second shape. Only the fill
+changes. Ratified by Mhofu on the M3 gate (2026-07-26).
+
+Note for the home map (ruling 3): public names render there in the
+unmodified section 7 chip, so that placement adds no deviation of its own.

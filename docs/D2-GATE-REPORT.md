@@ -1,6 +1,7 @@
 # D2 gate report — Did we get you there right? (feedback loop)
 
-Date: 2026-07-26 · Branch: product · Status: **PASSED, rulings below open**
+Date: 2026-07-26 · Branch: product · Status: **PASSED AND CLOSED** (rulings
+recorded below)
 
 ## What shipped
 
@@ -50,7 +51,22 @@ ride speed 4 m/s, alight tolerance 150 m, long walk factor 1.5x with a
 200 m dead band, arrival radius 500 m (beyond it the trace judges
 nothing), minimum 5 trace points.
 
-## Open rulings for Mhofu
+## Rulings from Mhofu (2026-07-26)
+
+1. **Early versus late stays a v1 reference rule, approved as documented.**
+   The verdict reads distance to the plan's reference point, not position
+   along the route line; the module header
+   (`packages/shared/src/plan-trace-mismatch.ts`) says so in plain words and
+   nothing pretends otherwise on screen or in the docs. Along-route
+   projection stays a later slice, and only if the mismatch data earns it.
+2. Rulings 2 and 3 below (three taps auto save, one row per trip forever)
+   were not disturbed: both stand as built.
+
+The same session ruled the M3 batch; those rulings, including community
+names on the home map, are recorded in `docs/M3-GATE-REPORT.md`. Nothing in
+that slice touches this batch's tables or geometry.
+
+## Original open rulings (answered above)
 
 1. **Early versus late is a v1 simplification.** The verdict reads
    distance to the plan's reference point (the walking tail destination,

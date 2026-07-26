@@ -107,6 +107,36 @@ Skip this and the demo works on the mock twin. Do it for real arrival numbers.
    The committed workflow `.github/workflows/spine-keepwarm.yml` then pings it
    every 10 minutes. Without the secret the workflow does nothing.
 
+## Scheduled jobs (pg_cron, inside Supabase)
+
+One job runs in the database itself, so it keeps running whether or not
+anything is deployed. Ruled and recorded on the M3 gate (2026-07-26):
+
+| Job | Schedule | What it does |
+|---|---|---|
+| `svika_places_promote` | `*/15 * * * *` | calls `private.promote_places()` |
+
+The pass only reads the places tables and appends to them: it counts
+independent authors near a spot, promotes a name from personal to suggested
+and from suggested to public when the rules are met, and writes a
+`place_events` row per promotion. It never touches tickets, wallets, the
+ledger or any other table, and it never rewrites history. The extension was
+enabled by migration 0038 (`create extension if not exists pg_cron`).
+
+Two things worth knowing:
+
+- **The project also serves frozen `main`.** The job runs on the shared
+  Supabase project, so it is live for both branches. Its only surface is the
+  places layer, which frozen `main` does not read.
+- **The same pass has a manual door.** `public.run_places_promotion()` is
+  service role only and triggers exactly the same function; that is what
+  the test suites call instead of waiting a quarter of an hour.
+
+To see it, or to stop it: `select * from cron.job;` and
+`select cron.unschedule('svika_places_promote');` in the SQL editor.
+Re-running the migration reschedules the same job name rather than stacking
+a second one.
+
 ## Post deploy check (the gate)
 
 Open the live Vercel URL on a phone and walk it:

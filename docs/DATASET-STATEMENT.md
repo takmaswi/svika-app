@@ -99,6 +99,16 @@ report rail, so nothing they made surfaces in search, recommendations or
 rendering. No real crowd data exists yet; when it does, this file gains
 its counts and provenance first.
 
+Two honest riders on that: some community rows from failed test runs stay
+in the table (a community row cannot be deleted without destroying its
+own promotion event, and events are append only by design), invisible on
+every surface once hidden and always at random spots off the corridor.
+And the home map evidence shots
+(`docs/design-evidence/places/places-home-names-*.png`, added with the
+ruling 3 slice) show a name seeded by the evidence script beside the
+rank, deleted at the end of the run: it is a staged name proving the
+rendering, not a name anybody in Harare has given that spot.
+
 ### Post trip feedback and plan mismatches (D2, 2026-07-26)
 
 Batch D2 adds two rider owned answer channels (migration 0040), both
