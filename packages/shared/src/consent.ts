@@ -20,6 +20,16 @@ export const EMERGENCY_CONSENT_VERSION = "emergency-v1";
  */
 export const JOURNEY_CONSENT_VERSION = "journey-v1";
 
+/**
+ * The Svika Partner consent stream (migration 0047). Accepting it is what
+ * lets a recorded trip's legs, marked stops and fare notes reach the server
+ * and become eligible for the network build; without it those stay on the
+ * device and the trip carries no partner stamp. Withdrawing shuts the doors
+ * from the next call. Its own version so it never moves the app gate, the
+ * journey gate or the emergency one.
+ */
+export const PARTNER_CONSENT_VERSION = "partner-v1";
+
 export interface ConsentRecord {
   action: "accepted" | "withdrawn";
   created_at: string;

@@ -1378,11 +1378,113 @@ export type Database = {
           },
         ]
       }
+      rider_journey_legs: {
+        Row: {
+          direction: Database["public"]["Enums"]["route_direction"] | null
+          ended_at: string | null
+          fare_cents: number | null
+          journey_id: string
+          leg_index: number
+          mode: Database["public"]["Enums"]["journey_leg_mode"]
+          route_name: string | null
+          started_at: string
+        }
+        Insert: {
+          direction?: Database["public"]["Enums"]["route_direction"] | null
+          ended_at?: string | null
+          fare_cents?: number | null
+          journey_id: string
+          leg_index: number
+          mode: Database["public"]["Enums"]["journey_leg_mode"]
+          route_name?: string | null
+          started_at: string
+        }
+        Update: {
+          direction?: Database["public"]["Enums"]["route_direction"] | null
+          ended_at?: string | null
+          fare_cents?: number | null
+          journey_id?: string
+          leg_index?: number
+          mode?: Database["public"]["Enums"]["journey_leg_mode"]
+          route_name?: string | null
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_journey_legs_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "rider_journeys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rider_journey_marks: {
+        Row: {
+          accuracy_m: number | null
+          id: string
+          journey_id: string
+          kind: Database["public"]["Enums"]["journey_mark_kind"]
+          lat: number
+          leg_index: number
+          lng: number
+          mark_seq: number
+          marked_at: string
+          name: string | null
+          place_name_id: string | null
+          recorded_at: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          id?: string
+          journey_id: string
+          kind: Database["public"]["Enums"]["journey_mark_kind"]
+          lat: number
+          leg_index: number
+          lng: number
+          mark_seq: number
+          marked_at: string
+          name?: string | null
+          place_name_id?: string | null
+          recorded_at: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          id?: string
+          journey_id?: string
+          kind?: Database["public"]["Enums"]["journey_mark_kind"]
+          lat?: number
+          leg_index?: number
+          lng?: number
+          mark_seq?: number
+          marked_at?: string
+          name?: string | null
+          place_name_id?: string | null
+          recorded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_journey_marks_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "rider_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rider_journey_marks_place_name_id_fkey"
+            columns: ["place_name_id"]
+            isOneToOne: false
+            referencedRelation: "place_names"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rider_journey_points: {
         Row: {
           accuracy_m: number | null
           journey_id: string
           lat: number
+          leg_index: number
           lng: number
           recorded_at: string
           seq: number
@@ -1391,6 +1493,7 @@ export type Database = {
           accuracy_m?: number | null
           journey_id: string
           lat: number
+          leg_index?: number
           lng: number
           recorded_at: string
           seq: number
@@ -1399,6 +1502,7 @@ export type Database = {
           accuracy_m?: number | null
           journey_id?: string
           lat?: number
+          leg_index?: number
           lng?: number
           recorded_at?: string
           seq?: number
@@ -1422,6 +1526,7 @@ export type Database = {
           id: string
           mode: Database["public"]["Enums"]["journey_mode"]
           name: string | null
+          partner_consent_version: string | null
           rider_id: string
           started_at: string
           status: Database["public"]["Enums"]["journey_status"]
@@ -1434,6 +1539,7 @@ export type Database = {
           id: string
           mode?: Database["public"]["Enums"]["journey_mode"]
           name?: string | null
+          partner_consent_version?: string | null
           rider_id: string
           started_at: string
           status?: Database["public"]["Enums"]["journey_status"]
@@ -1446,6 +1552,7 @@ export type Database = {
           id?: string
           mode?: Database["public"]["Enums"]["journey_mode"]
           name?: string | null
+          partner_consent_version?: string | null
           rider_id?: string
           started_at?: string
           status?: Database["public"]["Enums"]["journey_status"]
@@ -2591,6 +2698,24 @@ export type Database = {
           outcome: string
         }[]
       }
+      add_rider_journey_mark: {
+        Args: {
+          p_accuracy_m: number
+          p_journey: string
+          p_kind: Database["public"]["Enums"]["journey_mark_kind"]
+          p_lat: number
+          p_leg_index: number
+          p_lng: number
+          p_mark_seq: number
+          p_marked_at: string
+          p_name: string
+          p_recorded_at: string
+        }
+        Returns: {
+          mark_id: string
+          name_outcome: string
+        }[]
+      }
       anonymise_me: { Args: never; Returns: undefined }
       append_rider_journey_points: {
         Args: { p_journey: string; p_points: Json }
@@ -2853,6 +2978,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      save_rider_journey_legs: {
+        Args: { p_journey: string; p_legs: Json }
+        Returns: number
+      }
       search_public_places: {
         Args: { p_q: string }
         Returns: {
@@ -2932,6 +3061,8 @@ export type Database = {
     Enums: {
       app_language: "en" | "sn"
       guardian_link_status: "invited" | "active" | "revoked"
+      journey_leg_mode: "walking" | "waiting" | "riding"
+      journey_mark_kind: "dropoff" | "rank" | "terminal" | "landmark"
       journey_mode: "kombi" | "walk" | "mixed"
       journey_status: "recording" | "complete" | "discarded"
       ledger_account_kind:
@@ -3095,6 +3226,8 @@ export const Constants = {
     Enums: {
       app_language: ["en", "sn"],
       guardian_link_status: ["invited", "active", "revoked"],
+      journey_leg_mode: ["walking", "waiting", "riding"],
+      journey_mark_kind: ["dropoff", "rank", "terminal", "landmark"],
       journey_mode: ["kombi", "walk", "mixed"],
       journey_status: ["recording", "complete", "discarded"],
       ledger_account_kind: [
