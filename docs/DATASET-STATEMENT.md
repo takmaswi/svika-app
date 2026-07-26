@@ -4,7 +4,7 @@ What data Svika runs on, what is real, what is synthetic, and how the
 synthetic gets checked against the real. This file is maintained: it changes
 in the same commit as any change to the data. Rubric anchor: C3.
 
-Last updated: 2026-07-26, the product branch close.
+Last updated: 2026-07-26, batch Partner (docs/PARTNER-GATE-REPORT.md).
 
 ## Real data
 
@@ -79,6 +79,71 @@ so first. As of this date the table holds only team test artifacts:
 synthetic e2e walks (mocked browser geolocation, named as such) and the
 real 2026-07-07 walking leg replayed through the app for the M1 gate
 evidence (real geometry, replay timestamps).
+
+### Svika Partner contributions (batch Partner, 2026-07-26)
+
+This is the section that changes how new real data will arrive, so it is
+worth being exact about what is different and what is not.
+
+Until this batch, real corridor data came from a standalone field tool
+(`tools/gps-logger`) carried by the team, and its exports were ingested
+from disk. That tool is now **superseded**: data collection lives in the
+app as **Svika Partner**, and the two 2026-07-07 bundles it produced
+remain exactly what they were, the founding dataset, re ingestable
+unchanged.
+
+**What a partner contributes.** With partner mode on (an append only
+`partner-v1` consent stream, migration 0047, off by default), a recorded
+trip additionally carries:
+
+- its **legs**: walking, waiting or riding, each with a start and an end,
+  and each riding leg with the route as the rider typed it, a direction,
+  and optionally what they paid (`rider_journey_legs`)
+- **marked stops** dropped by hand where something actually happened, with
+  the kind and an optional name (`rider_journey_marks`)
+- a `leg_index` on every trace point, stamped at capture rather than
+  joined by wall clock afterwards
+
+**What does not change.** The raw trace stays exactly as private as it was
+under M1: a rider reads only their own `rider_journey_points`, no client
+can write them, and turning partner mode on widens that by zero rows (the
+PA checks in the security suite, PA-16 specifically). Nothing is collected
+passively: a recording starts and stops by hand, and a leg or a mark exists
+only because a rider tapped.
+
+**Where it goes.** A named mark is submitted through the existing places
+door (`submit_place_name`, migration 0038), so it is born personal under
+the same wordlist screen and the same daily and burst rails, and can only
+become community knowledge through the same counting rule as any other
+name. It never becomes a `public.stops` row directly. Separately, a
+partner trip becomes eligible input to the ride data pipeline: a
+maintainer runs `pnpm spine:ingest -- --partner --route CODE`, which reads
+only trips carrying a partner stamp, shapes them into the same bundle
+form gps-logger produced, and writes `journeys`, `gps_pings` and
+`segment_times` with the same `real_field_ride` honesty flag. Direction is
+inferred from geometry, never from the typed route name, and a trip whose
+riding pings do not fit the named route is **skipped with a printed
+reason** rather than forced.
+
+**What exists today.** No data from anyone outside the team. The partner
+tables hold team test artifacts only, named as such:
+
+- synthetic walks and one tagged kombi trip written by the e2e
+  (`apps/web/e2e/partner.spec.ts`) and the evidence script
+  (`apps/web/scripts/partner-evidence.mjs`) against mocked geolocation on a
+  Harare avenue, none of which fits the corridor, all of which the ingest
+  correctly refuses ("ride starts and ends nearest the same stop; direction
+  is ambiguous")
+- a replay of the real 2026-07-07 corridor geometry through the product's
+  own doors as the pipeline proof (`pnpm db:partner-test`): real geometry
+  from the seeded base line, replay timestamps spread over the measured 27
+  riding minutes, and the run deletes both the pipeline rows and the trip
+  it made before it exits
+- a handful of RLS suite rows at random spots in empty country, off the
+  corridor, following the M3 pollution rule
+
+When real partner data exists, this section gains its counts and the
+number of contributing riders before anything trains on it.
 
 ### Place names and shortcuts (M3, 2026-07-26)
 
@@ -169,7 +234,10 @@ can see of it is their own beacon. Nobody else sees anything.
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside
-the team. Gifted rides (V6) are the sharpest example of the rule: a rider
+the team. Partner mode does not change that sentence: it is off by
+default, it collects nothing on its own, and every leg and every mark
+exists because a rider tapped a control during a recording they started
+by hand. Gifted rides (V6) are the sharpest example of the rule: a rider
 can pay for somebody else's kombi, and Svika stores who paid and which
 ticket, but never who it was for. There is no recipient name, number or
 account anywhere, because the sender's own phone carries the message and
@@ -283,7 +351,9 @@ No data from anyone outside the team has entered this system.
 
 - The field GPS traces, stop names and fare were collected by the team and
   are covered by the repository licence (all rights reserved, publicly
-  visible for adjudication).
+  visible for adjudication). Future partner contributions come with a
+  recorded consent per contributing rider (the `partner-v1` stream), and
+  that record, not this paragraph, is the standing permission.
 - The synthetic histories are generated by committed code in this
   repository, same licence.
 - The base map is OpenStreetMap (ODbL, (c) OpenStreetMap contributors),

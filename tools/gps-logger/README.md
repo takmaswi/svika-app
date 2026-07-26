@@ -1,4 +1,36 @@
-# Svika GPS Logger
+# Svika GPS Logger — SUPERSEDED
+
+> **This tool is retired. Do not use it for a data day, and do not copy code
+> out of it.**
+>
+> Data collection lives inside the Svika app now, as **Svika Partner**. A
+> rider turns partner mode on in their profile (`/app/partner`), records a
+> trip on the record screen exactly as they always could, and the trip now
+> carries what this tool used to capture: leg tagging (walking, waiting,
+> riding, with the route, direction and what the fare was) and marked stops
+> dropped where something actually happened. Those reach the same pipeline
+> tables this tool's bundles fed, through `pnpm spine:ingest -- --partner`.
+>
+> Why it moved: a field tool that lives outside the workspace is never
+> typechecked, linted or tested by CI, and this one drifted away from the
+> schema underneath it (its upload button has had no valid target since
+> migration 0019). More to the point, corridor data cannot come from a
+> laptop on the same wifi as a phone. It has to come from riders, with
+> consent, on the app they already have.
+>
+> **It is kept, not deleted.** The two bundles in
+> `assets/Takunda real kombi ride data/` are the entire real dataset Svika
+> stands on, and this is the code that recorded them on 2026-07-07. They
+> still re ingest with `pnpm spine:ingest`, and its 28 unit tests still
+> pass. It is the record of how the first real data was collected.
+>
+> Read `docs/PARTNER-GATE-REPORT.md` before touching anything here: its step
+> 1 is a line by line audit of every bug, rough edge and product law
+> violation this tool carries, and which of them the in app flow fixed.
+
+---
+
+## What it was
 
 A small phone web app for corridor data days. You open it, start a journey, and
 walk it: from home, onto a kombi, riding, maybe a transfer to a second kombi,

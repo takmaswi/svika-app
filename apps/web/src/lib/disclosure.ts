@@ -212,10 +212,16 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real 128 bit capability links minted server side from the rider's own live fare. The public viewer answers only for a live, unrevoked, unexpired token and shows route facts, the live map and the arrival estimate, never who is riding, their code or their money.",
   },
   {
-    feature: "Record my trip (M1)",
+    feature: "Record my trip (M1, extended by Partner)",
     tier: 1,
     detail:
-      "Real GPS journeys recorded on the rider's own phone. Accuracy gating and adaptive sampling are documented geometry rules, points queue offline in IndexedDB and sync in batches through consent gated RPCs with RLS proven isolation, and without the journey consent nothing uploads: the trip stays on the device. Server side is storage only, no map matching, no analysis, no AI.",
+      "Real GPS journeys recorded on the rider's own phone. Accuracy gating and adaptive sampling are documented geometry rules, points queue offline in IndexedDB and sync in batches through consent gated RPCs with RLS proven isolation, and without the journey consent nothing uploads: the trip stays on the device. Server side is storage only, no map matching, no analysis, no AI. Batch Partner added leg tagging (walking, waiting, riding with a route, a direction and a fare note) and marked stops, both recorded to the phone as they happen; those controls appear only under a live partner consent, and see the Svika Partner row for where they go.",
+  },
+  {
+    feature: "Svika Partner",
+    tier: 1,
+    detail:
+      "Real, and consent is the whole mechanism. Partner mode is an append only consent stream, off by default, switched from the profile card or the partner screen and withdrawable in one tap. With it on, a recording's legs, marked stops and fare notes upload through two security definer doors; with it off those doors refuse outright and everything stays in the phone's IndexedDB, proven in the RLS suite. Turning it on does not widen who can read the raw trace by one row. A named mark is submitted through the existing places door, so it is born personal under the same wordlist and rate rails and can only become community knowledge through the same counting rule; it never becomes a network stop directly. Partner trips reach the ride data pipeline tables through the same service role ingest that has always fed them, which infers direction from geometry and skips by name any trip that does not fit the route; the whole chain is proven end to end on real 2026-07-07 corridor geometry. The contribution view counts the partner's own rows only: trips recorded, stops named, distance mapped. No badges, no streaks, no leaderboard, no comparison between people. This replaces the standalone field logger, now marked superseded.",
   },
   {
     feature: "Share a trip as a guide link (M2)",
