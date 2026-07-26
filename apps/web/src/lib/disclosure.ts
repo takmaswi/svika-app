@@ -81,6 +81,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real, and a count rather than an estimate. The hwindi declares which kombi the shift is on, every fare cleared from that shift is stamped with the vehicle, and the card shows how many fares that kombi cleared in the last 20 minutes against its declared seats. The card names what it counted and over how long, so it can never read as a departure time; a kombi with no declared seats is counted but not measured. The declaration is skippable and stays a shift fact: no crew record, no roster, no assignment. Not AI.",
   },
   {
+    feature: "Live fare board",
+    tier: 1,
+    detail:
+      "Real. Every digital ticket is a fare somebody actually paid, and the board counts them: today's tickets on a route grouped by hour and fare, turned into the fare most riders paid, the range and one bar per hour. History, not editorial: nothing judges a fare, compares routes or predicts the next hour, and the card says so on screen. A day with no fares shows nothing rather than a board of zeroes. Today's counted fares are mostly team and e2e traffic on the demo corridor, which is why some busy hours are the middle of the night; nothing is filtered to make it look better. Not AI.",
+  },
+  {
     feature: "Demand beacon: who is waiting",
     tier: 1,
     detail:
