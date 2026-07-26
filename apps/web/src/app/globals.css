@@ -2743,6 +2743,34 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
   }
 }
 
+/* V8 demand beacon: one action, then the law line that says what it is and
+   what nobody can do with it. Sits above the board because a rider standing
+   at a rank reaches for it first. */
+.beacon-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.beacon-form {
+  display: flex;
+  flex-direction: column;
+}
+/* the plain full width button, not the §5 CTA anatomy: the one primary
+   action on this screen is the board itself, and a second arrow chip would
+   compete with it */
+.beacon-cta {
+  text-align: center;
+}
+.beacon-live {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+.beacon-law {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+
 /* the board: one §8 card per vehicle, staggered in per §12 */
 .kombi-board-chip {
   display: inline-flex;

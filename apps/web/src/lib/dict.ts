@@ -590,6 +590,31 @@ export const dict = {
     en: "Position is demo movement. Plate, seats and counts come from the registry and the fare ledger.",
     sn: "Nzvimbo ndeyekuratidzira. Nhamba, zvigaro nehuwandu zvinobva muregistry nemubhuku remari.",
   },
+  // demand beacon (V8): a signal, never a dispatch. The law line is on
+  // screen because a rider deserves to know exactly what they just told the
+  // world, and exactly what nobody can do with it.
+  "beacon.raise": {
+    en: "I am at {stop}, heading to {terminus}",
+    sn: "Ndiri pa{stop}, ndoenda ku{terminus}",
+  },
+  "beacon.live": {
+    en: "You are counted at {stop}. This stops on its own in {minutes} minutes.",
+    sn: "Wanyorwa pa{stop}. Izvi zvinopera zvega mumaminitsi {minutes}.",
+  },
+  "beacon.withdraw": { en: "I have gone", sn: "Ndaenda" },
+  "beacon.law": {
+    en: "Hwindi on this route see how many people are waiting, never who. Nobody can be sent to you, and nobody can answer this.",
+    sn: "Mahwindi panzira iyi anoona kuti vangani vakamirira, kwete kuti ndiani. Hapana anogona kutumirwa kwauri, uye hapana anogona kupindura izvi.",
+  },
+  "beacon.tooMany": {
+    en: "That is a lot of taps in one hour. Try again later.",
+    sn: "Wadzvanya kakawanda muawa rimwe. Edza gare gare.",
+  },
+  "beacon.error": {
+    en: "That did not go through. Try again.",
+    sn: "Hazvina kuita. Edza zvakare.",
+  },
+
   // send a ride, not money (V6). The recipient is never named anywhere: the
   // sender's own phone carries the code, and Svika never learns who they are.
   "gift.planCta": { en: "Send this ride to someone", sn: "Tumira rwendo urwu kune mumwe" },

@@ -64,6 +64,21 @@ export const dict = {
   "vehicle.seatsUnknown": { en: "Seats not on record", sn: "Zvigaro hazvina kunyorwa" },
   "vehicle.skip": { en: "Not saying today", sn: "Handisi kutaura nhasi" },
 
+  // the waiting list (V8): a signal to look at, never an instruction. There
+  // is no button on that screen that answers anybody, and the law line says
+  // so out loud.
+  "waiting.pill": { en: "{count} waiting", sn: "{count} vakamirira" },
+  "waiting.title": { en: "Who is waiting", sn: "Vakamirira" },
+  "waiting.total": {
+    en: "{count} people on this route right now",
+    sn: "Vanhu {count} panzira iyi izvozvi",
+  },
+  "waiting.back": { en: "Back to the keypad", sn: "Dzokera kukodhi" },
+  "waiting.law": {
+    en: "A count, not an instruction. Nobody is assigned to you and you answer to nobody here. Counts disappear on their own after twenty minutes.",
+    sn: "Nhamba, kwete murairo. Hapana anopiwa kwauri uye hauna waunopindura pano. Nhamba dzinonyangarika dzega mushure memaminitsi makumi maviri.",
+  },
+
   "keypad.title": { en: "Enter board code", sn: "Isa kodhi" },
   "keypad.clear": { en: "Clear fare", sn: "Tambira mari" },
   "keypad.busy": { en: "Checking…", sn: "Kutarisa…" },

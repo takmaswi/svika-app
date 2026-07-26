@@ -69,6 +69,21 @@ interface VehicleInfo {
   capacity: number | null;
 }
 
+/**
+ * One stop's waiting count (V8). This is the WHOLE shape the conductor ever
+ * sees of a demand beacon: a stop, where it sits on the route, and a number.
+ * There is deliberately no rider, no time and no destination in this type,
+ * because there is none in the RPC, and nothing here can be acted on: a
+ * hwindi reads it and decides for themselves. Never dispatch, never an
+ * assignment. See migration 0044.
+ */
+interface BeaconCount {
+  stop_id: string;
+  stop_name: string;
+  seq: number;
+  waiting: number;
+}
+
 /** The shift a hwindi is working: route, direction and (V5) which kombi. */
 interface Shift {
   route: RouteInfo;
@@ -121,6 +136,8 @@ export default function App() {
   const [vehicles, setVehicles] = useState<VehicleInfo[]>([]);
   const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
   const [vehicleAsked, setVehicleAsked] = useState(false);
+  const [waiting, setWaiting] = useState<BeaconCount[]>([]);
+  const [showWaiting, setShowWaiting] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -256,6 +273,31 @@ export default function App() {
     if (!route) return;
     saveShift({ route, direction, vehicle: v, vehicleAsked: true });
   };
+
+  // V8: how many people are waiting ahead. Polled while a shift is running so
+  // the pill is honest at a glance; every read is counts only, and there is
+  // no write path back, by design.
+  useEffect(() => {
+    if (!route || !session) {
+      setWaiting([]);
+      return;
+    }
+    let stopped = false;
+    const read = async () => {
+      const { data, error } = await supabase.rpc("beacon_counts", {
+        p_route: route.id,
+        p_direction: direction,
+      });
+      if (stopped || error) return;
+      setWaiting((data ?? []) as BeaconCount[]);
+    };
+    void read();
+    const timer = setInterval(() => void read(), 60_000);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
+  }, [route, direction, session]);
 
   const langToggle = (
     <div className="lang-toggle" role="group" aria-label="language">
@@ -552,6 +594,52 @@ export default function App() {
     );
   }
 
+  // V8: the waiting list. Read only on purpose, and the copy says why: this
+  // screen has no button that answers a beacon, because answering one would
+  // make it dispatch. A hwindi looks, and decides for themselves.
+  if (showWaiting && route) {
+    const total = waiting.reduce((sum, w) => sum + w.waiting, 0);
+    return (
+      <main className="hwindi-shell" data-testid="waiting-screen">
+        <header className="hwindi-header">
+          <div className="hwindi-topline">
+            <button
+              className="hwindi-back"
+              type="button"
+              aria-label={t(lang, "waiting.back")}
+              onClick={() => setShowWaiting(false)}
+            >
+              <BackIcon />
+            </button>
+            <div className="hwindi-topline-right">
+              {statusPill}
+              {langToggle}
+            </div>
+          </div>
+          <h1 className="svika-headline">{t(lang, "waiting.title")}</h1>
+          <p className="svika-meta hwindi-route-tag">
+            {t(lang, "waiting.total").replace("{count}", String(total))}
+          </p>
+        </header>
+        <ul className="hwindi-waiting" data-testid="waiting-list">
+          {waiting.map((w) => (
+            <li
+              key={w.stop_id}
+              className={`hwindi-waiting-row${w.waiting > 0 ? " hwindi-waiting-some" : ""}`}
+              data-testid="waiting-row"
+            >
+              <span className="hwindi-waiting-stop">{w.stop_name}</span>
+              <span className="svika-mono-code hwindi-waiting-count">{w.waiting}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="svika-meta hwindi-waiting-law" data-testid="waiting-law">
+          {t(lang, "waiting.law")}
+        </p>
+      </main>
+    );
+  }
+
   // the kombi step: one tap, own fleet only, skippable. A hwindi whose fleet
   // has no vehicles on record never sees it at all.
   if (!vehicleAsked && vehicles.length > 0) {
@@ -707,6 +795,21 @@ export default function App() {
               {direction === "outbound" ? route.lastStop : route.firstStop}
             </span>
           </span>
+          {waiting.length > 0 && (
+            // V8: how many people are waiting ahead, at a glance. Tapping
+            // opens the read only list; nothing here answers anybody.
+            <button
+              type="button"
+              className="hwindi-route-pill hwindi-vehicle-pill touch-target"
+              data-testid="waiting-pill"
+              onClick={() => setShowWaiting(true)}
+            >
+              {t(lang, "waiting.pill").replace(
+                "{count}",
+                String(waiting.reduce((sum, w) => sum + w.waiting, 0)),
+              )}
+            </button>
+          )}
           {vehicle && (
             // the shift's kombi, tappable to change it mid shift (a hwindi
             // does swap vehicles in a day)
