@@ -1231,6 +1231,71 @@ export type Database = {
           },
         ]
       }
+      plan_trace_mismatches: {
+        Row: {
+          actual_walk_m: number | null
+          alight_offset_m: number | null
+          created_at: string
+          id: string
+          journey_id: string | null
+          kind: string
+          planned_walk_m: number
+          rider_id: string
+          ticket_id: string
+        }
+        Insert: {
+          actual_walk_m?: number | null
+          alight_offset_m?: number | null
+          created_at?: string
+          id?: string
+          journey_id?: string | null
+          kind: string
+          planned_walk_m: number
+          rider_id: string
+          ticket_id: string
+        }
+        Update: {
+          actual_walk_m?: number | null
+          alight_offset_m?: number | null
+          created_at?: string
+          id?: string
+          journey_id?: string | null
+          kind?: string
+          planned_walk_m?: number
+          rider_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_trace_mismatches_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "rider_journeys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_trace_mismatches_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_trace_mismatches_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_status"
+            referencedColumns: ["ticket_id"]
+          },
+          {
+            foreignKeyName: "plan_trace_mismatches_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           anonymised_at: string | null
@@ -1999,6 +2064,55 @@ export type Database = {
             columns: ["to_stop_id"]
             isOneToOne: false
             referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_feedback: {
+        Row: {
+          created_at: string
+          rider_id: string
+          right_kombi: boolean | null
+          right_stop: boolean | null
+          ticket_id: string
+          walk_ok: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          rider_id: string
+          right_kombi?: boolean | null
+          right_stop?: boolean | null
+          ticket_id: string
+          walk_ok?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          rider_id?: string
+          right_kombi?: boolean | null
+          right_stop?: boolean | null
+          ticket_id?: string
+          walk_ok?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_feedback_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_feedback_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "ticket_status"
+            referencedColumns: ["ticket_id"]
+          },
+          {
+            foreignKeyName: "trip_feedback_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: true
+            referencedRelation: "tickets"
             referencedColumns: ["id"]
           },
         ]

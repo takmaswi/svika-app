@@ -9,15 +9,17 @@ import { boardCodesOf, type BoardCodeEmbed } from "@/lib/tickets";
 import { createRideShare, revokeRideShare } from "@/lib/share-actions";
 import { markTicketArrived } from "@/lib/family-actions";
 import { ShareSheetButton } from "@/components/ticket/ShareSheetButton";
+import { FeedbackCard } from "@/components/ticket/FeedbackCard";
 
 interface TicketDetail {
   id: string;
   fare_cents: number;
   payment_method: "wallet" | "cash";
   direction: "outbound" | "inbound";
+  purchased_at: string;
   routes: { name: string } | null;
   from_stop: { name: string } | null;
-  to_stop: { name: string } | null;
+  to_stop: { name: string; lat: number; lng: number } | null;
   board_codes: BoardCodeEmbed | BoardCodeEmbed[] | null;
 }
 
@@ -46,7 +48,7 @@ export default async function TicketPage({
     supabase
       .from("tickets")
       .select(
-        "id, fare_cents, payment_method, direction, routes(name), from_stop:stops!tickets_from_stop_id_fkey(name), to_stop:stops!tickets_to_stop_id_fkey(name), board_codes(code, valid_until)",
+        "id, fare_cents, payment_method, direction, purchased_at, routes(name), from_stop:stops!tickets_from_stop_id_fkey(name), to_stop:stops!tickets_to_stop_id_fkey(name, lat, lng), board_codes(code, valid_until)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -87,6 +89,36 @@ export default async function TicketPage({
   const isStamped = status === "redeemed" || status === "arrived";
   const isArrived = status === "arrived";
   const kinName = (kinRes.data?.next_of_kin_name ?? "").trim();
+
+  // D2: after arrival the feedback card needs the plan's promises: the
+  // alight stop, the walking tail if one was booked, and the trip window
+  let arrivedAt: string | null = null;
+  let walkTail: { lat: number; lng: number; walkMeters: number } | null = null;
+  if (isArrived) {
+    const [arrivedRes, tailRes] = await Promise.all([
+      supabase
+        .from("ticket_events")
+        .select("created_at")
+        .eq("ticket_id", id)
+        .eq("event_type", "arrived")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("trip_walk_tails")
+        .select("dest_lat, dest_lng, walk_meters")
+        .eq("ticket_id", id)
+        .maybeSingle(),
+    ]);
+    arrivedAt = (arrivedRes.data?.created_at as string | undefined) ?? null;
+    walkTail = tailRes.data
+      ? {
+          lat: tailRes.data.dest_lat as number,
+          lng: tailRes.data.dest_lng as number,
+          walkMeters: tailRes.data.walk_meters as number,
+        }
+      : null;
+  }
 
   // share my ride: only a running trip can be shared, and the link is shown
   // right here (never in a URL we control the logging of)
@@ -183,6 +215,21 @@ export default async function TicketPage({
         <p className="wallet-ok svika-body" data-testid="ticket-arrived-note">
           {t(lang, "ticket.arrivedNote")}
         </p>
+      )}
+      {/* D2: three taps, skippable, and the quiet plan-versus-trace
+          comparison where a journey was recorded; answers tune plans,
+          never people */}
+      {isArrived && (
+        <FeedbackCard
+          lang={lang}
+          ticketId={id}
+          purchasedAt={ticket.purchased_at}
+          arrivedAt={arrivedAt}
+          alightStop={
+            ticket.to_stop ? { lat: ticket.to_stop.lat, lng: ticket.to_stop.lng } : null
+          }
+          walkTail={walkTail}
+        />
       )}
 
       {(isLive || isStamped) && (

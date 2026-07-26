@@ -3113,3 +3113,20 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
   text-decoration: none;
   color: var(--color-ink);
 }
+
+/* --- post trip feedback (D2): three taps, skippable ------------------------ */
+.feedback-q-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  flex-wrap: wrap;
+}
+.feedback-q-label {
+  margin: 0;
+}
+.feedback-q-chips {
+  display: inline-flex;
+  gap: var(--space-2);
+}

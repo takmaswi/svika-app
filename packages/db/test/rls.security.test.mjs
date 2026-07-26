@@ -1766,5 +1766,120 @@ check(
   );
 }
 
+// --- trip feedback and plan trace mismatches (migration 0040, batch D2) -----
+// Feedback exists only for the rider's own ARRIVED trip, is invisible to
+// everyone else, and can never be edited: an opinion is history too. The
+// mismatch table takes only the rider's own plan and journey, and neither
+// table carries a conductor or vehicle column to point at.
+{
+  const fbTicket = await buy(A, "rider A feedback trip");
+
+  const early = await A.c.from("trip_feedback").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: A.uid,
+    right_kombi: true,
+    right_stop: true,
+    walk_ok: true,
+  });
+  check(
+    "FB-1 feedback is refused before the trip has arrived",
+    !!early.error,
+  );
+
+  const arrive = await A.c.rpc("mark_ticket_arrived", {
+    p_ticket: fbTicket.ticket_id,
+  });
+  check("FB-2 the rider marks their own arrival", !arrive.error, arrive.error?.message);
+
+  const forgedRider = await A.c.from("trip_feedback").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: B.uid,
+    right_kombi: false,
+    right_stop: false,
+    walk_ok: false,
+  });
+  check("FB-3 feedback cannot be minted in someone else's name", !!forgedRider.error);
+
+  const foreignTicket = await B.c.from("trip_feedback").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: B.uid,
+    right_kombi: false,
+    right_stop: false,
+    walk_ok: false,
+  });
+  check("FB-4 feedback cannot be minted on someone else's trip", !!foreignTicket.error);
+
+  const mine = await A.c.from("trip_feedback").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: A.uid,
+    right_kombi: true,
+    right_stop: false,
+    walk_ok: true,
+  });
+  check(
+    "FB-5 three taps land once the trip arrived",
+    !mine.error,
+    mine.error?.message,
+  );
+
+  const crossRead = await B.c
+    .from("trip_feedback")
+    .select("ticket_id")
+    .eq("ticket_id", fbTicket.ticket_id);
+  check("FB-6 feedback is invisible to another rider", deniedOrEmpty(crossRead));
+  const anonRead = await anon.from("trip_feedback").select("ticket_id");
+  check("FB-7 anon sees zero trip_feedback", deniedOrEmpty(anonRead));
+
+  const edit = await A.c
+    .from("trip_feedback")
+    .update({ right_stop: true })
+    .eq("ticket_id", fbTicket.ticket_id);
+  check("FB-8 an opinion is history: no update, even by its author", !!edit.error);
+  const wipe = await A.c
+    .from("trip_feedback")
+    .delete()
+    .eq("ticket_id", fbTicket.ticket_id);
+  check("FB-9 no delete either", !!wipe.error);
+
+  const mismatch = await A.c.from("plan_trace_mismatches").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: A.uid,
+    journey_id: null,
+    kind: "early_alight",
+    alight_offset_m: 420,
+    planned_walk_m: 300,
+    actual_walk_m: 780,
+  });
+  check(
+    "FB-10 a detected mismatch logs against the plan that produced it",
+    !mismatch.error,
+    mismatch.error?.message,
+  );
+  const mismatchCross = await B.c
+    .from("plan_trace_mismatches")
+    .select("id")
+    .eq("ticket_id", fbTicket.ticket_id);
+  check("FB-11 mismatches are invisible to another rider", deniedOrEmpty(mismatchCross));
+  const anonMismatch = await anon.from("plan_trace_mismatches").select("id");
+  check("FB-12 anon sees zero plan_trace_mismatches", deniedOrEmpty(anonMismatch));
+  const foreignMismatch = await B.c.from("plan_trace_mismatches").insert({
+    ticket_id: fbTicket.ticket_id,
+    rider_id: B.uid,
+    journey_id: null,
+    kind: "long_walk",
+    planned_walk_m: 0,
+    actual_walk_m: 900,
+  });
+  check(
+    "FB-13 a mismatch cannot be minted on someone else's plan",
+    !!foreignMismatch.error,
+  );
+  const mmEdit = await A.c
+    .from("plan_trace_mismatches")
+    .update({ actual_walk_m: 1 })
+    .eq("ticket_id", fbTicket.ticket_id);
+  check("FB-14 the mismatch table is append only for clients", !!mmEdit.error);
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);

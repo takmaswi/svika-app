@@ -1053,6 +1053,31 @@ export const dict = {
     sn: "Waratidza zvakawanda nhasi. Edza zvakare mangwana.",
   },
 
+  // --- post trip feedback (D2): did we get you there right? Three taps,
+  // skippable, tunes plans and never people. Shona is machine drafted,
+  // rides the standing external translator pass. -----------------------------
+  "feedback.title": {
+    en: "Did we get you there right?",
+    sn: "Takusvitsa zvakanaka here?",
+  },
+  "feedback.qKombi": { en: "Right kombi?", sn: "Kombi yacho here?" },
+  "feedback.qStop": { en: "Right stop?", sn: "Chiteshi chacho here?" },
+  "feedback.qWalk": {
+    en: "Too much walking?",
+    sn: "Kwakanyanya kufamba here?",
+  },
+  "feedback.yes": { en: "Yes", sn: "Hongu" },
+  "feedback.no": { en: "No", sn: "Kwete" },
+  "feedback.skip": { en: "Skip", sn: "Siya" },
+  "feedback.thanks": {
+    en: "Thank you. This tunes the planner for everyone.",
+    sn: "Tatenda. Izvi zvinovandudza kuronga kwedu kune vose.",
+  },
+  "feedback.note": {
+    en: "Answers tune plans, never people.",
+    sn: "Mhinduro dzinovandudza kuronga, kwete vanhu.",
+  },
+
   "guide.title": { en: "Trip guide", sn: "Nhungamiro yerwendo" },
   "guide.sharedTrip": { en: "A shared trip", sn: "Rwendo rwakagoverwa" },
   "guide.intro": {
