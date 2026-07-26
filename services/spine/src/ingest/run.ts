@@ -1,7 +1,18 @@
-// Ingests gps-logger ride bundles into the ride data pipeline tables
-// (journeys, gps_pings, segment_times). Idempotent by natural key: journeys
-// on source_ref, pings on (journey, seq), segments on (journey, stop pair).
+// Ingests recorded rides into the ride data pipeline tables (journeys,
+// gps_pings, segment_times). Idempotent by natural key: journeys on
+// source_ref, pings on (journey, seq), segments on (journey, stop pair).
 // Running it twice changes nothing, which the printed counts prove.
+//
+// Two sources, one pipeline:
+//
+//   * gps-logger export bundles, the original path. The tool is superseded
+//     (tools/gps-logger/README.md) but its two 2026-07-07 corridor bundles
+//     are the founding dataset and re ingest exactly as they always did.
+//   * Svika Partner trips, read straight out of the database. A partner
+//     records in the app, and the trip carries the leg tagging the pipeline
+//     needs. Only trips stamped with a partner consent are ever read, and
+//     that stamp exists only where a live accepted partner consent produced
+//     it (migration 0047).
 //
 // This is a data pipeline script in the same trust tier as the seed script:
 // it runs on a maintainer's machine or in CI with the service role key from
@@ -9,11 +20,26 @@
 //
 //   pnpm spine:ingest                      # the two real 2026-07-07 rides
 //   pnpm spine:ingest -- --route CODE --source real_field_ride <bundle.json...>
+//   pnpm spine:ingest -- --partner         # every partner trip on the route
+//   pnpm spine:ingest -- --partner --dry-run
+//
+// The route is a human's call, deliberately. A partner types a route name
+// on a moving kombi and the pipeline has never trusted that string (it
+// infers direction from geometry); a maintainer says which coded route a
+// batch belongs to, and trips whose riding pings do not fit it are skipped
+// by name.
 
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseBundle } from "./bundle.ts";
+import { parseBundle, type ParsedBundle } from "./bundle.ts";
+import {
+  ingestableReason,
+  toParsedBundle,
+  type PartnerJourneyRow,
+  type PartnerLegRow,
+  type PartnerPointRow,
+} from "./partner.ts";
 import { buildIngestPlan, type RideSource } from "./plan.ts";
 import type { OrderedStop } from "./segments.ts";
 import { loadRepoEnv, repoRoot } from "../lib/env.ts";
@@ -48,6 +74,8 @@ interface CliArgs {
   source: RideSource;
   uploaderEmail: string;
   bundlePaths: string[];
+  partner: boolean;
+  dryRun: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -56,10 +84,16 @@ function parseArgs(argv: string[]): CliArgs {
     source: "real_field_ride",
     uploaderEmail: process.env.DEMO_OWNER_EMAIL ?? "",
     bundlePaths: [],
+    partner: false,
+    dryRun: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--route") args.routeCode = argv[++i] ?? args.routeCode;
+    // pnpm forwards the separator itself; it is not a bundle path
+    if (a === "--") continue;
+    else if (a === "--route") args.routeCode = argv[++i] ?? args.routeCode;
+    else if (a === "--partner") args.partner = true;
+    else if (a === "--dry-run") args.dryRun = true;
     else if (a === "--source") {
       const s = argv[++i];
       if (s !== "real_field_ride" && s !== "synthetic" && s !== "demo_sim") {
@@ -69,6 +103,9 @@ function parseArgs(argv: string[]): CliArgs {
     } else if (a === "--uploader") args.uploaderEmail = argv[++i] ?? "";
     else if (a) args.bundlePaths.push(a);
   }
+  // partner trips are uploaded by the partner who recorded them, so the
+  // bundle defaults and the uploader flag do not apply
+  if (args.partner) return args;
   if (args.bundlePaths.length === 0) args.bundlePaths = DEFAULT_BUNDLES;
   if (!args.uploaderEmail) {
     throw new Error("no uploader: pass --uploader <email> or set DEMO_OWNER_EMAIL");
@@ -115,14 +152,13 @@ async function countRows(table: string, journeyId: string): Promise<number> {
   return count ?? 0;
 }
 
-async function ingestBundle(
-  path: string,
+async function ingestParsed(
+  bundle: ParsedBundle,
   routeId: string,
   stops: OrderedStop[],
   source: RideSource,
   uploadedBy: string,
 ): Promise<void> {
-  const bundle = parseBundle(JSON.parse(readFileSync(path, "utf8")));
   const plan = buildIngestPlan(bundle, stops, source);
 
   const { data: journey, error: jErr } = await admin
@@ -187,10 +223,108 @@ async function ingestBundle(
   );
 }
 
+async function ingestBundleFile(
+  path: string,
+  routeId: string,
+  stops: OrderedStop[],
+  source: RideSource,
+  uploadedBy: string,
+): Promise<void> {
+  const bundle = parseBundle(JSON.parse(readFileSync(path, "utf8")));
+  await ingestParsed(bundle, routeId, stops, source, uploadedBy);
+}
+
+/**
+ * Every partner contributed trip, oldest first. The filter is the whole
+ * consent story: a trip without a partner stamp is invisible here, and only
+ * the server doors can set that stamp. Raw traces are read with the service
+ * role because this is the pipeline, the same trust tier as the seed; no
+ * client and no other rider ever reads them (RLS, migration 0033).
+ */
+async function loadPartnerTrips(): Promise<
+  { journey: PartnerJourneyRow & { rider_id: string }; legs: PartnerLegRow[]; points: PartnerPointRow[] }[]
+> {
+  const { data: journeys, error } = await admin
+    .from("rider_journeys")
+    .select("id, rider_id, name, started_at, ended_at")
+    .eq("status", "complete")
+    .not("partner_consent_version", "is", null)
+    .order("started_at", { ascending: true });
+  if (error) throw error;
+
+  const trips = [];
+  for (const journey of journeys ?? []) {
+    const [{ data: legs, error: lErr }, { data: points, error: pErr }] =
+      await Promise.all([
+        admin
+          .from("rider_journey_legs")
+          .select("leg_index, mode")
+          .eq("journey_id", journey.id)
+          .order("leg_index"),
+        admin
+          .from("rider_journey_points")
+          .select("seq, leg_index, lat, lng, accuracy_m, recorded_at")
+          .eq("journey_id", journey.id)
+          .order("seq"),
+      ]);
+    if (lErr) throw lErr;
+    if (pErr) throw pErr;
+    trips.push({
+      journey: journey as PartnerJourneyRow & { rider_id: string },
+      legs: (legs ?? []) as PartnerLegRow[],
+      points: (points ?? []) as PartnerPointRow[],
+    });
+  }
+  return trips;
+}
+
+async function ingestPartnerTrips(
+  routeId: string,
+  stops: OrderedStop[],
+  source: RideSource,
+  dryRun: boolean,
+): Promise<void> {
+  const trips = await loadPartnerTrips();
+  console.log(`${trips.length} partner contributed trips to consider`);
+  let ingested = 0;
+  for (const trip of trips) {
+    const bundle = toParsedBundle(trip.journey, trip.legs, trip.points);
+    // a skip is always named: silence here would read as "we ingested
+    // everything" when most partner trips are walks that never board
+    const unusable = ingestableReason(bundle);
+    if (unusable) {
+      console.log(`skip ${bundle.journey.sourceRef}: ${unusable}`);
+      continue;
+    }
+    if (dryRun) {
+      console.log(
+        `would ingest ${bundle.journey.sourceRef}: ${bundle.pings.length} points`,
+      );
+      ingested++;
+      continue;
+    }
+    try {
+      await ingestParsed(bundle, routeId, stops, source, trip.journey.rider_id);
+      ingested++;
+    } catch (err) {
+      // a trip off this route cannot have a direction inferred against it;
+      // that is a skip, not a run ending failure
+      console.log(
+        `skip ${bundle.journey.sourceRef}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+  console.log(`${ingested} of ${trips.length} partner trips ${dryRun ? "would be " : ""}ingested`);
+}
+
 const args = parseArgs(process.argv.slice(2));
-const uploader = await uploaderProfileId(args.uploaderEmail);
 const route = await loadRoute(args.routeCode);
-for (const path of args.bundlePaths) {
-  await ingestBundle(path, route.id, route.stops, args.source, uploader);
+if (args.partner) {
+  await ingestPartnerTrips(route.id, route.stops, args.source, args.dryRun);
+} else {
+  const uploader = await uploaderProfileId(args.uploaderEmail);
+  for (const path of args.bundlePaths) {
+    await ingestBundleFile(path, route.id, route.stops, args.source, uploader);
+  }
 }
 console.log("ingest complete");
