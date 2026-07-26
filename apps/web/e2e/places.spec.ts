@@ -63,11 +63,65 @@ async function nameTheSpot(page: Page, role: DemoRole): Promise<void> {
   );
 }
 
+/**
+ * How many reports each demo account has left in its rolling 24 hour window.
+ *
+ * The report rail caps an author at 10 a day (migration 0038), and this spec
+ * spends three of them per run, so about six full runs in a day exhausts it
+ * and the last step would go red for a reason that is the product working
+ * correctly. Checked up front so the run can skip by name instead, the same
+ * shape as the CAT clock skip in commute.spec.ts.
+ */
+const REPORTS_PER_DAY = 10;
+
+async function reportsLeftToday(): Promise<number> {
+  const admin = serviceClient();
+  const emails = [
+    process.env.DEMO_RIDER_EMAIL,
+    process.env.DEMO_OWNER_EMAIL,
+    process.env.DEMO_CONDUCTOR_EMAIL,
+  ].filter((e): e is string => Boolean(e));
+
+  const { data: users } = await admin.auth.admin.listUsers({ perPage: 200 });
+  const ids = (users?.users ?? [])
+    .filter((u) => u.email && emails.includes(u.email))
+    .map((u) => u.id);
+  if (ids.length < emails.length) return REPORTS_PER_DAY; // cannot tell; do not skip
+
+  const since = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
+  const { data: rows, error } = await admin
+    .from("place_reports")
+    .select("reporter_id")
+    .in("reporter_id", ids)
+    .gt("created_at", since);
+  if (error) return REPORTS_PER_DAY; // cannot tell; do not skip
+
+  const used = new Map<string, number>();
+  for (const r of rows ?? []) {
+    used.set(r.reporter_id as string, (used.get(r.reporter_id as string) ?? 0) + 1);
+  }
+  // the run needs one report from EACH account, so the tightest account wins
+  return Math.min(...ids.map((id) => REPORTS_PER_DAY - (used.get(id) ?? 0)));
+}
+
 test.describe("name the city", () => {
   test("a name is personal until three riders agree, then a suggestion appears, and reports hide it", async ({
     page,
     browser,
-  }) => {
+  }, testInfo) => {
+    // The report rail is a real daily cap, and this spec spends three of it
+    // per run. When earlier runs have filled it, the honest thing is a named
+    // skip rather than a red that means "the safety rail worked".
+    const left = await reportsLeftToday();
+    testInfo.annotations.push({
+      type: "places report cap",
+      description: `${left} of ${REPORTS_PER_DAY} left today on the tightest demo account`,
+    });
+    test.skip(
+      left < 1,
+      "places report cap filled by earlier runs today; the naming half still passes, re-run tomorrow",
+    );
+
     // rider one names the spot; the chip renders as theirs alone
     await nameTheSpot(page, "RIDER");
     await expect(
