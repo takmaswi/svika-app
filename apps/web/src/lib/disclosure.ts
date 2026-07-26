@@ -72,7 +72,13 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     feature: "Kombi card and board",
     tier: 2,
     detail:
-      "Mixed and labelled on screen. The moving position is the simulated fleet behind the VehicleFeed adapter; plates and declared seats are a seeded staging registry, not fieldwork; the trust record is real rules over the live fare ledger, which holds no vehicle linked fares yet, so every kombi honestly shows the unverified default. Trust states are counts on a vehicle's ledger, never a person. Real positions arrive later from conductor shift GPS behind the same adapter.",
+      "Mixed and labelled on screen. The moving position is the simulated fleet behind the VehicleFeed adapter; plates and declared seats are a seeded staging registry, not fieldwork; the trust record is real rules over the live fare ledger. Vehicle linked fares only began existing when the conductor shift started declaring its kombi, so the record is thin and every kombi honestly shows the unverified default until it earns otherwise. Trust states are counts on a vehicle's ledger, never a person. Real positions arrive later from conductor shift GPS behind the same adapter.",
+  },
+  {
+    feature: "Rank pulse (how full a kombi is getting)",
+    tier: 1,
+    detail:
+      "Real, and a count rather than an estimate. The hwindi declares which kombi the shift is on, every fare cleared from that shift is stamped with the vehicle, and the card shows how many fares that kombi cleared in the last 20 minutes against its declared seats. The card names what it counted and over how long, so it can never read as a departure time; a kombi with no declared seats is counted but not measured. The declaration is skippable and stays a shift fact: no crew record, no roster, no assignment. Not AI.",
   },
   {
     feature: "Saved trips (nickname a trip)",

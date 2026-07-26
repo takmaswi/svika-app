@@ -1049,6 +1049,56 @@ check(
     "KB-4 the vehicles table itself stays closed to riders",
     deniedOrEmpty(vehiclesDirect),
   );
+
+  // rank pulse (V5, migration 0041): the pulse pair is an aggregate like the
+  // rest, and the fleet picker behind it is a conductor-only door.
+  check(
+    "KB-5 the board carries the pulse pair as plain counts",
+    !!kbRow &&
+      typeof kbRow.pulse_fares === "number" &&
+      kbRow.pulse_fares >= 0 &&
+      kbRow.pulse_window_minutes > 0,
+    kbRow ? `${kbRow.pulse_fares}/${kbRow.pulse_window_minutes}` : "no row",
+  );
+
+  const riderFleet = await A.c.rpc("conductor_vehicles");
+  check(
+    "KB-6 a rider cannot list a fleet: the picker is a conductor door",
+    !!riderFleet.error,
+    riderFleet.error?.message,
+  );
+
+  const anonFleet = await client().rpc("conductor_vehicles");
+  check(
+    "KB-7 anon cannot list a fleet either",
+    !!anonFleet.error,
+    anonFleet.error?.message,
+  );
+
+  // The test conductor's owner runs no vehicles, while the registry (which
+  // the board proves is not empty) is full of another owner's fleet. So the
+  // door opening on nothing is exactly the cross fleet proof: a conductor
+  // cannot pick, or even see, a kombi that is not their employer's.
+  const myFleet = await C.c.rpc("conductor_vehicles");
+  const registryPlates = new Set((board.data ?? []).map((r) => r.plate));
+  const minePlates = (myFleet.data ?? []).map((v) => v.plate);
+  check(
+    "KB-8 a conductor whose fleet is empty gets nothing, not the registry",
+    !myFleet.error &&
+      registryPlates.size > 0 &&
+      minePlates.every((p) => registryPlates.has(p)) &&
+      minePlates.length < registryPlates.size,
+    myFleet.error?.message ?? `${minePlates.length} own of ${registryPlates.size}`,
+  );
+
+  check(
+    "KB-9 a fleet row is plate and seats only, never an owner or a person",
+    (myFleet.data ?? []).every(
+      (v) => JSON.stringify(Object.keys(v).sort()) ===
+        JSON.stringify(["capacity", "id", "plate"]),
+    ),
+    Object.keys((myFleet.data ?? [])[0] ?? {}).join(","),
+  );
 }
 
 // --- rider journeys (migration 0033) ---------------------------------------
@@ -1620,6 +1670,8 @@ check(
         "last_verified_at",
         "peak_hour_load_30d",
         "plate",
+        "pulse_fares",
+        "pulse_window_minutes",
         "verified_fares_30d",
       ]),
     boardCols.join(","),

@@ -2,13 +2,49 @@
 // to the board of every kombi on the corridor. The card and board answer
 // "which kombi, and can I trust it": plate and declared seats from the
 // seeded registry, live wait for the rider's stop, and the trust record as
-// rules over the fare ledger. No vehicle-linked fares exist yet, so every
-// kombi shows the unverified default — asserted here on purpose: the trust
+// rules over the fare ledger.
+//
+// Trust used to be asserted as a flat "unverified" here, which held only
+// because no fare in the database carried a vehicle id at all. The V5 shift
+// declaration changed that, so the assertion now says the thing that must be
+// true forever instead: the chip shows exactly the state the ledger implies,
+// and a kombi with no verified fare history is unverified, full stop. The
 // surface must never invent a good record.
 import { test, expect } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 import { loginAs } from "./helpers";
+import { deriveTrustState } from "../src/lib/kombi/trust";
+import type { KombiBoardRow } from "../src/lib/kombi/fleet";
 
 const PLATE = /^(AEZ 4821|AFK 2903|AGT 1157|ADR 7346)$/;
+
+/** The trust state each plate's own ledger counts imply, read as the rider. */
+async function trustByPlate(): Promise<Record<string, string>> {
+  const c = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } },
+  );
+  const { error } = await c.auth.signInWithPassword({
+    email: process.env.DEMO_RIDER_EMAIL!,
+    password: process.env.DEMO_RIDER_PASSWORD!,
+  });
+  if (error) throw new Error(`rider sign in failed: ${error.message}`);
+  const { data } = await c.rpc("kombi_board");
+  const rows = (data ?? []) as KombiBoardRow[];
+  return Object.fromEntries(
+    rows.map((r) => [
+      r.plate,
+      deriveTrustState({
+        verifiedFares30d: r.verified_fares_30d,
+        fareDays30d: r.fare_days_30d,
+        declaredCapacity: r.capacity,
+        peakHourLoad30d: r.peak_hour_load_30d,
+        driftDays30d: r.drift_days_30d,
+      }),
+    ]),
+  );
+}
 
 test.describe("kombi card and board", () => {
   test.beforeEach(async ({ page }) => {
@@ -16,6 +52,7 @@ test.describe("kombi card and board", () => {
   });
 
   test("tap kombi opens the card, card walks to the board", async ({ page }) => {
+    const expected = await trustByPlate();
     // prime the board route so the dev server's first compile of it never
     // races the navigation assertion mid suite
     await page.request.get("/app/kombis");
@@ -37,10 +74,11 @@ test.describe("kombi card and board", () => {
     // the registry plate, mono per type law
     await expect(card.getByTestId("kombi-plate")).toHaveText(PLATE);
 
-    // trust: the unverified default is the truthful state of the fleet today
+    // trust: exactly what this kombi's own ledger counts imply
+    const cardPlate = await card.getByTestId("kombi-plate").innerText();
     await expect(card.getByTestId("kombi-trust")).toHaveAttribute(
       "data-trust",
-      "unverified",
+      expected[cardPlate.trim()]!,
     );
 
     // the live wait row and the standing provenance line
@@ -55,8 +93,19 @@ test.describe("kombi card and board", () => {
     const rows = page.getByTestId("kombi-board-row");
     await expect(rows).toHaveCount(4);
     for (let i = 0; i < 4; i++) {
-      await expect(rows.nth(i).getByTestId("kombi-plate")).toHaveText(PLATE);
+      const plate = (await rows.nth(i).getByTestId("kombi-plate").innerText()).trim();
+      expect(plate).toMatch(PLATE);
       await expect(rows.nth(i).getByTestId("kombi-trust")).toHaveAttribute(
+        "data-trust",
+        expected[plate]!,
+      );
+    }
+    // and the rule that must hold whatever the ledger says: no verified fare
+    // history means unverified, never a courtesy upgrade
+    for (const [plate, state] of Object.entries(expected)) {
+      if (state !== "unverified") continue;
+      const row = rows.filter({ hasText: plate });
+      await expect(row.getByTestId("kombi-trust")).toHaveAttribute(
         "data-trust",
         "unverified",
       );

@@ -14,6 +14,8 @@ const row = (plate: string, over: Partial<KombiBoardRow> = {}): KombiBoardRow =>
   peak_hour_load_30d: null,
   drift_days_30d: 0,
   last_verified_at: null,
+  pulse_fares: 0,
+  pulse_window_minutes: 20,
   ...over,
 });
 
@@ -47,5 +49,20 @@ describe("the sim fleet to registry bridge", () => {
   test("an unknown sim id still yields the unverified default", () => {
     const profiles = joinFleetProfiles(["sim-99"], []);
     expect(profiles[0]).toMatchObject({ simId: "sim-99", plate: null, trust: "unverified" });
+  });
+
+  test("a registry row carries its rank pulse through the join", () => {
+    const rows = [row("AEZ 4821", { pulse_fares: 14 })];
+    const profiles = joinFleetProfiles(["sim-1"], rows);
+    expect(profiles[0]?.pulse).toEqual({
+      state: "almost",
+      fares: 14,
+      capacity: 16,
+      windowMinutes: 20,
+    });
+  });
+
+  test("no registry row means no pulse at all, not a quiet one", () => {
+    expect(joinFleetProfiles(["sim-3"], [])[0]?.pulse).toBeNull();
   });
 });

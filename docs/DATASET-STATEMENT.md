@@ -131,6 +131,27 @@ honest seed for a future learned plan ranker; if that ranker is ever
 built it becomes an AI feature with a baseline and metrics table first,
 and this file says so before any training happens.
 
+### Vehicle linked fares (V5, 2026-07-26)
+
+Until this batch every `ticket_events` row carried a null `vehicle_id`:
+the redemption RPC had accepted a vehicle since migration 0018 but the
+hwindi surface never sent one. Batch V5 adds one skippable step to the
+conductor's shift ("which kombi today?"), and from then on each cleared
+fare records which vehicle it was cleared on. That is the whole new
+data point: a fare and a plate, both already ours, joined. Nothing new
+is collected about a rider, and nothing about the conductor beyond what
+the redemption row already held. The rank pulse on the rider card is a
+count over those rows inside a 20 minute window against the registry's
+declared seats; the fleet registry itself (plates, seats) remains
+seeded staging, not fieldwork, until the corridor day brings real
+plates. As of this date the vehicle linked fares in the database are
+team test artifacts from the e2e suite and the gate evidence script
+(both named in `docs/V5-GATE-REPORT.md`), cleared through the real
+purchase and redemption RPCs rather than written in. A hwindi may skip
+the step, so the linkage is a declaration and not a claim of complete
+coverage; anything counted from it is honest about the window it
+counted over.
+
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside
