@@ -14,7 +14,10 @@ $lines = @(
   @{ lang = "en"; file = "walk.wav";        text = "Your walking leg starts here." },
   @{ lang = "sn"; file = "approaching.wav"; text = "Wakusvika pachiteshi chako." },
   @{ lang = "sn"; file = "get-off.wav";     text = "Chiteshi chako ndechichi. Chiburuka pano." },
-  @{ lang = "sn"; file = "walk.wav";        text = "Kufamba netsoka kunotangira pano." }
+  @{ lang = "sn"; file = "walk.wav";        text = "Kufamba netsoka kunotangira pano." },
+  # the last kombi warning (V7): spoken on the plan screen, not in a ride
+  @{ lang = "en"; file = "last-kombi.wav";  text = "The last kombi on this route is usually gone soon. Leave now if you can." },
+  @{ lang = "sn"; file = "last-kombi.wav";  text = "Kombi yekupedzisira panzira iyi inowanzoenda munguva pfupi. Simuka izvozvi kana uchikwanisa." }
 )
 
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer

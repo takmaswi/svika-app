@@ -14,10 +14,16 @@ signed consent replace these in P5, same file names, no code change.
 | `sn/approaching.wav` | approaching | Wakusvika pachiteshi chako. |
 | `sn/get-off.wav` | get off | Chiteshi chako ndechichi. Chiburuka pano. |
 | `sn/walk.wav` | walk | Kufamba netsoka kunotangira pano. |
+| `en/last-kombi.wav` | last kombi (V7) | The last kombi on this route is usually gone soon. Leave now if you can. |
+| `sn/last-kombi.wav` | last kombi (V7) | Kombi yekupedzisira panzira iyi inowanzoenda munguva pfupi. Simuka izvozvi kana uchikwanisa. |
 
-Declared in the disclosure register. Audio is preloaded when a ride starts
-and played from memory: zero network calls at play time (proven in
-`apps/web/test/voice-audio-cache.test.ts`).
+Declared in the disclosure register. Ride audio is preloaded when a ride
+starts and played from memory: zero network calls at play time (proven in
+`apps/web/test/voice-audio-cache.test.ts`). The last kombi cue is not a ride
+cue, so it is not in the ride preload; the plan screen loads it once through
+`CachedPhrase` and every later tap plays from memory, proven by the same
+test file. It plays only when the rider taps listen: a warning that speaks
+unasked is a warning nobody keeps switched on.
 
 ## The P5 recording list
 

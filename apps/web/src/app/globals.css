@@ -2328,6 +2328,12 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
 .plan-sheet {
   --sheet-peek: 330px;
 }
+/* the last kombi warning (V7) sits above the pay row, so the peek grows by
+   the card's height: the one primary action must never be pushed under the
+   fold by a warning about missing the kombi */
+.plan-sheet-warned {
+  --sheet-peek: 452px;
+}
 .plan-sheet-head {
   display: flex;
   flex-direction: column;
@@ -2909,6 +2915,45 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
 .guide-cue-warn {
   background: var(--color-marigold);
   color: #161d18;
+}
+/* the last kombi warning (V7): the guide cue's attention grammar, carrying
+   its own basis line and a listen button. Char on marigold throughout, so
+   the quiet lines drop opacity rather than changing colour. */
+.last-kombi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: var(--space-3) 0 0;
+}
+.last-kombi-title {
+  margin: 0;
+  font-weight: var(--weight-bold);
+}
+.last-kombi-line {
+  margin: 0;
+  font-weight: var(--weight-regular, 400);
+}
+.last-kombi-basis {
+  margin: 0;
+  font-size: 12px;
+  font-weight: var(--weight-regular, 400);
+  opacity: 0.72;
+}
+.last-kombi-listen {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 6px 12px;
+  border: 1.5px solid #161d18;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: #161d18;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+.last-kombi-listen:active {
+  transform: scale(0.99);
 }
 .guide-head {
   display: flex;

@@ -590,6 +590,29 @@ export const dict = {
     en: "Position is demo movement. Plate, seats and counts come from the registry and the fare ledger.",
     sn: "Nzvimbo ndeyekuratidzira. Nhamba, zvigaro nehuwandu zvinobva muregistry nemubhuku remari.",
   },
+  // last kombi countdown (V7). Every line says "usually": this is a
+  // percentile over past evenings, never a timetable and never a promise.
+  "lastKombi.title": { en: "Last kombi on {route}", sn: "Kombi yekupedzisira pa{route}" },
+  "lastKombi.usually": { en: "Usually gone by {time}", sn: "Inowanzoenda na{time}" },
+  "lastKombi.left": { en: "about {minutes} min left", sn: "kwasara maminitsi {minutes}" },
+  "lastKombi.past": {
+    en: "The last kombi has usually gone by now. Some nights it still runs.",
+    sn: "Kombi yekupedzisira inowanzoenda ikozvino. Dzimwe manheru inenge ichiripo.",
+  },
+  "lastKombi.wide": {
+    en: "This route varies a lot, close to an hour either way.",
+    sn: "Nzira iyi inosiyana zvakanyanya, inenge awa kudivi rimwe nerimwe.",
+  },
+  "lastKombi.basis": {
+    en: "Counted from {days} evenings on this route.",
+    sn: "Kuverengwa kwemanheru {days} panzira iyi.",
+  },
+  "lastKombi.synthetic": {
+    en: "{days} of them are generated history, not real evenings yet.",
+    sn: "Manheru {days} acho akagadzirwa, haasati ari emanheru chaiwo.",
+  },
+  "lastKombi.listen": { en: "Listen", sn: "Teerera" },
+
   "kombi.boardCta": { en: "All kombis", sn: "Makombi ese" },
   "kombi.boardTitle": { en: "Kombis on the road", sn: "Makombi ari munzira" },
   "kombi.boardChip": { en: "Kombis", sn: "Makombi" },

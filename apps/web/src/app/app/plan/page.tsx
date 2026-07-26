@@ -9,8 +9,11 @@ import { loadPlaces, resolvePlaceQuery, type GeoPlace } from "@/lib/geocode/sear
 import { fetchPublicPlaces } from "@/lib/geocode/public-places";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
+import { LastKombiCard } from "@/components/plan/LastKombiCard";
+import { planLastKombi } from "@/lib/last-kombi";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 import {
+  formatMinuteOfDay,
   formatUsd,
   planToPoint,
   planTrip,
@@ -179,6 +182,14 @@ export default async function PlanPage({
   const destLabel = to.stop ? to.stop.name : destPlace!.name;
   const totalMinutes = plan.totalMinutes + (tail?.minutes ?? 0);
 
+  // V7: the last kombi warning, but only while the rider can still act on it.
+  // Off-peak hours and routes with too little evening history say nothing at
+  // all rather than guessing.
+  const lastKombi = await planLastKombi(
+    supabase,
+    plan.legs.filter((leg) => leg.type === "ride"),
+  );
+
   const overlay = buildPlanOverlay(
     network,
     plan,
@@ -206,7 +217,7 @@ export default async function PlanPage({
       </header>
 
       <HomeSheet
-        className="plan-sheet"
+        className={`plan-sheet${lastKombi?.estimate ? " plan-sheet-warned" : ""}`}
         openLabel={t(lang, "plan.sheetOpen")}
         closeLabel={t(lang, "home.sheetClose")}
         defaultOpen={justSaved || err !== ""}
@@ -236,6 +247,28 @@ export default async function PlanPage({
               >
                 {tradeLine}
               </p>
+            )}
+            {lastKombi?.estimate && (
+              <LastKombiCard
+                lang={lang}
+                state={lastKombi.state === "past" ? "past" : "warn"}
+                routeName={lastKombi.routeName}
+                usualTime={formatMinuteOfDay(lastKombi.estimate.usualMinute)}
+                minutesLeft={lastKombi.minutesLeft ?? 0}
+                wide={lastKombi.wide}
+                observedDays={lastKombi.estimate.observedDays}
+                syntheticDays={lastKombi.estimate.syntheticDays}
+                strings={{
+                  title: t(lang, "lastKombi.title"),
+                  usually: t(lang, "lastKombi.usually"),
+                  left: t(lang, "lastKombi.left"),
+                  past: t(lang, "lastKombi.past"),
+                  wide: t(lang, "lastKombi.wide"),
+                  basis: t(lang, "lastKombi.basis"),
+                  synthetic: t(lang, "lastKombi.synthetic"),
+                  listen: t(lang, "lastKombi.listen"),
+                }}
+              />
             )}
             {err === "balance" && (
               <p className="auth-error svika-body">{t(lang, "plan.insufficient")}</p>

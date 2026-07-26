@@ -13,6 +13,7 @@
     "build": "pnpm -r --if-present build",
     "db:security-test": "pnpm --filter @svika/db security-test",
     "db:seed": "pnpm --filter @svika/db seed",
+    "db:service-days": "pnpm --filter @svika/db service-days",
     "db:demo-reset": "pnpm --filter @svika/db demo-reset",
     "auth:verify": "pnpm --filter web auth:verify",
     "db:ledger-test": "pnpm --filter @svika/db ledger-test",

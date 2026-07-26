@@ -45,3 +45,37 @@ export class VoiceAudioCache {
     return this.urls.get(cue) ?? null;
   }
 }
+
+/**
+ * One cached phrase outside the ride: the last kombi warning (V7) is spoken
+ * on the plan screen, not in a ride, so it does not belong in the ride
+ * preload. Same law as the cache above though: one fetch, then play time
+ * never touches the network, however many times the rider taps listen.
+ */
+export class CachedPhrase {
+  private url: string | null = null;
+  private inFlight: Promise<string | null> | null = null;
+  private readonly fetchFn: typeof fetch;
+  private readonly createObjectUrl: (blob: Blob) => string;
+
+  constructor(
+    private readonly path: string,
+    deps: CacheDeps = {},
+  ) {
+    this.fetchFn = deps.fetchFn ?? fetch.bind(globalThis);
+    this.createObjectUrl =
+      deps.createObjectUrl ?? ((blob) => URL.createObjectURL(blob));
+  }
+
+  /** Resolves to the in-memory source, fetching at most once. */
+  async load(): Promise<string | null> {
+    if (this.url) return this.url;
+    this.inFlight ??= (async () => {
+      const res = await this.fetchFn(this.path);
+      if (!res.ok) return null; // a missing file mutes the button, never crashes
+      this.url = this.createObjectUrl(await res.blob());
+      return this.url;
+    })();
+    return this.inFlight;
+  }
+}

@@ -9,3 +9,4 @@ export * from "./journey-trace";
 export * from "./trace-guide";
 export * from "./place-wordlist";
 export * from "./plan-trace-mismatch";
+export * from "./last-kombi";
