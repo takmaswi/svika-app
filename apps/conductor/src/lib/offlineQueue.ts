@@ -12,6 +12,8 @@ export interface QueuedRedeem {
   seq: number;
   routeId: string;
   direction: Direction;
+  /** V5: the kombi the shift declared; null when the hwindi skipped it. */
+  vehicleId?: string | null;
   code: string;
   ticketId: string;
   fareCents: number;

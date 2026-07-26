@@ -54,6 +54,16 @@ export const dict = {
   "route.title": { en: "Pick your route", sn: "Sarudza nzira yako" },
   "route.towards": { en: "Towards", sn: "Kuenda ku" },
 
+  // the kombi step (V5): which vehicle this shift is clearing fares on
+  "vehicle.title": { en: "Which kombi today?", sn: "Ndeipi kombi nhasi?" },
+  "vehicle.why": {
+    en: "Riders see how full it is getting. Nobody sees who you are.",
+    sn: "Vafambi vanoona kuti yava kuzara sei. Hapana anoona kuti ndiwe ani.",
+  },
+  "vehicle.seats": { en: "{seats} seats", sn: "Zvigaro {seats}" },
+  "vehicle.seatsUnknown": { en: "Seats not on record", sn: "Zvigaro hazvina kunyorwa" },
+  "vehicle.skip": { en: "Not saying today", sn: "Handisi kutaura nhasi" },
+
   "keypad.title": { en: "Enter board code", sn: "Isa kodhi" },
   "keypad.clear": { en: "Clear fare", sn: "Tambira mari" },
   "keypad.busy": { en: "Checking…", sn: "Kutarisa…" },

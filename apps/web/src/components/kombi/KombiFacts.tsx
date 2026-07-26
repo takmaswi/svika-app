@@ -1,9 +1,11 @@
 // The kombi facts block, shared by the marker card and the board rows so
 // the two surfaces can never drift apart: plate, trust chip, direction,
-// the live wait for the rider's stop, declared seats, the trust record in
-// counts, and the standing provenance line. Trust copy names patterns on a
-// vehicle's fare ledger, never a person (CLAUDE.md law); red here means
-// unverified against facts, not a character score.
+// the live wait for the rider's stop, declared seats, the rank pulse, the
+// trust record in counts, and the standing provenance line. Trust copy names
+// patterns on a vehicle's fare ledger, never a person (CLAUDE.md law); red
+// here means unverified against facts, not a character score. The pulse row
+// (V5) is a count of fares cleared in the last few minutes against declared
+// seats, and carries its own basis line so it can never read as a promise.
 import type { KombiProfile } from "@/lib/kombi/fleet";
 import type { VehicleEta } from "@/lib/kombi/vehicle-eta";
 import type { KombiStrings } from "@/lib/kombi/strings";
@@ -29,7 +31,7 @@ function etaBasis(strings: KombiStrings, eta: VehicleEta): string {
 }
 
 export function KombiFacts({ profile, eta, stopName, terminus, strings }: KombiFactsProps) {
-  const { facts, trust } = profile;
+  const { facts, trust, pulse } = profile;
   const capacity = facts?.declaredCapacity ?? null;
   return (
     <div className="kombi-facts">
@@ -76,7 +78,31 @@ export function KombiFacts({ profile, eta, stopName, terminus, strings }: KombiF
             <span className="svika-meta">{strings.seatsUnknown}</span>
           )}
         </div>
+        {pulse && (
+          <div
+            className="kombi-fact-row"
+            data-testid="kombi-pulse"
+            data-pulse={pulse.state}
+          >
+            <span className="peek-label">{strings.pulseLabel}</span>
+            <span className="kombi-eta-cell">
+              <span className="peek-mono kombi-eta-value">
+                {pulse.capacity !== null
+                  ? strings.pulseCount
+                      .replace("{fares}", String(pulse.fares))
+                      .replace("{seats}", String(pulse.capacity))
+                  : strings.pulseCountOnly.replace("{fares}", String(pulse.fares))}
+              </span>
+              <span className="peek-route-sub">{strings.pulseState[pulse.state]}</span>
+            </span>
+          </div>
+        )}
       </div>
+      {pulse && (
+        <p className="svika-meta kombi-pulse-basis" data-testid="kombi-pulse-basis">
+          {strings.pulseBasis.replace("{minutes}", String(pulse.windowMinutes))}
+        </p>
+      )}
       <div className="kombi-trust-block">
         <p className="peek-label">{strings.trustTitle}</p>
         {trust === "unverified" && (

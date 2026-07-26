@@ -546,6 +546,26 @@ export const dict = {
   "kombi.seats": { en: "Declared seats", sn: "Zvigaro zvakanyorwa" },
   "kombi.seatsUnknown": { en: "Not declared yet", sn: "Hazvisati zvanyorwa" },
   "kombi.plateUnknown": { en: "Not linked yet", sn: "Haisati yabatanidzwa" },
+  // rank pulse (V5): a count of fares cleared on this kombi in the last few
+  // minutes, read against its declared seats. Never a departure time.
+  "kombi.pulseLabel": { en: "Cleared just now", sn: "Dzabhadharwa izvozvi" },
+  "kombi.pulseCount": { en: "{fares} of {seats}", sn: "{fares} pa {seats}" },
+  "kombi.pulseCountOnly": { en: "{fares} fares", sn: "Mari {fares}" },
+  "kombi.pulseQuiet": {
+    en: "Nothing cleared here yet",
+    sn: "Hapana chabhadharwa pano",
+  },
+  "kombi.pulseLoading": { en: "Loading at the rank", sn: "Iri kutakura pa rank" },
+  "kombi.pulseFilling": { en: "Filling up", sn: "Iri kuzara" },
+  "kombi.pulseAlmost": { en: "Nearly full, leaves soon", sn: "Yava kuzara, yobva" },
+  "kombi.pulseUnknown": {
+    en: "Seats not declared, so this is a count only",
+    sn: "Zvigaro hazvina kunyorwa, iyi inhamba chete",
+  },
+  "kombi.pulseBasis": {
+    en: "Counted from fares conductors cleared in the last {minutes} minutes.",
+    sn: "Kuverengwa kwemari dzakabhadharwa nemakondakita mumaminitsi {minutes} apfuura.",
+  },
   "kombi.trustTitle": { en: "Trust record", sn: "Rekodhi yekuvimbika" },
   "kombi.trustUnverified": { en: "Unverified", sn: "Hakusati kwasimbiswa" },
   "kombi.trustVerified": { en: "Verified fares", sn: "Mari dzakasimbiswa" },

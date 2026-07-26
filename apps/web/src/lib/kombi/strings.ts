@@ -11,6 +11,17 @@ export interface KombiStrings {
   away: string;
   seats: string;
   seatsUnknown: string;
+  pulseLabel: string;
+  pulseCount: string;
+  pulseCountOnly: string;
+  pulseState: {
+    quiet: string;
+    loading: string;
+    filling: string;
+    almost: string;
+    unknown: string;
+  };
+  pulseBasis: string;
   plateUnknown: string;
   trustTitle: string;
   trustChip: { unverified: string; verified: string; drift: string };
@@ -38,6 +49,17 @@ export function kombiStrings(lang: AppLanguage): KombiStrings {
     away: t(lang, "kombi.away"),
     seats: t(lang, "kombi.seats"),
     seatsUnknown: t(lang, "kombi.seatsUnknown"),
+    pulseLabel: t(lang, "kombi.pulseLabel"),
+    pulseCount: t(lang, "kombi.pulseCount"),
+    pulseCountOnly: t(lang, "kombi.pulseCountOnly"),
+    pulseState: {
+      quiet: t(lang, "kombi.pulseQuiet"),
+      loading: t(lang, "kombi.pulseLoading"),
+      filling: t(lang, "kombi.pulseFilling"),
+      almost: t(lang, "kombi.pulseAlmost"),
+      unknown: t(lang, "kombi.pulseUnknown"),
+    },
+    pulseBasis: t(lang, "kombi.pulseBasis"),
     plateUnknown: t(lang, "kombi.plateUnknown"),
     trustTitle: t(lang, "kombi.trustTitle"),
     trustChip: {

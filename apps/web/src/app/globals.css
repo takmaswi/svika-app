@@ -2686,9 +2686,16 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
   margin: 0;
 }
 .kombi-trust-law,
+.kombi-pulse-basis,
 .kombi-provenance {
   margin: 0;
   color: var(--color-ink-soft);
+}
+/* the pulse's own basis line: what was counted, over how long. It belongs to
+   the row above it, so it sits tight under the fact rows rather than joining
+   the standing provenance line at the foot of the card. */
+.kombi-pulse-basis {
+  margin-top: calc(var(--space-1) * -1);
 }
 .kombi-card-cta {
   margin-top: var(--space-2);

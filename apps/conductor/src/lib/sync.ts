@@ -47,6 +47,9 @@ export async function flushQueue(supabase: SupabaseClient): Promise<FlushSummary
         p_direction: ev.direction,
         p_code: ev.code,
         p_redeemed_at: new Date(ev.claimedAt).toISOString(),
+        // V5: the kombi the shift declared when the fare was cleared, not
+        // whichever one the phone is on at sync time
+        p_vehicle: ev.vehicleId ?? null,
       });
       if (error) return { results, blocked: true };
       const row = (data as SyncRedeemRow[] | null)?.[0];

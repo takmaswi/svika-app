@@ -4,6 +4,7 @@
 // fieldwork brings real plates. The mapping is deterministic so a marker
 // always opens the same card. A sim id with no registry row simply has no
 // facts, and no facts means unverified: the default never needs data.
+import { derivePulse, type RankPulse } from "./pulse";
 import { deriveTrustState, type TrustFacts, type TrustState } from "./trust";
 
 /** sim vehicle id -> staging registry plate, aligned with the seed. */
@@ -23,6 +24,10 @@ export interface KombiBoardRow {
   peak_hour_load_30d: number | null;
   drift_days_30d: number;
   last_verified_at: string | null;
+  /** V5: fares cleared on this vehicle inside the short pulse window. */
+  pulse_fares: number;
+  /** V5: the window the database counted over, in minutes. */
+  pulse_window_minutes: number;
 }
 
 export interface KombiProfile {
@@ -30,6 +35,8 @@ export interface KombiProfile {
   plate: string | null;
   facts: TrustFacts | null;
   trust: TrustState;
+  /** Rank pulse; null when the vehicle has no registry row to count against. */
+  pulse: RankPulse | null;
 }
 
 function toFacts(row: KombiBoardRow): TrustFacts {
@@ -51,11 +58,19 @@ export function joinFleetProfiles(
   return simIds.map((simId) => {
     const plate = SIM_PLATE_BY_ID[simId] ?? null;
     const row = plate ? byPlate.get(plate) : undefined;
+    const facts = row ? toFacts(row) : null;
     return {
       simId,
       plate,
-      facts: row ? toFacts(row) : null,
-      trust: deriveTrustState(row ? toFacts(row) : null),
+      facts,
+      trust: deriveTrustState(facts),
+      pulse: row
+        ? derivePulse({
+            pulseFares: row.pulse_fares,
+            windowMinutes: row.pulse_window_minutes,
+            declaredCapacity: row.capacity,
+          })
+        : null,
     };
   });
 }

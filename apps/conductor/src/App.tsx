@@ -1,8 +1,14 @@
-// The hwindi surface: sign in → pick route and direction → keypad → verdict.
-// Fat finger first: one action per screen, huge targets, high contrast for
-// sunlight, works one handed in a moving kombi. With no signal the same
-// keypad clears fares against the local cache and queues the events; the
-// pill in the header shows the connection and what is waiting to sync.
+// The hwindi surface: sign in → pick route and direction → pick the kombi →
+// keypad → verdict. Fat finger first: one action per screen, huge targets,
+// high contrast for sunlight, works one handed in a moving kombi. With no
+// signal the same keypad clears fares against the local cache and queues the
+// events; the pill in the header shows the connection and what is waiting
+// to sync.
+//
+// The kombi step (V5, ruled by Mhofu 2026-07-26) is one tap that stamps every
+// clear from this shift with a vehicle id. It is a shift declaration, nothing
+// else: no crew record, no roster, no assignment. A hwindi who does not know
+// or does not want to say taps past it and clears fares exactly as before.
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import {
@@ -56,6 +62,23 @@ interface RouteInfo {
   lastStop: string;
 }
 
+/** One kombi in the hwindi's own fleet, from the conductor_vehicles RPC. */
+interface VehicleInfo {
+  id: string;
+  plate: string;
+  capacity: number | null;
+}
+
+/** The shift a hwindi is working: route, direction and (V5) which kombi. */
+interface Shift {
+  route: RouteInfo;
+  direction: Direction;
+  /** null means the hwindi skipped the kombi step; fares still clear. */
+  vehicle: VehicleInfo | null;
+  /** true once the kombi step has been answered, skip included. */
+  vehicleAsked?: boolean;
+}
+
 type Outcome =
   | "success"
   | "already_redeemed"
@@ -95,6 +118,9 @@ export default function App() {
   const [routes, setRoutes] = useState<RouteInfo[]>([]);
   const [route, setRoute] = useState<RouteInfo | null>(null);
   const [direction, setDirection] = useState<Direction>("outbound");
+  const [vehicles, setVehicles] = useState<VehicleInfo[]>([]);
+  const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
+  const [vehicleAsked, setVehicleAsked] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -105,7 +131,7 @@ export default function App() {
   const [changeError, setChangeError] = useState<string | null>(null);
   const [faresCovered, setFaresCovered] = useState(1);
 
-  const offline = useOfflineBoarding(route?.id ?? null, direction);
+  const offline = useOfflineBoarding(route?.id ?? null, direction, vehicle?.id ?? null);
   const [consented, setConsented] = useState<boolean | null>(null);
 
   // the consent gate: nothing past sign in renders until the latest consent
@@ -184,19 +210,51 @@ export default function App() {
       }
       setRoutes(list);
 
-      // restore the shift: an app killed mid-route reopens on its keypad
-      const shift = await getMeta<{ route: RouteInfo; direction: Direction }>("shift");
+      // the hwindi's own fleet for the kombi step, cached the same way the
+      // routes are: a restart in a dead zone still reaches the picker
+      const vehiclesRes = await supabase.rpc("conductor_vehicles");
+      let fleet: VehicleInfo[];
+      if (vehiclesRes.error) {
+        fleet = (await getMeta<VehicleInfo[]>("vehicles")) ?? [];
+      } else {
+        fleet = ((vehiclesRes.data ?? []) as VehicleInfo[]).map((v) => ({
+          id: v.id,
+          plate: v.plate,
+          capacity: v.capacity,
+        }));
+        await setMeta("vehicles", fleet);
+      }
+      setVehicles(fleet);
+
+      // restore the shift: an app killed mid-route reopens on its keypad,
+      // still on the same kombi it was clearing fares for
+      const shift = await getMeta<Shift>("shift");
       if (shift && list.some((r) => r.id === shift.route.id)) {
         setRoute(shift.route);
         setDirection(shift.direction);
+        const stillInFleet =
+          shift.vehicle && fleet.some((v) => v.id === shift.vehicle!.id);
+        setVehicle(stillInFleet ? shift.vehicle : null);
+        setVehicleAsked(shift.vehicleAsked === true);
       }
     })();
   }, [session]);
 
+  const saveShift = (next: Shift) => {
+    setRoute(next.route);
+    setDirection(next.direction);
+    setVehicle(next.vehicle);
+    setVehicleAsked(next.vehicleAsked === true);
+    void setMeta("shift", next);
+  };
+
   const pickRoute = (r: RouteInfo, dir: Direction) => {
-    setRoute(r);
-    setDirection(dir);
-    void setMeta("shift", { route: r, direction: dir });
+    saveShift({ route: r, direction: dir, vehicle: null, vehicleAsked: false });
+  };
+
+  const pickVehicle = (v: VehicleInfo | null) => {
+    if (!route) return;
+    saveShift({ route, direction, vehicle: v, vehicleAsked: true });
   };
 
   const langToggle = (
@@ -494,6 +552,64 @@ export default function App() {
     );
   }
 
+  // the kombi step: one tap, own fleet only, skippable. A hwindi whose fleet
+  // has no vehicles on record never sees it at all.
+  if (!vehicleAsked && vehicles.length > 0) {
+    return (
+      <main className="hwindi-shell" data-testid="vehicle-picker">
+        <header className="hwindi-header">
+          <div className="hwindi-topline">
+            <button
+              className="hwindi-back"
+              type="button"
+              aria-label={t(lang, "keypad.changeRoute")}
+              onClick={() => {
+                setRoute(null);
+                setVehicle(null);
+                setVehicleAsked(false);
+                void setMeta("shift", null);
+              }}
+            >
+              <BackIcon />
+            </button>
+            <div className="hwindi-topline-right">
+              {statusPill}
+              {langToggle}
+            </div>
+          </div>
+          <h1 className="svika-headline">{t(lang, "vehicle.title")}</h1>
+          <p className="svika-meta hwindi-route-tag">{t(lang, "vehicle.why")}</p>
+        </header>
+        <div className="hwindi-routes">
+          {vehicles.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className="hwindi-route touch-target"
+              data-testid="vehicle-option"
+              onClick={() => pickVehicle(v)}
+            >
+              <span className="svika-mono-code hwindi-route-name">{v.plate}</span>
+              <span className="svika-meta">
+                {v.capacity !== null
+                  ? t(lang, "vehicle.seats").replace("{seats}", String(v.capacity))
+                  : t(lang, "vehicle.seatsUnknown")}
+              </span>
+            </button>
+          ))}
+        </div>
+        <button
+          className="hwindi-quiet"
+          type="button"
+          data-testid="vehicle-skip"
+          onClick={() => pickVehicle(null)}
+        >
+          {t(lang, "vehicle.skip")}
+        </button>
+      </main>
+    );
+  }
+
   // no network (or the call dies mid-air): the local cache answers and the
   // event queues for sync. Same verdict screens either way.
   const submitOffline = async () => {
@@ -526,6 +642,9 @@ export default function App() {
       p_route: route.id,
       p_direction: direction,
       p_code: code,
+      // V5: the shift's kombi rides on every clear. Null when skipped, which
+      // the server has always accepted.
+      p_vehicle: vehicle?.id ?? null,
     });
     if (error && isNetworkError(error)) {
       await submitOffline();
@@ -588,6 +707,18 @@ export default function App() {
               {direction === "outbound" ? route.lastStop : route.firstStop}
             </span>
           </span>
+          {vehicle && (
+            // the shift's kombi, tappable to change it mid shift (a hwindi
+            // does swap vehicles in a day)
+            <button
+              type="button"
+              className="hwindi-route-pill hwindi-vehicle-pill touch-target"
+              data-testid="shift-vehicle"
+              onClick={() => setVehicleAsked(false)}
+            >
+              <span className="svika-mono-code">{vehicle.plate}</span>
+            </button>
+          )}
         </div>
         <p className="hwindi-keypad-title">{t(lang, "keypad.title")}</p>
       </header>

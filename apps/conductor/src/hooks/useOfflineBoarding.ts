@@ -26,7 +26,11 @@ export function isNetworkError(err: { message?: string } | null): boolean {
   return Boolean(err?.message && /fetch|network|load failed/i.test(err.message));
 }
 
-export function useOfflineBoarding(routeId: string | null, direction: Direction) {
+export function useOfflineBoarding(
+  routeId: string | null,
+  direction: Direction,
+  vehicleId: string | null = null,
+) {
   const [online, setOnline] = useState(() => navigator.onLine);
   const [queued, setQueued] = useState(0);
   const [lastFlush, setLastFlush] = useState<FlushSummary | null>(null);
@@ -97,6 +101,7 @@ export function useOfflineBoarding(routeId: string | null, direction: Direction)
           seq: await store.nextSeq(),
           routeId,
           direction,
+          vehicleId,
           code,
           ticketId: d.row.ticketId,
           fareCents: d.row.fareCents,
@@ -126,7 +131,7 @@ export function useOfflineBoarding(routeId: string | null, direction: Direction)
       }
       return { outcome: d.outcome };
     },
-    [routeId, direction, refreshQueued],
+    [routeId, direction, vehicleId, refreshQueued],
   );
 
   /** Record change to credit offline; settles through the ledger on sync. */
