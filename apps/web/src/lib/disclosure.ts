@@ -206,6 +206,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real. Riders name stops, gates and landmarks; a saved walking trip flags as a shortcut. Everything a rider types is born personal and visible to them alone, RLS proven. Promotion to a suggested then public community name is a counting rule, not a model: three independent established authors at the same spot with a similar name, then five distinct authors tapping the suggestion, shortcuts by a distance bound between walked shapes, all run by a scheduled pass. Safety rails are server enforced: daily caps and burst limits with outcome only attempt logs (never the typed name), a bilingual wordlist screened on the phone and again by the server before even a personal save, and a report door where three distinct reporters hide a community name. History is never rewritten and no rail ever names a person. Public names join the destination search the moment they are public.",
   },
   {
+    feature: "Did we get you there right (D2)",
+    tier: 1,
+    detail:
+      "Real. After arrival a skippable three tap card asks right kombi, right stop, too much walking; the row lands once in an append only table only the rider can read, and only for a trip the event stream proves arrived, RLS proven. Where the rider recorded their journey, the phone compares the planned alight stop and walking tail against the trace with documented geometry rules and named constants, unit tested on synthetic traces, and logs mismatches against the plan that produced them; a walk-only or unfinished trace judges nothing. No model; the mismatch table is the disclosed seed for a future learned ranker which would then need its baseline and metrics table first. Neither table carries a conductor or vehicle column: answers tune plans, never people, and the card says so on screen.",
+  },
+  {
     feature: "Guest mode (V2)",
     tier: 1,
     detail:

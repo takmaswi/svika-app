@@ -99,6 +99,28 @@ report rail, so nothing they made surfaces in search, recommendations or
 rendering. No real crowd data exists yet; when it does, this file gains
 its counts and provenance first.
 
+### Post trip feedback and plan mismatches (D2, 2026-07-26)
+
+Batch D2 adds two rider owned answer channels (migration 0040), both
+append only under RLS with no update or delete path even for their
+author. `trip_feedback` holds the explicit three tap card (right kombi,
+right stop, too much walking), insertable only against the rider's own
+ARRIVED ticket, skippable, and a skip stores nothing. `plan_trace_mismatches`
+holds the implicit channel: where a rider recorded their journey (M1)
+over a planned trip, the phone compares the planned alight stop and
+walking tail against the trace with documented geometry rules
+(`packages/shared/src/plan-trace-mismatch.ts`, named constants, no
+model) and logs early alights, late alights and longer than planned
+walks against the plan that produced them. Neither table carries a
+conductor or vehicle column, deliberately. The unit tests for the
+mismatch rules run on SYNTHETIC traces built in code
+(`packages/shared/test/plan-trace-mismatch.test.ts`), named as such; no
+real rider data feeds them. As of this date both tables hold only team
+test artifacts from the e2e and security suites. This data is the
+honest seed for a future learned plan ranker; if that ranker is ever
+built it becomes an AI feature with a baseline and metrics table first,
+and this file says so before any training happens.
+
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside
