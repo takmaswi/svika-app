@@ -28,8 +28,9 @@
     "map:tiles": "node tools/map-tiles/build-tiles.mjs",
     "geocode:index": "node tools/geocode-index/build-index.mjs",
     "map:fonts": "node tools/map-tiles/build-glyphs.mjs",
+    "map:glyphs:gz": "node tools/map-tiles/compress-glyphs.mjs",
     "map:sprites": "node tools/map-tiles/build-sprites.mjs",
-    "map:assets": "node tools/map-tiles/build-sprites.mjs && node tools/map-tiles/build-glyphs.mjs && node tools/map-tiles/build-tiles.mjs"
+    "map:assets": "node tools/map-tiles/build-sprites.mjs && node tools/map-tiles/build-glyphs.mjs && node tools/map-tiles/compress-glyphs.mjs && node tools/map-tiles/build-tiles.mjs"
   },
   "engines": {
     "node": ">=20"

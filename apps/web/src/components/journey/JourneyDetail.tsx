@@ -10,7 +10,7 @@ import type { AppLanguage } from "@svika/shared";
 import { t, type DictKey } from "@/lib/dict";
 import { createClient } from "@/lib/supabase/client";
 import { getJourney, listPoints } from "@/lib/journey/store";
-import { TraceMap } from "@/components/map/TraceMap";
+import { TraceMapLazy } from "@/components/map/TraceMapLazy";
 import { BackIcon } from "@/components/icons";
 
 interface LiveShare {
@@ -239,7 +239,7 @@ export function JourneyDetail({
       )}
 
       <div className="journey-map svika-animate-fade-up">
-        <TraceMap
+        <TraceMapLazy
           labels={{
             ariaLabel: t(lang, "map.ariaLabel"),
             unavailable: t(lang, "map.unavailable"),

@@ -18,6 +18,8 @@ export const dict = {
     sn: "Ride Harare. Keep your change.",
   },
   "nav.signIn": { en: "Sign in", sn: "Sign in" },
+  // M4: announced to screen readers while a data screen loads its skeleton
+  "common.loading": { en: "Loading", sn: "Kurodha" },
 
   "landing.headline1": { en: "Beyond the", sn: "Beyond the" },
   "landing.headlineWord": { en: "Kombi", sn: "Kombi" },

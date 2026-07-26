@@ -3289,3 +3289,61 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
   display: inline-flex;
   gap: var(--space-2);
 }
+
+/* --- loading skeletons (M4) -------------------------------------------------
+   DESIGN.md has no loading state; this is built by the extract only rule from
+   the section 8 card and the section 12 rise, with park toned bars standing in
+   for lines of copy. No spinner, no new colour, no new shape. Recorded as
+   spec gap 15 in docs/DESIGN-DEVIATIONS.md. */
+.skeleton-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.skeleton-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.skeleton-line {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--color-park, #d9e8cc);
+  opacity: 0.55;
+  animation: svk-skeleton 1.6s ease-in-out infinite;
+}
+@keyframes svk-skeleton {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+/* night: the park tone would glow on char, so the bars become a white wash,
+   the same treatment the night overlay cards use */
+:root[data-theme="dark"] .skeleton-line {
+  background: rgba(255, 255, 255, 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .skeleton-line {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+/* the brand's own motion law: nothing pulses when a rider asked for stillness */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}

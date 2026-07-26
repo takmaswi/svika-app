@@ -21,7 +21,7 @@ import {
 } from "@svika/shared";
 import { t, type DictKey } from "@/lib/dict";
 import { VoiceAudioCache } from "@/lib/voice/audio-cache";
-import { TraceMap } from "@/components/map/TraceMap";
+import { TraceMapLazy } from "@/components/map/TraceMapLazy";
 
 export interface GuideViewerProps {
   lang: AppLanguage;
@@ -124,7 +124,7 @@ export function GuideViewer({ lang, name, mode, distanceM, points }: GuideViewer
   return (
     <div data-testid="guide-view">
       <div className="journey-map svika-animate-fade-up">
-        <TraceMap
+        <TraceMapLazy
           labels={{
             ariaLabel: t(lang, "map.ariaLabel"),
             unavailable: t(lang, "map.unavailable"),

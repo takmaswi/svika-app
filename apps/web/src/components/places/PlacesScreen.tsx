@@ -13,7 +13,8 @@ import type { AppLanguage } from "@svika/shared";
 import { isPlaceNameClean } from "@svika/shared";
 import { t, type DictKey } from "@/lib/dict";
 import { createClient } from "@/lib/supabase/client";
-import { PlacesMap, type PlaceLabel, type ShortcutLine } from "./PlacesMap";
+import { PlacesMapLazy } from "./PlacesMapLazy";
+import type { PlaceLabel, ShortcutLine } from "./PlacesMap";
 import { BackIcon } from "@/components/icons";
 
 const HARARE_CENTER: [number, number] = [31.0522, -17.8292];
@@ -228,7 +229,7 @@ export function PlacesScreen({
       </p>
 
       <div className="places-map-frame svika-animate-fade-up svika-rise-2">
-        <PlacesMap
+        <PlacesMapLazy
           labels={{
             ariaLabel: t(lang, "map.ariaLabel"),
             unavailable: t(lang, "map.unavailable"),

@@ -19,7 +19,9 @@
 // PWA's rule that offline behaviour is explicit app logic, never a stale
 // HTTP cache of the API.
 
-const STATIC_CACHE = "svika-map-static-v2";
+// v3: entries are stored without transport headers (see putDecoded), so the
+// v2 cache is dropped rather than reused.
+const STATIC_CACHE = "svika-map-static-v3";
 const TILE_CACHE = "svika-map-tiles-v2";
 const PAGE_CACHE = "svika-map-pages-v2";
 const KEEP = [STATIC_CACHE, TILE_CACHE, PAGE_CACHE];
@@ -51,8 +53,16 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(STATIC_CACHE);
-      // best effort: a missing asset must not block the worker install
-      await Promise.allSettled(PRECACHE.map((url) => cache.add(url)));
+      // best effort: a missing asset must not block the worker install.
+      // fetch + putDecoded rather than cache.add, so a precompressed asset
+      // (the glyph ranges) lands in the cache as the bytes the page needs.
+      await Promise.allSettled(
+        PRECACHE.map(async (url) => {
+          const req = new Request(url);
+          const res = await fetch(req);
+          if (res && res.ok && res.status === 200) await putDecoded(cache, req, res);
+        }),
+      );
       await self.skipWaiting();
     })(),
   );
@@ -104,6 +114,23 @@ function networkFirstPage(event, req) {
   })();
 }
 
+// Store a response without the transport headers.
+//
+// M4 (V8 era): the glyph ranges are served precompressed with
+// Content-Encoding: gzip (next.config.ts). fetch() hands back a DECODED body
+// but the Response keeps the gzip header, so putting it in the cache stores
+// decoded bytes labelled as compressed. Replaying that from cache is at best
+// confusing and at worst a decode error, so the encoding and length headers
+// are dropped on the way in: what the cache holds is exactly what the page
+// needs. Applies to every static asset, not just glyphs.
+async function putDecoded(cache, req, res) {
+  const headers = new Headers(res.headers);
+  headers.delete("content-encoding");
+  headers.delete("content-length");
+  const body = await res.clone().arrayBuffer();
+  await cache.put(req, new Response(body, { status: 200, headers }));
+}
+
 // Cache-first with network fallback and offline retry; the MapTiler path.
 async function cacheFirst(req, cacheName) {
   const cache = await caches.open(cacheName);
@@ -111,7 +138,7 @@ async function cacheFirst(req, cacheName) {
   if (hit) return hit;
   const res = await fetch(req);
   if (res && res.ok && res.status === 200) {
-    cache.put(req, res.clone()).then(() => trim(cache)).catch(() => {});
+    putDecoded(cache, req, res).then(() => trim(cache)).catch(() => {});
   }
   return res;
 }
@@ -124,7 +151,7 @@ function staleWhileRevalidate(event, req) {
     const refresh = fetch(req)
       .then((res) => {
         if (res && res.ok && res.status === 200) {
-          return cache.put(req, res.clone());
+          return putDecoded(cache, req, res);
         }
         return undefined;
       })
@@ -153,8 +180,11 @@ function rangeKey(req, range) {
 
 async function storeRange(cache, key, res) {
   if (!res || (res.status !== 206 && res.status !== 200)) return;
+  const headers = new Headers(res.headers);
+  headers.delete("content-encoding");
+  headers.delete("content-length");
   const body = await res.clone().arrayBuffer();
-  await cache.put(key, new Response(body, { status: 200, headers: res.headers }));
+  await cache.put(key, new Response(body, { status: 200, headers }));
   await trim(cache);
 }
 

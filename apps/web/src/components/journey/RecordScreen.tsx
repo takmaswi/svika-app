@@ -25,7 +25,7 @@ import {
   setActiveJourneyId,
   type LocalJourneyMode,
 } from "@/lib/journey/store";
-import { TraceMap } from "@/components/map/TraceMap";
+import { TraceMapLazy } from "@/components/map/TraceMapLazy";
 import { BackIcon } from "@/components/icons";
 
 interface RecordScreenProps {
@@ -246,7 +246,7 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
         data-wake={wakeHeld ? "held" : "off"}
       >
         <div className="home-map">
-          <TraceMap
+          <TraceMapLazy
             labels={{
               ariaLabel: t(lang, "map.ariaLabel"),
               unavailable: t(lang, "map.unavailable"),
