@@ -1,6 +1,8 @@
 # Partner gate report — Svika Partner: data collection comes into the app
 
-Date: 2026-07-26 · Branch: product · Status: **IN PROGRESS**
+Date: 2026-07-26 · Branch: product · Status: **PASSED, awaiting rulings**
+(commits 586cb44..9ab2d4e, never pushed, never deployed; migrations 0047
+and 0048, both additive, demo machinery untouched)
 
 Goal 9. Bring corridor data collection into the main app as a consented
 rider facing feature, close the gaps between what the standalone field
@@ -196,15 +198,35 @@ how the first real data was collected, its bundles still re ingest, and its
 | Proof | Result |
 |---|---|
 | Step 1, the audit | The table above: 6 product law violations, 11 real bugs, 11 rough edges, 6 lessons kept, every one cited to a file and line, each either fixed or explicitly not carried across. One item (C10, unbounded local storage) is named as **not fixed** rather than quietly dropped. |
-| RLS matrix | `pnpm db:security-test` **271 passed, 0 failed, 0 skipped** (24 new PA checks). The load bearing one is **PA-16: a partner's raw trace stays theirs** (no other rider, no guest). Also: both doors refused without consent (PA-1, PA-2), an unstamped trip when partner mode is off (PA-3), the stamp recorded on contribution (PA-5), the leg set settling rather than doubling with its fare note (PA-6), a named mark born personal in the places layer and never a network stop (PA-8), a replayed mark being the same mark (PA-9), no cross rider read or write (PA-10 to PA-13), no direct table write even for the owner (PA-14, PA-15), the leg riding with the point (PA-17), anon blind (PA-18, PA-19), a saved trip refusing more legs (PA-20), opting out closing the doors (PA-21), contributed rows staying contributed (PA-22), and the partner stream never moving the app gate (PA-23). |
+| RLS matrix | `pnpm db:security-test` **273 passed, 0 failed, 0 skipped** (26 new PA checks). The load bearing one is **PA-16: a partner's raw trace stays theirs** (no other rider, no guest). Also: both doors refused without consent (PA-1, PA-2), an unstamped trip when partner mode is off (PA-3), the stamp recorded on contribution (PA-5), the leg set settling rather than doubling with its fare note (PA-6), a named mark born personal in the places layer and never a network stop (PA-8), a replayed mark being the same mark (PA-9), no cross rider read or write (PA-10 to PA-13), no direct table write even for the owner (PA-14, PA-15), the leg riding with the point (PA-17), anon blind (PA-18, PA-19), a saved trip refusing more legs (PA-20), opting out closing the doors (PA-21), contributed rows staying contributed (PA-22), the partner stream never moving the app gate (PA-23), a discard taking the tagging with it (PA-24) and a refused name kept nowhere (PA-25). |
 | Pipeline proof | `pnpm db:partner-test` **7 passed, 0 failed** (`packages/db/test/partner.pipeline.test.mjs`). Real 2026-07-07 corridor geometry replayed through the product's own doors, then: the plan builder infers a direction and derives segment times from it (PP-5), the rows land in `journeys`, `gps_pings` and `segment_times` and **re running changes nothing** (PP-6), and the derived segment times are the network's while the raw trace behind them is still only the rider's (PP-7). The run deletes everything it made. |
 | E2e | `partner.spec.ts` **1/1 green**: partner off (no leg controls, no marks, no leg chip), on (board with a route, a direction and a fare, mark a rank, three legs and one mark at finish, save), **the counts move because the rows landed on the server**, then off again (controls gone, the gentle door back, and the counts do not move). |
 | Ingest against the real database | `pnpm spine:ingest -- --partner` run twice: reads the partner trips, and correctly **skips the e2e's synthetic avenue walks by name** ("ride starts and ends nearest the same stop; direction is ambiguous"). That refusal is the proof that the pipeline does not invent a direction for a trip that is not on the route. |
 | Screenshots | `docs/design-evidence/partner/`: the partner screen and the profile card, on and off, **both themes and both languages** (`partner-screen-on-{light,dark}-{en,sn}.png`, `partner-card-on-*`, `partner-contributions-*`); the gentle door in both languages; and the tagging surfaces live over the map (`partner-recording-light-en.png`, `partner-board-sheet-light-en.png`, `partner-mark-sheet-light-en.png`). Real basemap, 360px reference viewport, real counts (3 trips, 2 stops named, 842 m). |
 | CI gate | `pnpm typecheck` and `pnpm lint` clean; unit tests **496 passed** across the workspace (shared 114, conductor 37, spine 101, web 244), including 16 new leg chain tests (`apps/web/test/journey-legs.test.ts`), 12 new adapter tests (`services/spine/test/ingest-partner.test.ts`) and 2 added to the sync batching suite for the new optional `leg_index`. |
+| Whole wall, rerun at the close | typecheck clean, lint clean, **496 unit**, **RLS 273**, **partner pipeline 7**, **ledger 18**, **offline 34**, **places 25**, **beacon 6**, **e2e 75 passed with 4 named skips and zero failures** across 33 spec files. One honest note: the ledger suite went red on its first run of the evening with `rate_limited` on a board code, because the full e2e run immediately before it had used up the 5 failed attempts per 10 minutes wall that migration 0004 sets. Reran after the window and it was 18/18. Shared state, not a regression, and worth writing down because the same trap will catch the next person who runs the two back to back. |
 | Docs law | `docs/DISCLOSURE-REGISTER.md` + `apps/web/src/lib/disclosure.ts` (new Svika Partner row, Tier 1; M1 row rewritten), `docs/DATASET-STATEMENT.md` (a full section on what a partner contributes, what does not change, where it goes, and that what exists today is team test artifacts named one by one), the privacy page's own counts, and `tools/gps-logger/README.md` marked superseded. |
 
-### One bug this batch found and fixed in its own work
+### Three bugs this batch found in its own work
+
+Named because a batch that only reports what it planned is not telling you
+what happened.
+
+**Two found by attacking 0047 rather than by a failing test**, fixed in
+0048 with PA-24 and PA-25 written afterwards so they cannot come back:
+
+- **A discard left its legs and marks standing.** 0033 is explicit that an
+  unsaved recording is "data the rider chose not to hand over" and deletes
+  the trace to say so; 0047 deleted the trace and kept the shape of the
+  trip, its route, its fare and every place the rider had marked.
+- **A mark kept a name the wordlist had already refused.** The place row
+  was correctly refused and the mark stored the same string anyway. Only
+  its author could ever read it, but a word the house has refused has no
+  business being kept.
+
+**One found by the e2e**, below.
+
+### One bug the e2e found
 
 The first e2e run went red on the marked stop, not the legs. The partner
 layer was being latched as synced on the **first** successful pass, but a
