@@ -3,6 +3,7 @@
 // must always be labelled as a demo estimate (honesty tier 2, disclosure
 // register entry).
 import { test, expect } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
 import { loginAs, waitForHydration } from "./helpers";
 
 test.describe("saved trips", () => {
@@ -79,5 +80,17 @@ test.describe("saving a trip to a place", () => {
     await pick.locator(".home-pick-link").click();
     await expect(page).toHaveURL(/to=University/i, { timeout: 20_000 });
     await expect(page.getByTestId("plan-trade")).toBeVisible();
+
+    // clean up: a place trip left at the top of the demo rider's list is the
+    // newest saved trip for every later spec, which changes the stop the
+    // kombi surfaces talk about and the trip the home peek answers with
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && key) {
+      const admin = createClient(url, key, { auth: { persistSession: false } });
+      // this run, and any earlier run that died before its own cleanup
+      await admin.from("saved_trips").delete().like("nickname", "Place %");
+      void nickname;
+    }
   });
 });

@@ -41,3 +41,24 @@ export async function walletBalanceCents(page: Page): Promise<number> {
   if (!m) throw new Error(`unreadable wallet amount: ${text}`);
   return Number(m[1]) * 100 + Number(m[2]);
 }
+
+/**
+ * Walk past the hwindi surface's kombi step (V5), which sits between picking
+ * a route and the keypad. Flows that prove money, codes or parcels have
+ * nothing to say about which vehicle a shift is on, so they skip it; the
+ * server has always accepted a null vehicle.
+ *
+ * Safe to call when the step is absent (a conductor whose fleet has no
+ * vehicles never sees it). isVisible() would race the render, hence the
+ * explicit wait, and the keypad wait afterwards means callers can type
+ * immediately.
+ */
+export async function skipKombiStep(page: Page): Promise<void> {
+  await page
+    .getByTestId("vehicle-picker")
+    .waitFor({ timeout: 5_000 })
+    .catch(() => {});
+  const skip = page.getByTestId("vehicle-skip");
+  if ((await skip.count()) > 0) await skip.click();
+  await page.locator(".hwindi-key").first().waitFor({ timeout: 10_000 });
+}

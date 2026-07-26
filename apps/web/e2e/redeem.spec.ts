@@ -4,6 +4,7 @@
 // second clear of the same code is refused.
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -56,6 +57,7 @@ async function pickHeightsOutbound(page: Page): Promise<void> {
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
+    await skipKombiStep(page);
 }
 
 async function typeCode(page: Page, code: string): Promise<void> {
@@ -109,6 +111,7 @@ test.describe("conductor online redeem", () => {
       .filter({ hasText: "2nd boom gate" })
       .first()
       .click();
+      await skipKombiStep(page);
     await typeCode(page, code);
     await expect(page.getByTestId("verdict")).toHaveClass(
       /hwindi-verdict-invalid_code/,

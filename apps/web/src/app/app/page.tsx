@@ -21,8 +21,9 @@ import {
   YouIcon,
 } from "@/components/icons";
 import { InitialAvatar } from "@/components/profile/InitialAvatar";
-import { formatUsd, planTrip, type RideLeg } from "@svika/shared";
+import { formatUsd, planToPoint, planTrip, type RideLeg } from "@svika/shared";
 import { fetchNetwork } from "@/lib/network";
+import { loadPlaces, resolvePlaceQuery } from "@/lib/geocode/search";
 import { fetchCorridorPlaceNames } from "@/lib/places-live";
 import { bookTrip } from "@/lib/actions";
 import { markTicketArrived } from "@/lib/family-actions";
@@ -214,15 +215,31 @@ export default async function RiderHome({
   );
   const etaProvider = homeEtaProvider(corridorStopIds);
   const etaByTrip = new Map<string, EtaEstimate>();
+  // A trip saved to a place (M4) has no alight stop stored, and the arrival
+  // engine needs one to know which way along the corridor the rider is going.
+  // Rather than let the flagship number fall back to the demo twin, the
+  // alight stop is recovered the same way the plan screen finds it: the local
+  // place corpus plus the deterministic point planner, both pure and in
+  // memory. The network is already loaded on this page for the answer peek.
+  const placeTrips = savedTrips.filter((t) => t.to_stop_id === null);
+  const alightByTrip = new Map<string, string>();
+  if (placeTrips.length > 0) {
+    const network = await fetchNetwork(supabase);
+    const corpus = loadPlaces();
+    for (const trip of placeTrips) {
+      const place = resolvePlaceQuery(corpus, trip.dest_name ?? "").match;
+      if (!place) continue;
+      const pointPlan = planToPoint(network, trip.from_stop_id, place);
+      if (pointPlan) alightByTrip.set(trip.id, pointPlan.alightStopId);
+    }
+  }
   for (const trip of savedTrips) {
-    // A trip saved to a place (M4) has no alight stop to aim at, so the
-    // spine cannot measure that leg and the provider falls back to its mock
-    // twin, which the basis label on the card already says out loud. Working
-    // out the alight stop would mean replanning every quick pick on every
-    // home render; it is not worth that, and a wrong number would be worse.
     etaByTrip.set(
       trip.id,
-      await etaProvider.estimate(trip.from_stop_id, trip.to_stop_id ?? ""),
+      await etaProvider.estimate(
+        trip.from_stop_id,
+        trip.to_stop_id ?? alightByTrip.get(trip.id) ?? "",
+      ),
     );
   }
 

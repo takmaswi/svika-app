@@ -8,6 +8,7 @@
 // (docs/p2-recording-script.md).
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -75,17 +76,10 @@ async function pickHeightsOutboundCached(page: Page): Promise<void> {
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
-  // the kombi step (V5) sits between the route and the keypad. Offline
-  // boarding proves the money path, not the shift declaration, so this walks
-  // past it; the queued event then carries a null vehicle, which the sync RPC
-  // has always accepted.
-  await page
-    .getByTestId("vehicle-picker")
-    .waitFor({ timeout: 5_000 })
-    .catch(() => {});
-  const skip = page.getByTestId("vehicle-skip");
-  if ((await skip.count()) > 0) await skip.click();
-  await page.locator(".hwindi-key").first().waitFor({ timeout: 10_000 });
+  // Offline boarding proves the money path, not the shift declaration, so it
+  // skips the kombi step; the queued event then carries a null vehicle, which
+  // the sync RPC has always accepted.
+  await skipKombiStep(page);
   await pull;
 }
 

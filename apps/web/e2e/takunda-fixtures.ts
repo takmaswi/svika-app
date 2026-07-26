@@ -84,3 +84,50 @@ export async function rebuildTakundaHistory(offsetMinutes: number): Promise<void
   if (histErr) throw histErr;
   await supabase.auth.signOut();
 }
+
+/**
+ * How Takunda's fixture history compares with the stray rides that have piled
+ * up on that account.
+ *
+ * Every e2e run that books as Takunda (the D1 and D2 flows do) leaves a REAL
+ * ticket that can never be deleted: the wallet paid and the ledger holds a
+ * foreign key to it. Those strays sit at whatever hour the suite happened to
+ * run, so once they outnumber the fixture they drag the mined median away from
+ * the staged window and a clock staged test asserts against a pattern the
+ * miner correctly refuses to see.
+ *
+ * That is data, not a defect: the product is reading the history it actually
+ * has. So the specs that stage a moment check this first and skip by name.
+ * Raising the fixture is not a way out, because the RPC caps it at 60 rides.
+ * The real remedy is a fresh demo account, or accepting the account's own
+ * history as the demo's history.
+ */
+export async function takundaFixtureBalance(): Promise<{
+  fixture: number;
+  stray: number;
+}> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { fixture: 1, stray: 0 }; // cannot tell; never skip
+  const admin = createClient(url, key, { auth: { persistSession: false } });
+
+  const { data: users } = await admin.auth.admin.listUsers({ perPage: 200 });
+  const takunda = (users?.users ?? []).find((u) => u.email === TAKUNDA_EMAIL);
+  if (!takunda) return { fixture: 1, stray: 0 };
+
+  const since = new Date(Date.now() - HISTORY_DAYS * 24 * 60 * 60_000).toISOString();
+  const [{ data: tickets }, { data: fixtures }] = await Promise.all([
+    admin
+      .from("tickets")
+      .select("id")
+      .eq("rider_id", takunda.id)
+      .eq("kind", "fare")
+      .gt("purchased_at", since),
+    admin.from("demo_commute_fixtures").select("ticket_id").eq("profile_id", takunda.id),
+  ]);
+
+  const fixtureIds = new Set((fixtures ?? []).map((f) => f.ticket_id as string));
+  const all = tickets ?? [];
+  const fixture = all.filter((t) => fixtureIds.has(t.id as string)).length;
+  return { fixture, stray: all.length - fixture };
+}

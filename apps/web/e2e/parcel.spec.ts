@@ -4,6 +4,7 @@
 // paid parcel settles to the owner only at collection.
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -77,6 +78,7 @@ test("book a parcel, load it, refuse early collect, then collect", async ({
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
+    await skipKombiStep(hwindi);
   await typeAndClear(hwindi, collectCode);
   await expect(hwindi.getByTestId("verdict")).toHaveClass(/hwindi-verdict-not_ready/, {
     timeout: 15_000,

@@ -5,6 +5,7 @@
 // same ticket is refused by the database.
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -73,6 +74,7 @@ async function clearCode(page: Page, code: string): Promise<void> {
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
+    await skipKombiStep(page);
   for (const d of code) {
     await page.locator(".hwindi-key", { hasText: d }).first().click();
   }
@@ -147,6 +149,7 @@ test.describe("change to credit", () => {
       .filter({ hasText: "Avondale" })
       .first()
       .click();
+      await skipKombiStep(page);
     for (const d of code) {
       await page.locator(".hwindi-key", { hasText: d }).first().click();
     }

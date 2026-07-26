@@ -6,7 +6,7 @@
 // carries the law line, and there is no control on it that answers anybody.
 // If a future change adds one, the last assertion here fails.
 import { test, expect, type Page } from "@playwright/test";
-import { loginAs } from "./helpers";
+import { loginAs, skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -21,12 +21,7 @@ async function conductorToKeypad(page: Page): Promise<void> {
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
-  await page
-    .getByTestId("vehicle-picker")
-    .waitFor({ timeout: 5_000 })
-    .catch(() => {});
-  const skip = page.getByTestId("vehicle-skip");
-  if ((await skip.count()) > 0) await skip.click();
+  await skipKombiStep(page);
 }
 
 test.describe("demand beacon", () => {

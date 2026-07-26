@@ -6,7 +6,7 @@
 // now, exactly like the seed, and restored after).
 import { test, expect, type Page } from "@playwright/test";
 import { loginAs, waitForHydration } from "./helpers";
-import { rebuildTakundaHistory } from "./takunda-fixtures";
+import { rebuildTakundaHistory, takundaFixtureBalance } from "./takunda-fixtures";
 
 const TAKUNDA_EMAIL = "demo.takunda@svika.app";
 
@@ -66,6 +66,21 @@ test.describe("V1 answer first home", () => {
     // a window that already passed today needs the clock to be far enough
     // past midnight to hold one; before ~04:30 CAT there is nowhere to put it
     test.skip(minute < 270, "CAT clock too early to stage a passed window today");
+
+    // Staging a moment only works while the fixture still outweighs the real
+    // rides the demo account has collected from earlier runs; those tickets
+    // are append only and cannot be cleaned up, so the honest move is a named
+    // skip rather than asserting against a pattern the miner correctly does
+    // not see.
+    const balance = await takundaFixtureBalance();
+    testInfo.annotations.push({
+      type: "fixture balance",
+      description: `${balance.fixture} fixture rides against ${balance.stray} strays`,
+    });
+    test.skip(
+      balance.stray >= balance.fixture,
+      "stray rides on the demo account now outnumber the fixture, so a staged window cannot be mined; needs a fresh demo account",
+    );
 
     await rebuildTakundaHistory(180);
     try {

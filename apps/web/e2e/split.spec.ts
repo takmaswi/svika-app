@@ -3,6 +3,7 @@
 // in the payer's wallet.
 import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 
@@ -63,6 +64,7 @@ test("a $5 note covering two $1.50 fares credits exactly $2.00", async ({ page }
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
+    await skipKombiStep(page);
   for (const d of code) {
     await page.locator(".hwindi-key", { hasText: d }).first().click();
   }

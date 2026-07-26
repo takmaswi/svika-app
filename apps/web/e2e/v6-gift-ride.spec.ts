@@ -8,7 +8,7 @@
 // copies the whole message when navigator.share is absent. The clipboard read
 // IS the share payload.
 import { test, expect, type Page } from "@playwright/test";
-import { loginAs } from "./helpers";
+import { loginAs, skipKombiStep } from "./helpers";
 
 const CONDUCTOR_URL = "http://localhost:5174";
 const PLAN = `/app/plan?from=${encodeURIComponent("2nd boom gate")}&to=${encodeURIComponent("Rezende Rank")}`;
@@ -29,16 +29,7 @@ async function clearCode(page: Page, code: string): Promise<void> {
     .filter({ hasText: "Rezende Rank" })
     .first()
     .click();
-  // the kombi step (V5) sits between the route and the keypad; a gift proves
-  // nothing about vehicles, so this walks past it. isVisible() would race the
-  // render, hence the explicit wait.
-  await page
-    .getByTestId("vehicle-picker")
-    .waitFor({ timeout: 5_000 })
-    .catch(() => {});
-  const skip = page.getByTestId("vehicle-skip");
-  if ((await skip.count()) > 0) await skip.click();
-  await page.locator(".hwindi-key").first().waitFor({ timeout: 10_000 });
+  await skipKombiStep(page);
   for (const d of code) {
     await page.locator(".hwindi-key", { hasText: d }).first().click();
   }
