@@ -174,7 +174,8 @@ migration by design, so its history stays reviewable.
 
 ## 14. The recording queue has no cap (C10, batch Partner, OPEN)
 
-Logged on your instruction at the Goal 9 close so it does not get forgotten.
+Logged on your instruction at the Goal 9 close so it does not get forgotten,
+and confirmed there: this stays a written plan, not silent deletion.
 Inherited from M1, not introduced by the partner batch, and the one item in
 the gps-logger audit that this batch named as **not fixed**.
 

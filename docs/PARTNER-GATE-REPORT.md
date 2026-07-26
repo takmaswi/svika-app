@@ -1,12 +1,13 @@
 # Partner gate report — Svika Partner: data collection comes into the app
 
-Date: 2026-07-26 · Branch: product · Status: **PASSED, ruled**
+Date: 2026-07-26 · Branch: product · Status: **PASSED, ruled, CLOSED**
 (commits 586cb44..9ab2d4e, never pushed, never deployed; migrations 0047
 and 0048, both additive, demo machinery untouched)
 
-All eight open questions are ruled below: four by Mhofu on 2026-07-26, four
-taken conservatively on his instruction and standing until he says otherwise.
-No ruling changed a line of code; all four of his confirmed what shipped.
+All eight open questions are ruled below and Mhofu closed the goal on
+2026-07-26: four he ruled directly, four taken conservatively on his
+instruction and confirmed as taken in the same sitting. No ruling changed a
+line of code; all four of his direct rulings confirmed what shipped.
 
 Goal 9. Bring corridor data collection into the main app as a consented
 rider facing feature, close the gaps between what the standalone field
@@ -288,9 +289,12 @@ The eight questions this batch carried, and how each was settled.
    more riding legs make a trip mixed, whatever chip the rider tapped before
    starting.
 
-### Taken conservatively on Mhofu's instruction, 2026-07-26
+### Taken conservatively on Mhofu's instruction, confirmed 2026-07-26
 
-Each of these takes the cautious option and stands until he rules otherwise.
+Each of these takes the cautious option. All four were read back to Mhofu and
+confirmed as taken in his words: "caps stay, route filing stays a human
+decision with dry-run first, C10 stays a written plan in CHECKS not silent
+deletion, Shona stays honest draft." They stand until he rules otherwise.
 
 5. **The caps stay exactly as shipped and do not move on a hunch.** 60 legs
    and 200 marks per trip, 90 seconds before a GPS fix is too stale to mark
