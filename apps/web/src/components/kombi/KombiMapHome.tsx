@@ -6,7 +6,7 @@
 // a card is open.
 import { useState } from "react";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
-import type { LiveMapLabels } from "@/components/map/LiveMap";
+import type { LiveMapLabels, LiveMapPlaceName } from "@/components/map/LiveMap";
 import type { KombiProfile } from "@/lib/kombi/fleet";
 import type { KombiStrings } from "@/lib/kombi/strings";
 import { KombiCard } from "./KombiCard";
@@ -16,6 +16,8 @@ import { useFleetEtas } from "./useFleetEtas";
 interface KombiMapHomeProps {
   labels: LiveMapLabels;
   camera?: "corridor" | "boarding";
+  /** M3 ruling 3: the agreed names ride this map too. */
+  placeNames?: LiveMapPlaceName[];
   profiles: KombiProfile[];
   stopId: string;
   stopName: string;
@@ -27,6 +29,7 @@ interface KombiMapHomeProps {
 export function KombiMapHome({
   labels,
   camera,
+  placeNames,
   profiles,
   stopId,
   stopName,
@@ -40,7 +43,12 @@ export function KombiMapHome({
 
   return (
     <>
-      <LiveMapLazy labels={labels} camera={camera} onKombiTap={setSelectedId} />
+      <LiveMapLazy
+        labels={labels}
+        camera={camera}
+        placeNames={placeNames}
+        onKombiTap={setSelectedId}
+      />
       {selected && (
         <KombiCard
           key={selected.simId}

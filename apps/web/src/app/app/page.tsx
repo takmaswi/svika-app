@@ -23,6 +23,7 @@ import {
 import { InitialAvatar } from "@/components/profile/InitialAvatar";
 import { formatUsd, planTrip, type RideLeg } from "@svika/shared";
 import { fetchNetwork } from "@/lib/network";
+import { fetchCorridorPlaceNames } from "@/lib/places-live";
 import { bookTrip } from "@/lib/actions";
 import { markTicketArrived } from "@/lib/family-actions";
 import { boardCodesOf, type BoardCodeEmbed } from "@/lib/tickets";
@@ -116,6 +117,7 @@ export default async function RiderHome({
     historyRes,
     profileRes,
     kombiBoardRes,
+    placeNames,
   ] = await Promise.all([
     supabase
       .from("account_balances")
@@ -173,6 +175,8 @@ export default async function RiderHome({
       .maybeSingle(),
     // batch K1: registry facts and fare aggregates for the kombi card
     supabase.rpc("kombi_board"),
+    // batch M3 ruling 3: the names the city agreed on, over the corridor
+    fetchCorridorPlaceNames(supabase),
   ]);
 
   const balance = balanceRes.data?.balance_cents ?? 0;
@@ -441,6 +445,7 @@ export default async function RiderHome({
               kombiTap: t(lang, "kombi.markerTap"),
             }}
             camera="boarding"
+            placeNames={placeNames}
             profiles={kombiProfiles}
             stopId={kombiContext.stopId}
             stopName={kombiContext.stopName}
@@ -459,6 +464,7 @@ export default async function RiderHome({
               view3d: t(lang, "map.view3d"),
               viewFlat: t(lang, "map.viewFlat"),
             }}
+            placeNames={placeNames}
             camera="boarding"
           />
         )}

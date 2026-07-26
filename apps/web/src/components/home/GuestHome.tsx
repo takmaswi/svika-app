@@ -13,6 +13,7 @@ import type { AppTheme } from "@/lib/theme";
 import { formatUsd } from "@svika/shared";
 import { CORRIDOR_ROUTE_CODE } from "@/lib/map/corridor-data";
 import { homeEtaProvider } from "@/lib/map/eta-home";
+import { fetchCorridorPlaceNames } from "@/lib/places-live";
 
 // The guest home (batch V2): the same live map and search a rider sees,
 // fed entirely by the world readable network under the anon role. Nothing
@@ -27,7 +28,7 @@ export async function GuestHome({
   theme: AppTheme | null;
 }) {
   const supabase = await createClient();
-  const [corridorRes, corridorFareRes] = await Promise.all([
+  const [corridorRes, corridorFareRes, placeNames] = await Promise.all([
     supabase
       .from("route_stops")
       .select("stop_id, seq, stops(name), routes!inner(code, name)")
@@ -41,6 +42,9 @@ export async function GuestHome({
       .order("effective_from", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // batch M3 ruling 3: community names are community knowledge, so a
+    // guest map carries exactly the same agreed names a rider map does
+    fetchCorridorPlaceNames(supabase),
   ]);
 
   const corridorRows = (corridorRes.data ?? []) as unknown as {
@@ -74,6 +78,7 @@ export async function GuestHome({
             view3d: t(lang, "map.view3d"),
             viewFlat: t(lang, "map.viewFlat"),
           }}
+          placeNames={placeNames}
           camera="boarding"
         />
       </div>

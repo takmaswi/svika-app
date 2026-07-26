@@ -4,7 +4,7 @@
 // so the home shell paints instantly on a cheap phone, with a warm linen
 // placeholder holding the space while the map arrives.
 import dynamic from "next/dynamic";
-import type { LiveMapLabels, LiveMapOverlay } from "./LiveMap";
+import type { LiveMapLabels, LiveMapOverlay, LiveMapPlaceName } from "./LiveMap";
 
 const Inner = dynamic(() => import("./LiveMap").then((m) => m.LiveMap), {
   ssr: false,
@@ -14,15 +14,23 @@ const Inner = dynamic(() => import("./LiveMap").then((m) => m.LiveMap), {
 export function LiveMapLazy({
   labels,
   overlay,
+  placeNames,
   camera,
   onKombiTap,
 }: {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
+  placeNames?: LiveMapPlaceName[];
   camera?: "corridor" | "boarding";
   onKombiTap?: (id: string) => void;
 }) {
   return (
-    <Inner labels={labels} overlay={overlay} camera={camera} onKombiTap={onKombiTap} />
+    <Inner
+      labels={labels}
+      overlay={overlay}
+      placeNames={placeNames}
+      camera={camera}
+      onKombiTap={onKombiTap}
+    />
   );
 }

@@ -16,6 +16,11 @@ import { loginAs, type DemoRole } from "./helpers";
 const AT = `${(-17.79 + Math.random() * 0.05).toFixed(5)},${(31.1 + Math.random() * 0.06).toFixed(5)}`;
 const RUN_NAME = `Pa e2e ${Date.now().toString(36)}`;
 
+// the home map test names a spot beside the rank the boarding camera opens
+// on (the first corridor coordinate, from the seed's field export)
+const RANK: [number, number] = [31.0468404, -17.7170019];
+const HOME_NAME = `Pahome e2e ${Date.now().toString(36)}`;
+
 function serviceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -33,6 +38,17 @@ async function openPlaces(page: Page): Promise<void> {
     "true",
     { timeout: 30_000 },
   );
+}
+
+// pull the home camera into a neighbourhood frame: the map answers wheel
+// deltas the way a pinch would, and the zoom settles in well under a second
+async function zoomIn(page: Page): Promise<void> {
+  await page.mouse.move(180, 300);
+  for (let i = 0; i < 4; i += 1) {
+    await page.mouse.wheel(0, -240);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(600);
 }
 
 async function nameTheSpot(page: Page, role: DemoRole): Promise<void> {
@@ -140,5 +156,69 @@ test.describe("name the city", () => {
 
     await ownerCtx.close();
     await conductorCtx.close();
+  });
+
+  // M3 ruling 3: an agreed name is not a filing cabinet entry, it belongs on
+  // the map everybody opens. Public names only, riders and guests alike, and
+  // only while the camera is close enough for a neighbourhood to read.
+  test("a public name rides the home map for riders and guests, and pulls back with the camera", async ({
+    page,
+    browser,
+  }) => {
+    const admin = serviceClient();
+    // beside the rank the home camera opens on, so the chip lands in frame
+    const { data: seeded, error: seedErr } = await admin
+      .from("place_names")
+      .insert({
+        author_id: null,
+        name: HOME_NAME,
+        kind: "stop",
+        scope: "public",
+        location: `SRID=4326;POINT(${RANK[0] + 0.0008} ${RANK[1] - 0.0006})`,
+      })
+      .select("id")
+      .single();
+    expect(seedErr, seedErr?.message).toBeNull();
+
+    const chip = `[data-testid="map-place-chip"][data-scope="public"][data-place-name="${HOME_NAME}"]`;
+    try {
+      await loginAs(page, "RIDER");
+      await page.goto("/app");
+      await expect(page.getByTestId("live-map")).toHaveAttribute(
+        "data-map-ready",
+        "true",
+        { timeout: 30_000 },
+      );
+      // the chip is drawn; whether it shows depends on the camera, and the
+      // opening frame follows the nearest kombi, so the test sets the zoom
+      // itself instead of trusting where the fleet happens to be
+      await expect(page.locator(chip)).toHaveCount(1, { timeout: 15_000 });
+      await zoomIn(page);
+      await expect(page.locator(chip)).toBeVisible({ timeout: 15_000 });
+
+      // one tap out to the whole corridor and the names step back: the route
+      // never competes with labels at network zoom
+      await page.getByTestId("map-view-toggle").click();
+      await expect(page.locator(chip)).toBeHidden({ timeout: 15_000 });
+
+      // community knowledge with no account: the same name on the guest map
+      const guestCtx = await browser.newContext({
+        baseURL: test.info().project.use.baseURL,
+      });
+      const guest = await guestCtx.newPage();
+      await guest.goto("/app");
+      await expect(guest.getByTestId("guest-home")).toBeVisible();
+      await expect(guest.getByTestId("live-map")).toHaveAttribute(
+        "data-map-ready",
+        "true",
+        { timeout: 30_000 },
+      );
+      await zoomIn(guest);
+      await expect(guest.locator(chip)).toBeVisible({ timeout: 15_000 });
+      await guestCtx.close();
+    } finally {
+      // the corridor is the demo stage: this row leaves with the test
+      if (seeded?.id) await admin.from("place_names").delete().eq("id", seeded.id);
+    }
   });
 });

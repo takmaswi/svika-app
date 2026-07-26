@@ -4,7 +4,9 @@
 // community shortcut at a fresh spot, shoots the places screen as the
 // rider (personal chip + community chip + walk tone dash + recommended
 // row) and once as a guest (community only: the personal wall on camera),
-// then removes what it seeded. Needs the dev server on :3000.
+// then (ruling 3) seeds one PUBLIC name beside the rank and shoots the
+// home map carrying it, before removing everything it seeded.
+// Needs the dev server on :3000.
 // Usage: node scripts/places-evidence.mjs
 import { chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
@@ -37,6 +39,8 @@ const admin = createClient(
 const lat = -17.78 + Math.random() * 0.03;
 const lng = 31.11 + Math.random() * 0.04;
 const at = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+// the rank the home camera opens on (first corridor coordinate, seed export)
+const RANK = [31.0468404, -17.7170019];
 
 // the rider whose personal name shows
 const { data: signIn, error: signInErr } = await createClient(
@@ -153,6 +157,60 @@ try {
   await guest.screenshot({ path: join(OUT, "places-guest-community-only.png") });
   await guestCtx.close();
   console.log("guest shot");
+
+  // ruling 3: the agreed name on the map everybody opens. One public name
+  // beside the rank the boarding camera frames, shot in both themes and
+  // both languages.
+  await seedName({
+    author_id: null,
+    name: "Pamaticket",
+    kind: "stop",
+    scope: "public",
+    location: `SRID=4326;POINT(${RANK[0] - 0.0018} ${RANK[1] - 0.0011})`,
+  });
+  for (const theme of ["light", "dark"]) {
+    for (const lang of ["en", "sn"]) {
+      const context = await browser.newContext({ viewport: MOBILE });
+      await context.addCookies([
+        { name: "svika_theme", value: theme, url: BASE },
+        { name: "svika_lang", value: lang, url: BASE },
+      ]);
+      const page = await context.newPage();
+      const login = await page.request.post(`${BASE}/e2e/login`, {
+        data: {
+          email: process.env.DEMO_RIDER_EMAIL,
+          password: process.env.DEMO_RIDER_PASSWORD,
+        },
+      });
+      if (!login.ok()) throw new Error(`e2e login failed: ${login.status()}`);
+      // The opening frame is fitted to the rank plus the nearest kombi, so
+      // on the passes where the fleet is spread the whole corridor gets
+      // framed and the names correctly stay quiet. Reload until the camera
+      // opens on a neighbourhood; the seeded name sits beside the rank, so
+      // whenever it is on it is also in frame.
+      let framed = false;
+      for (let attempt = 0; attempt < 8 && !framed; attempt += 1) {
+        await page.goto(`${BASE}/app`);
+        await page
+          .locator('[data-testid="live-map"][data-map-ready="true"]')
+          .waitFor({ timeout: 30_000 });
+        await page.waitForTimeout(1200); // markers land inside the load handler
+        framed = await page
+          .locator('[data-testid="map-place-chip"][data-scope="public"]')
+          .first()
+          .isVisible()
+          .catch(() => false);
+        if (!framed) await page.waitForTimeout(4000); // let the fleet move on
+      }
+      if (!framed) throw new Error("the fleet never opened a close enough frame");
+      await page.waitForTimeout(2600); // tiles and the entrance settle
+      await page.screenshot({
+        path: join(OUT, `places-home-names-${theme}-${lang}.png`),
+      });
+      await context.close();
+      console.log(`home map shots ${theme}/${lang}`);
+    }
+  }
 } finally {
   await browser.close();
   // remove what this run seeded (no promotion events were ever appended to

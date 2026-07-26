@@ -43,6 +43,15 @@ import {
 
 const TICK_MS = 1000;
 
+// M3 ruling 3: community names on the home map. Public names only, drawn as
+// the §7 map place chip the places screen already uses, and only once the
+// camera holds roughly a neighbourhood rather than the whole network. The
+// whole corridor view sits near zoom 11 at the reference viewport, so it
+// stays clean; the boarding camera normally lands above this gate, and on
+// the mornings the nearest kombi is far away it opens wide and the names
+// wait for the rider to come closer. Names never compete with the route.
+const PLACE_NAME_MIN_ZOOM = 12.5;
+
 // §11 route: stroke 5, dasharray 1 11 (in line-width units at width 5).
 const ROUTE_WIDTH = 5;
 const ROUTE_DASH = [0.2, 2.2];
@@ -89,9 +98,19 @@ export interface LiveMapOverlay {
   destination: LngLat;
 }
 
+/** A public place name the city agreed on; see lib/places-live.ts. */
+export interface LiveMapPlaceName {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 interface LiveMapProps {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
+  /** M3 ruling 3: public nicknames over the corridor, from neighbourhood zoom. */
+  placeNames?: LiveMapPlaceName[];
   /** Batch K1: a tap on a kombi marker opens its card. The marker element
    *  becomes a real button (role, tabindex, Enter and Space) so the card is
    *  reachable without a pointer; the marker asset itself is untouched. */
@@ -186,6 +205,19 @@ function makeKombiElement(entering: boolean): HTMLDivElement {
       </svg>
       <img class="kombi-map-img" src="/map/kombi-marker.svg" alt="" width="44" height="44" draggable="false" />
     </div>`;
+  return el;
+}
+
+// The §7 map place chip, the same element the places screen draws (M3):
+// char rect, mono 9px, white text, night stroke through the CSS tokens. No
+// pointer events, so a chip never eats a tap meant for a kombi.
+function makePlaceChipElement(place: LiveMapPlaceName): HTMLDivElement {
+  const el = document.createElement("div");
+  el.className = "map-place-chip";
+  el.textContent = place.name;
+  el.dataset.testid = "map-place-chip";
+  el.dataset.placeName = place.name;
+  el.dataset.scope = "public";
   return el;
 }
 
@@ -371,7 +403,13 @@ function addCorridorLayers(
   });
 }
 
-export function LiveMap({ labels, overlay, camera = "corridor", onKombiTap }: LiveMapProps) {
+export function LiveMap({
+  labels,
+  overlay,
+  placeNames,
+  camera = "corridor",
+  onKombiTap,
+}: LiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // the map effect mounts once; the ref keeps the latest handler in reach
   const onKombiTapRef = useRef<((id: string) => void) | undefined>(undefined);
@@ -607,6 +645,30 @@ export function LiveMap({ labels, overlay, camera = "corridor", onKombiTap }: Li
         if (!map || disposed) return;
         setReady(true);
 
+        // the city's agreed names, hidden until the camera is close enough
+        // for a neighbourhood to read (M3 ruling 3)
+        if (placeNames?.length) {
+          const chips = placeNames.map((place) => {
+            const marker = new maplibregl.Marker({
+              element: makePlaceChipElement(place),
+            })
+              .setLngLat([place.lng, place.lat])
+              .addTo(map!);
+            // MapLibre labels every marker "Map marker" and calls it a
+            // button; a name is neither, so it announces itself instead
+            const el = marker.getElement();
+            el.setAttribute("role", "img");
+            el.setAttribute("aria-label", place.name);
+            return marker;
+          });
+          const applyNameZoom = () => {
+            const on = (map?.getZoom() ?? 0) >= PLACE_NAME_MIN_ZOOM;
+            for (const chip of chips) chip.getElement().style.display = on ? "" : "none";
+          };
+          applyNameZoom();
+          map.on("zoom", applyNameZoom);
+        }
+
         const entering = !reducedMotion;
         if (entering) playEntrance(map);
 
@@ -775,7 +837,12 @@ export function LiveMap({ labels, overlay, camera = "corridor", onKombiTap }: Li
   }
 
   return (
-    <div className="live-map" data-testid="live-map" data-map-ready={ready}>
+    <div
+      className="live-map"
+      data-testid="live-map"
+      data-map-ready={ready}
+      data-name-count={placeNames?.length ?? 0}
+    >
       <div
         ref={containerRef}
         className="live-map-canvas"
