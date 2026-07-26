@@ -81,6 +81,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real, and a count rather than an estimate. The hwindi declares which kombi the shift is on, every fare cleared from that shift is stamped with the vehicle, and the card shows how many fares that kombi cleared in the last 20 minutes against its declared seats. The card names what it counted and over how long, so it can never read as a departure time; a kombi with no declared seats is counted but not measured. The declaration is skippable and stays a shift fact: no crew record, no roster, no assignment. Not AI.",
   },
   {
+    feature: "Send a ride, not money",
+    tier: 1,
+    detail:
+      "Real. The sender pays a real fare from their wallet and hands over the four digit board code; the recipient needs no account, no wallet and no app, and the hwindi clears the code through exactly the same rate limited, route scoped path as any other. The message travels through the phone's own share sheet: no WhatsApp Business API, no SMS vendor, no Svika server in the middle, and no row anywhere naming who it was for. A gift can be taken back until somebody boards, which returns exactly the fare and is proven by the ledger invariant tests; after boarding it cannot. A gifted ride is never offered to the sender as their own trip and never teaches their commute pattern.",
+  },
+  {
     feature: "Last kombi countdown",
     tier: 2,
     detail:

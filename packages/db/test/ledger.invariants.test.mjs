@@ -143,5 +143,155 @@ if (probe) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// I6: gifted rides (V6). A gift is the first thing in Svika that can send
+// money BACK, so the invariants get exercised against the live RPCs rather
+// than against history alone: buy a gift, take it back, and prove the wallet
+// is exactly where it started, that a second take-back refunds nothing, and
+// that a boarded ride cannot be taken back at all.
+// ---------------------------------------------------------------------------
+{
+  const anon = createClient(URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+  const { error: signInErr } = await anon.auth.signInWithPassword({
+    email: process.env.DEMO_RIDER_EMAIL,
+    password: process.env.DEMO_RIDER_PASSWORD,
+  });
+  if (signInErr) {
+    console.log(`SKIP  I6 gifted rides :: demo rider sign in failed`);
+  } else {
+    const { data: route } = await anon
+      .from("routes")
+      .select("id")
+      .eq("code", "HEIGHTS-REZENDE")
+      .single();
+
+    const balance = async () => {
+      const { data } = await anon
+        .from("account_balances")
+        .select("balance_cents")
+        .eq("kind", "rider_wallet")
+        .maybeSingle();
+      return Number(data?.balance_cents ?? 0);
+    };
+
+    const before = await balance();
+    const { data: gift, error: giftErr } = await anon.rpc("gift_ticket", {
+      p_route: route.id,
+      p_direction: "outbound",
+    });
+    check("I6 a rider can buy a ride for someone else", !giftErr, giftErr?.message);
+
+    if (!giftErr) {
+      const { ticket_id: ticketId, fare_cents: fare } = gift[0];
+      const afterGift = await balance();
+      check(
+        "I6 the gift debits the sender's wallet by exactly the fare",
+        afterGift === before - fare,
+        `${before} -> ${afterGift}, fare ${fare}`,
+      );
+
+      // the recipient is nobody: no row anywhere names them
+      const { data: giftRow } = await anon
+        .from("ticket_gifts")
+        .select("*")
+        .eq("ticket_id", ticketId)
+        .maybeSingle();
+      check(
+        "I6 a gift row names the sender and no recipient at all",
+        !!giftRow &&
+          JSON.stringify(Object.keys(giftRow).sort()) ===
+            JSON.stringify(["created_at", "sender_id", "ticket_id"]),
+        giftRow ? Object.keys(giftRow).join(",") : "no row",
+      );
+
+      const { data: revoked, error: revokeErr } = await anon.rpc("revoke_gift", {
+        p_ticket: ticketId,
+      });
+      check(
+        "I6 taking it back returns exactly the fare",
+        !revokeErr &&
+          revoked[0].outcome === "revoked" &&
+          revoked[0].refunded_cents === fare,
+        revokeErr?.message ?? JSON.stringify(revoked?.[0]),
+      );
+      const afterRevoke = await balance();
+      check(
+        "I6 the wallet ends exactly where it started: no money made or lost",
+        afterRevoke === before,
+        `${before} -> ${afterRevoke}`,
+      );
+
+      const { data: twice } = await anon.rpc("revoke_gift", { p_ticket: ticketId });
+      check(
+        "I6 taking the same ride back twice refunds nothing the second time",
+        twice[0].outcome === "already_revoked" && twice[0].refunded_cents === null,
+        JSON.stringify(twice?.[0]),
+      );
+      const afterTwice = await balance();
+      check(
+        "I6 and the wallet did not move on the refused second take-back",
+        afterTwice === before,
+        `${before} -> ${afterTwice}`,
+      );
+
+      // a gift belonging to someone else is not revocable, and does not even
+      // confirm it exists
+      const otherAnon = createClient(URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+        auth: { persistSession: false },
+      });
+      const { error: otherErr } = await otherAnon.auth.signInWithPassword({
+        email: process.env.TEST_RIDER_B_EMAIL,
+        password: process.env.TEST_RIDER_B_PASSWORD,
+      });
+      if (!otherErr) {
+        const { data: stolen } = await otherAnon.rpc("revoke_gift", {
+          p_ticket: ticketId,
+        });
+        check(
+          "I6 another rider cannot take back a gift, or learn it exists",
+          stolen[0].outcome === "not_your_gift" && stolen[0].refunded_cents === null,
+          JSON.stringify(stolen?.[0]),
+        );
+      }
+
+      // and a boarded gift cannot be taken back: the conductor already
+      // cleared it, so the money is the owner's
+      const conductor = createClient(URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+        auth: { persistSession: false },
+      });
+      const { error: condErr } = await conductor.auth.signInWithPassword({
+        email: process.env.DEMO_CONDUCTOR_EMAIL,
+        password: process.env.DEMO_CONDUCTOR_PASSWORD,
+      });
+      const { data: second, error: secondErr } = await anon.rpc("gift_ticket", {
+        p_route: route.id,
+        p_direction: "outbound",
+      });
+      if (!condErr && !secondErr) {
+        const cleared = await conductor.rpc("redeem_board_code", {
+          p_route: route.id,
+          p_direction: "outbound",
+          p_code: second[0].board_code,
+        });
+        check(
+          "I6 a gifted code clears at the kombi like any other code",
+          cleared.data?.[0]?.outcome === "success",
+          JSON.stringify(cleared.data?.[0] ?? cleared.error?.message),
+        );
+        const { data: late } = await anon.rpc("revoke_gift", {
+          p_ticket: second[0].ticket_id,
+        });
+        check(
+          "I6 a boarded ride cannot be taken back",
+          late[0].outcome === "already_boarded" && late[0].refunded_cents === null,
+          JSON.stringify(late?.[0]),
+        );
+      }
+    }
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed === 0 ? 0 : 1);

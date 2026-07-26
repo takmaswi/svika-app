@@ -1157,6 +1157,63 @@ check(
   );
 }
 
+// --- gifted rides (migration 0043, batch V6) --------------------------------
+// A gift is a ticket bought for somebody Svika never learns about. The walls
+// that matter: no other rider sees that a ticket was gifted, no client writes
+// the table, and guests cannot buy rides for strangers.
+{
+  const gift = await A.c.rpc("gift_ticket", {
+    p_route: routeId,
+    p_direction: "outbound",
+  });
+  check(
+    "GF-1 a rider buys a ride for someone else",
+    !gift.error && gift.data?.[0]?.board_code?.length === 4,
+    gift.error?.message,
+  );
+  const giftTicket = gift.data?.[0]?.ticket_id ?? null;
+
+  if (giftTicket) {
+    const mine = await A.c
+      .from("ticket_gifts")
+      .select("ticket_id")
+      .eq("ticket_id", giftTicket)
+      .maybeSingle();
+    check("GF-2 the sender sees their own gift", !mine.error && !!mine.data);
+
+    const theirs = await B.c
+      .from("ticket_gifts")
+      .select("ticket_id")
+      .eq("ticket_id", giftTicket);
+    check("GF-3 another rider cannot see that a ticket was gifted", deniedOrEmpty(theirs));
+
+    const anonGifts = await anon.from("ticket_gifts").select("ticket_id");
+    check("GF-4 anon sees zero gifts", deniedOrEmpty(anonGifts));
+
+    const forge = await B.c
+      .from("ticket_gifts")
+      .insert({ ticket_id: giftTicket, sender_id: B.uid });
+    check("GF-5 no client writes the gift table", !!forge.error, forge.error?.message);
+
+    const steal = await B.c.rpc("revoke_gift", { p_ticket: giftTicket });
+    check(
+      "GF-6 another rider cannot take back a gift, and learns nothing",
+      steal.data?.[0]?.outcome === "not_your_gift",
+      JSON.stringify(steal.data?.[0] ?? steal.error?.message),
+    );
+
+    const anonGift = await anon.rpc("gift_ticket", {
+      p_route: routeId,
+      p_direction: "outbound",
+    });
+    check("GF-7 a guest cannot buy a ride for anyone", !!anonGift.error);
+
+    // tidy: take the probe gift back so the wallet is where the rest of the
+    // suite expects it
+    await A.c.rpc("revoke_gift", { p_ticket: giftTicket });
+  }
+}
+
 // --- rider journeys (migration 0033) ---------------------------------------
 // A recorded trace is personal location data: consent gates the upload, RLS
 // scopes every read to the owner, the RPCs are the only doors, and a replayed

@@ -155,7 +155,11 @@ counted over.
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside
-the team. Journey traces exist only when a rider starts a recording by
+the team. Gifted rides (V6) are the sharpest example of the rule: a rider
+can pay for somebody else's kombi, and Svika stores who paid and which
+ticket, but never who it was for. There is no recipient name, number or
+account anywhere, because the sender's own phone carries the message and
+the code identifies a ticket, not a person. Journey traces exist only when a rider starts a recording by
 hand and end when they stop it; there is no passive collection. The two
 corridor traces above are the team riding its own corridor. Real riders
 enter the system only through the consent gate (migration 0021), and
