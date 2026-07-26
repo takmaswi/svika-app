@@ -1628,5 +1628,143 @@ check(
   check("GS the vehicles table stays closed to guests", deniedOrEmpty(anonVehicles));
 }
 
+// --- places layer (migrations 0038 + 0039, batch M3) -------------------------
+// Personal first, promote by consensus: a name a rider types is visible to
+// that rider alone until the scheduled rule pass promotes a cluster. This
+// block proves the personal wall, the RPC-only write path, the wordlist
+// screen, and that no client can run the promotion pass themselves.
+{
+  // a per-run spot in empty country, far from the demo corridor
+  const at = {
+    lat: -19.62 - Math.random() * 0.2,
+    lng: 30.35 + Math.random() * 0.3,
+  };
+  const mine = await A.c.rpc("submit_place_name", {
+    p_name: `Pedu ${Date.now().toString(36)}`,
+    p_kind: "gate",
+    p_lat: at.lat,
+    p_lng: at.lng,
+  });
+  let placeId = null;
+  if (mine.data?.[0]?.outcome === "rate_limited") {
+    skip("PL-1 rider A names a spot", "daily cap from earlier runs; rerun tomorrow");
+  } else {
+    placeId = mine.data?.[0]?.place_id ?? null;
+    check(
+      "PL-1 rider A names a spot through the only door there is",
+      !mine.error && mine.data?.[0]?.outcome === "success" && !!placeId,
+      mine.error?.message ?? JSON.stringify(mine.data),
+    );
+  }
+
+  if (placeId) {
+    const crossB = await B.c.from("place_names").select("id").eq("id", placeId);
+    check("PL-2 a personal name is invisible to another rider", deniedOrEmpty(crossB));
+    const crossAnon = await anon.from("place_names").select("id").eq("id", placeId);
+    check("PL-3 a personal name is invisible to guests", deniedOrEmpty(crossAnon));
+    const liveB = await B.c.from("place_names_live").select("id").eq("id", placeId);
+    check(
+      "PL-4 the live view keeps the personal wall",
+      deniedOrEmpty(liveB),
+    );
+    const liveA = await A.c.from("place_names_live").select("id, scope").eq("id", placeId);
+    check(
+      "PL-5 the author sees their own name on their own map",
+      !liveA.error && liveA.data?.length === 1 && liveA.data[0].scope === "personal",
+      liveA.error?.message,
+    );
+    const recB = await B.c.rpc("recommend_place_names", {
+      p_lat: at.lat,
+      p_lng: at.lng,
+    });
+    check(
+      "PL-6 recommendations never leak a personal name",
+      !recB.error && !(recB.data ?? []).some((r) => r.place_id === placeId),
+      recB.error?.message,
+    );
+    const foreignReport = await B.c.rpc("report_place_name", { p_place: placeId });
+    check(
+      "PL-7 the report door only opens on community names",
+      !foreignReport.error && foreignReport.data?.[0]?.outcome === "invalid",
+      foreignReport.error?.message,
+    );
+  }
+
+  const forge = await A.c.from("place_names").insert({
+    name: "forged",
+    kind: "place",
+    scope: "public",
+    location: "POINT(31 -17.8)",
+  });
+  check("PL-8 no direct insert into place_names, even for the author", !!forge.error);
+  const tamper = await A.c
+    .from("place_names")
+    .update({ name: "tampered" })
+    .eq("author_id", A.uid);
+  check("PL-9 no direct update on place names", !!tamper.error);
+  const forgeEvent = await A.c.from("place_events").insert({
+    kind: "promoted_public",
+    place_name_id: placeId,
+  });
+  check("PL-10 no client ever appends a promotion event", !!forgeEvent.error);
+
+  const dirty = await A.c.rpc("submit_place_name", {
+    p_name: "mboro gate",
+    p_kind: "gate",
+    p_lat: at.lat,
+    p_lng: at.lng,
+  });
+  if (dirty.data?.[0]?.outcome === "rate_limited") {
+    skip("PL-11 wordlist screen", "burst rail from earlier runs; rerun in 10 minutes");
+  } else {
+    check(
+      "PL-11 the wordlist screens a name before even a personal save",
+      !dirty.error && dirty.data?.[0]?.outcome === "blocked_word",
+      dirty.error?.message ?? JSON.stringify(dirty.data),
+    );
+    const { data: lastAttempt } = await A.c
+      .from("place_submission_attempts")
+      .select("*")
+      .order("attempted_at", { ascending: false })
+      .limit(1);
+    check(
+      "PL-12 the attempt log keeps outcomes only, never the typed name",
+      lastAttempt?.length === 1 &&
+        lastAttempt[0].outcome === "blocked_word" &&
+        !Object.keys(lastAttempt[0]).some((k) => /name|text|entered/.test(k)),
+      JSON.stringify(Object.keys(lastAttempt?.[0] ?? {})),
+    );
+  }
+
+  const anonSubmit = await anon.rpc("submit_place_name", {
+    p_name: "guest name",
+    p_kind: "place",
+    p_lat: at.lat,
+    p_lng: at.lng,
+  });
+  check("PL-13 guests cannot name places (the identity wall holds)", !!anonSubmit.error);
+  const anonPromote = await anon.rpc("run_places_promotion");
+  const riderPromote = await B.c.rpc("run_places_promotion");
+  check(
+    "PL-14 no client runs the promotion pass, they wait for the scheduler",
+    !!anonPromote.error && !!riderPromote.error,
+  );
+  const foreignFlag = await B.c.rpc("flag_journey_shortcut", {
+    p_journey: "00000000-0000-0000-0000-000000000000",
+  });
+  check("PL-15 flagging someone else's journey is refused", !!foreignFlag.error);
+
+  for (const table of ["place_reports", "place_submission_attempts"]) {
+    const res = await anon.from(table).select("*").limit(1);
+    check(`PL anon sees zero ${table}`, deniedOrEmpty(res));
+  }
+  const anonLive = await anon.from("place_names_live").select("id, scope").limit(50);
+  check(
+    "PL-16 the guest live view carries community rows only",
+    !anonLive.error && (anonLive.data ?? []).every((r) => r.scope !== "personal"),
+    anonLive.error?.message,
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);

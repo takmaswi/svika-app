@@ -9,6 +9,7 @@
     "seed": "node seed/seed.mjs",
     "demo-reset": "node scripts/demo-reset.mjs",
     "ledger-test": "node test/ledger.invariants.test.mjs",
+    "places-test": "node test/places.promotion.test.mjs",
     "offline-test": "node test/offline.sync.test.mjs"
   },
   "dependencies": {
