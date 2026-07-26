@@ -3347,3 +3347,106 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
     animation: none;
   }
 }
+
+/* --- Svika Partner (batch Partner) ------------------------------------------
+   Two surfaces and nothing invented. While a recording runs, the tag row is
+   the §7 map overlay pill grammar (opaque, drawn border, never frosted) so
+   it reads over the live map, and the board and mark sheets are plain §8
+   cards that rise into the same bottom slot the stop CTA occupies. The
+   sheet replaces the CTA rather than covering it: one primary action per
+   screen holds while a sheet is open. */
+.record-tag-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.record-tag-btn {
+  flex: 1;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.record-tag-btn:active {
+  transform: scale(0.99);
+}
+.record-tag-btn:disabled {
+  color: var(--color-ink-mute);
+  cursor: default;
+}
+/* the "marked" glance: same pill, centred, gone in three seconds */
+.record-mark-note {
+  display: block;
+  margin: 0 0 var(--space-3);
+  padding: 10px 14px;
+  text-align: center;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+}
+.record-sheet {
+  padding: var(--space-4);
+  max-height: 72vh;
+  overflow-y: auto;
+}
+.record-sheet .svika-title {
+  margin: 0 0 var(--space-3);
+}
+.record-sheet-hint {
+  margin: 0 0 var(--space-3);
+  color: var(--color-ink-soft);
+}
+
+/* the partner card on the profile and its own screen: card grammar, the
+   state line in the ink the state deserves, and the switch is the page's
+   one primary action */
+.partner-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 var(--space-3);
+  font-weight: var(--weight-semibold);
+}
+.partner-state[data-on="true"] {
+  color: var(--color-link);
+}
+.partner-list {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.partner-list li {
+  color: var(--color-ink-soft);
+}
+.partner-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  /* the figures line up whatever the label does: "Distance mapped" is
+     three lines in Shona and two in English, and a count you cannot read
+     across is not a count */
+  align-items: end;
+}
+.partner-count {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.partner-count dd {
+  margin: 0;
+}
+/* 360px first: three counts side by side stay readable only if the figure
+   scales down with the column */
+@media (max-width: 359px) {
+  .partner-counts {
+    grid-template-columns: 1fr;
+  }
+}

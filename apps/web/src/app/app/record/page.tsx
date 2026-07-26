@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
-import { hasActiveConsent, JOURNEY_CONSENT_VERSION, type ConsentRecord } from "@svika/shared";
+import {
+  hasActiveConsent,
+  JOURNEY_CONSENT_VERSION,
+  PARTNER_CONSENT_VERSION,
+  type ConsentRecord,
+} from "@svika/shared";
 import { getLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { RecordScreen } from "@/components/journey/RecordScreen";
@@ -28,18 +33,30 @@ export default async function RecordPage({
   // rider, so the wall stands here and says why
   if (!user) redirect("/login?why=record&next=%2Fapp%2Frecord");
 
-  const { data: consents } = await supabase
-    .from("consent_records")
-    .select("action, created_at")
-    .eq("user_id", user.id)
-    .eq("version", JOURNEY_CONSENT_VERSION);
-  const hasConsent = hasActiveConsent((consents ?? []) as ConsentRecord[]);
+  // two streams, read apart so neither can move the other: journey consent
+  // decides whether the trace may upload at all, partner consent decides
+  // whether the trip's legs, marked stops and fare notes go with it
+  const [journeyRes, partnerRes] = await Promise.all([
+    supabase
+      .from("consent_records")
+      .select("action, created_at")
+      .eq("user_id", user.id)
+      .eq("version", JOURNEY_CONSENT_VERSION),
+    supabase
+      .from("consent_records")
+      .select("action, created_at")
+      .eq("user_id", user.id)
+      .eq("version", PARTNER_CONSENT_VERSION),
+  ]);
+  const hasConsent = hasActiveConsent((journeyRes.data ?? []) as ConsentRecord[]);
+  const isPartner = hasActiveConsent((partnerRes.data ?? []) as ConsentRecord[]);
 
   return (
     <RecordScreen
       lang={lang}
       initialMode={initialMode}
       hasConsent={hasConsent}
+      isPartner={isPartner}
       replay={replay}
     />
   );

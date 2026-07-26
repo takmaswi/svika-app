@@ -62,13 +62,18 @@ export function planBatches(
   return batches;
 }
 
-/** The RPC payload row for a local point. */
+/**
+ * The RPC payload row for a local point. `leg_index` is optional at the
+ * server door (migration 0047), so a point recorded before legs existed
+ * still uploads and lands on leg 0 exactly as it always did.
+ */
 export function toRpcPoint(p: LocalPoint): {
   seq: number;
   lat: number;
   lng: number;
   accuracy_m: number;
   recorded_at: string;
+  leg_index: number;
 } {
   return {
     seq: p.seq,
@@ -76,6 +81,7 @@ export function toRpcPoint(p: LocalPoint): {
     lng: p.lng,
     accuracy_m: p.accuracyM,
     recorded_at: new Date(p.recordedAt).toISOString(),
+    leg_index: p.legIndex ?? 0,
   };
 }
 

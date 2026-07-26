@@ -6,10 +6,16 @@
 //   journeys  the recording facts (status, counts, how far the sync got)
 //   points    every accepted GPS fix, written the moment it is accepted so
 //             a crash or reload never loses the trace
+//   legs      the shape of the trip: walk, wait, ride, walk (batch Partner)
+//   marks     the places where something happened (batch Partner)
 //   meta      the active recording id, so a reload can resume
 //
 // The trace stays here until the rider saves with journey consent; without
-// consent nothing ever leaves this database (M1 law).
+// consent nothing ever leaves this database (M1 law). Legs, marks and fare
+// notes go one step further: they leave only under an accepted partner
+// consent, and the server doors refuse them without it (migration 0047).
+
+import type { LocalLeg } from "./legs";
 
 export type LocalJourneyStatus = "recording" | "complete" | "discarded";
 export type LocalJourneyMode = "kombi" | "walk" | "mixed";
@@ -32,6 +38,8 @@ export interface LocalJourney {
   statusSynced: boolean;
   /** A replayed batch met rows that were already there: flagged, not hidden. */
   conflict: boolean;
+  /** Legs, marks and fare notes have reached the server for this trip. */
+  partnerSynced?: boolean;
 }
 
 export interface LocalPoint {
@@ -42,10 +50,33 @@ export interface LocalPoint {
   accuracyM: number;
   /** Epoch ms. */
   recordedAt: number;
+  /** Which leg this fix was captured on; 0 for a trip nobody tagged. */
+  legIndex?: number;
+}
+
+/** A place where something happened, dropped by hand during a recording. */
+export interface LocalMark {
+  journeyId: string;
+  /** Monotonic within the journey, 0-based; the sync key. */
+  markSeq: number;
+  legIndex: number;
+  kind: "dropoff" | "rank" | "terminal" | "landmark";
+  /** Optional at drop time: you cannot type on a moving kombi. */
+  name: string | null;
+  lat: number;
+  lng: number;
+  accuracyM: number;
+  /** When the GPS last knew where the phone was. Epoch ms. */
+  recordedAt: number;
+  /** When the rider tapped. Epoch ms. The gap is how stale the mark is. */
+  markedAt: number;
 }
 
 const DB_NAME = "svika-journey";
-const DB_VERSION = 1;
+// v2 adds the legs and marks stores (batch Partner). Existing databases
+// upgrade in place; the guards below mean a fresh install and an upgrade
+// end up identical.
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -63,6 +94,12 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains("meta")) {
         db.createObjectStore("meta", { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains("legs")) {
+        db.createObjectStore("legs", { keyPath: ["journeyId", "legIndex"] });
+      }
+      if (!db.objectStoreNames.contains("marks")) {
+        db.createObjectStore("marks", { keyPath: ["journeyId", "markSeq"] });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -105,6 +142,8 @@ export async function listJourneys(): Promise<LocalJourney[]> {
 export async function deleteJourney(id: string): Promise<void> {
   await request((await store("journeys", "readwrite")).delete(id));
   await deletePoints(id);
+  await deleteLegs(id);
+  await deleteMarks(id);
 }
 
 export async function addPoint(p: LocalPoint): Promise<void> {
@@ -122,6 +161,50 @@ export async function listPoints(journeyId: string): Promise<LocalPoint[]> {
 export async function deletePoints(journeyId: string): Promise<void> {
   const range = IDBKeyRange.bound([journeyId, 0], [journeyId, Infinity]);
   await request((await store("points", "readwrite")).delete(range));
+}
+
+// --- legs and marks (batch Partner) ----------------------------------------
+// Same offline first posture as the trace: written the moment they happen,
+// uploaded later or never. A key range per journey keeps every read and
+// every delete scoped to one trip.
+
+function journeyRange(journeyId: string): IDBKeyRange {
+  return IDBKeyRange.bound([journeyId, 0], [journeyId, Infinity]);
+}
+
+export async function putLeg(leg: LocalLeg): Promise<void> {
+  await request((await store("legs", "readwrite")).put(leg));
+}
+
+export async function putLegs(legs: readonly LocalLeg[]): Promise<void> {
+  const s = await store("legs", "readwrite");
+  await Promise.all(legs.map((leg) => request(s.put(leg))));
+}
+
+export async function listLegs(journeyId: string): Promise<LocalLeg[]> {
+  const rows = (await request(
+    (await store("legs", "readonly")).getAll(journeyRange(journeyId)),
+  )) as LocalLeg[];
+  return rows.sort((a, b) => a.legIndex - b.legIndex);
+}
+
+export async function deleteLegs(journeyId: string): Promise<void> {
+  await request((await store("legs", "readwrite")).delete(journeyRange(journeyId)));
+}
+
+export async function addMark(mark: LocalMark): Promise<void> {
+  await request((await store("marks", "readwrite")).put(mark));
+}
+
+export async function listMarks(journeyId: string): Promise<LocalMark[]> {
+  const rows = (await request(
+    (await store("marks", "readonly")).getAll(journeyRange(journeyId)),
+  )) as LocalMark[];
+  return rows.sort((a, b) => a.markSeq - b.markSeq);
+}
+
+export async function deleteMarks(journeyId: string): Promise<void> {
+  await request((await store("marks", "readwrite")).delete(journeyRange(journeyId)));
 }
 
 export async function getActiveJourneyId(): Promise<string | undefined> {

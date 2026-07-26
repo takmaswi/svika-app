@@ -834,6 +834,13 @@ export const dict = {
   "yourdata.tickets": { en: "Tickets", sn: "Matikiti" },
   "yourdata.movements": { en: "Wallet movements", sn: "Kufamba kwemari muWallet" },
   "yourdata.savedTrips": { en: "Saved trips", sn: "Nzendo dzakasaviwa" },
+  // recorded trips and, of those, the ones given to the network as a
+  // partner: the difference between the two is the whole partner bargain
+  "yourdata.journeys": { en: "Recorded trips", sn: "Nzendo dzakarekodhwa" },
+  "yourdata.partnerTrips": {
+    en: "Given to the network",
+    sn: "Dzakapiwa kunetwork",
+  },
   "yourdata.consents": { en: "Consent records", sn: "Marecords ekubvumira" },
   "yourdata.deleteH": { en: "Delete your details", sn: "Dzima details ako" },
   "yourdata.deleteB": {
@@ -1394,6 +1401,149 @@ export const dict = {
 
   // Gogo on her mbudzi
   // Kombi capacity
+
+  // --- Svika Partner: data collection inside the app, by consent ----------
+  // Plain language throughout: a partner has to be able to read this on a
+  // phone at a rank and know exactly what they are agreeing to. Shona is
+  // machine drafted and rides the standing external translator pass.
+  "partner.title": { en: "Svika Partner", sn: "Svika Partner" },
+  "partner.doorB": {
+    en: "The kombi network has no map. Partners build it by recording the trips they already take.",
+    sn: "Network yemakombi haina mepu. Vanopartner vanoivaka nekurekodha nzendo dzavanotoita.",
+  },
+  "partner.whatH": { en: "What you would send", sn: "Zvaunotumira" },
+  "partner.what1": {
+    en: "The shape of a trip you record: where you walked, where you waited, which kombi you rode and which way it went.",
+    sn: "Chimiro cherwendo rwaunorekodha: kwawakafamba, kwawakamirira, kombi yawakakwira nekwayakaenda.",
+  },
+  "partner.what2": {
+    en: "Stops you mark by hand while you ride, with the name you give them.",
+    sn: "Zviteshi zvaunomaka nemaoko uchifamba, nezita raunozvipa.",
+  },
+  "partner.what3": {
+    en: "What you paid on a kombi, if you say. That number is what makes a fare honest.",
+    sn: "Zvawakabhadhara mukombi, kana ukataura. Nhamba iyoyo ndiyo inoita mari yechokwadi.",
+  },
+  "partner.whyH": { en: "Why it matters", sn: "Kuti nei zvichikosha" },
+  "partner.whyB": {
+    en: "Every stop named and every trip mapped makes arrival times better for everyone on that road, including you. Nothing you send names anyone.",
+    sn: "Chiteshi chega chega chinotumidzwa nerwendo rwega rwega runoiswa pamepu zvinoita nguva dzekusvika dziri nani kune wese ari mumugwagwa iwoyo, kusanganisira iwe. Hapana chaunotumira chinodoma munhu.",
+  },
+  "partner.keepH": { en: "What stays yours", sn: "Zvinoramba zviri zvako" },
+  "partner.keepB": {
+    en: "Your raw GPS trace stays yours. No other rider, no conductor and no owner can read it, ever. Turn this off and nothing new leaves your phone.",
+    sn: "GPS trace yako chaiyo inoramba iri yako. Hapana mumwe mufambi, hwindi kana muridzi anogona kuiverenga, zvachose. Dzima izvi hapana chitsva chinobuda pafoni yako.",
+  },
+  "partner.on": { en: "Partner mode is on", sn: "Partner mode yavhurwa" },
+  "partner.off": { en: "Partner mode is off", sn: "Partner mode yakadzimwa" },
+  "partner.turnOn": { en: "Become a partner", sn: "Iva partner" },
+  "partner.turnOff": { en: "Stop being a partner", sn: "Rega kuva partner" },
+  "partner.onNote": {
+    en: "Your next recordings will carry their legs, marked stops and fare notes.",
+    sn: "Marekodhi ako anotevera achatakura magumbo awo, zviteshi zvakamakwa nemari.",
+  },
+  "partner.offNote": {
+    en: "Nothing new leaves this phone. What you already sent stays part of the map.",
+    sn: "Hapana chitsva chinobuda pafoni ino. Zvawatotumira zvinoramba zviri chikamu chemepu.",
+  },
+  "partner.contribH": { en: "What you have added", sn: "Zvawawedzera" },
+  "partner.contribTrips": { en: "Trips recorded", sn: "Nzendo dzakarekodhwa" },
+  "partner.contribStops": { en: "Stops named", sn: "Zviteshi zvakatumidzwa" },
+  "partner.contribDistance": { en: "Distance mapped", sn: "Daro rakaiswa pamepu" },
+  "partner.contribEmpty": {
+    en: "Nothing yet. Record a trip and it shows up here.",
+    sn: "Hapana chinhu parizvino. Rekodha rwendo ugozviona pano.",
+  },
+  "partner.contribNote": {
+    en: "These are your own rows, counted. Svika does not rank partners against each other.",
+    sn: "Aya mativi ako chaiwo, akaverengwa. Svika haienzanisi vanopartner.",
+  },
+  "partner.seeCta": { en: "See what you have added", sn: "Ona zvawawedzera" },
+  "partner.savedDoorH": {
+    en: "Turn trips like this into a map",
+    sn: "Shandura nzendo dzakaita seizvi kuita mepu",
+  },
+  "partner.savedDoorB": {
+    en: "You just recorded a trip. Partners send the shape of a trip so the network learns the road. You choose, and you can stop any time.",
+    sn: "Wangorekodha rwendo. Vanopartner vanotumira chimiro cherwendo kuti network idzidze mugwagwa. Unosarudza iwe, uye unogona kumira chero nguva.",
+  },
+  "partner.savedDoorCta": { en: "Read what it means", sn: "Verenga zvazvinoreva" },
+  "partner.recordNote": {
+    en: "You are recording as a partner: legs, marked stops and fare notes go with this trip.",
+    sn: "Uri kurekodha se partner: magumbo, zviteshi zvakamakwa nemari zvinoenda nerwendo urwu.",
+  },
+  "partner.privacy": {
+    en: "Partner contributions (legs, marked stops, fare notes) when you turn partner mode on. Your raw trace is never shared.",
+    sn: "Zvipo zve partner (magumbo, zviteshi zvakamakwa, mari) paunovhura partner mode. Trace yako chaiyo haigoverwi.",
+  },
+
+  // --- leg tagging and marked stops inside the recorder -------------------
+  "journey.legLabel": { en: "Leg", sn: "Gumbo" },
+  "journey.legMode.walking": { en: "Walking", sn: "Kufamba" },
+  "journey.legMode.waiting": { en: "Waiting", sn: "Kumirira" },
+  "journey.legMode.riding": { en: "Riding", sn: "Kufamba nekombi" },
+  "journey.board": { en: "I boarded a kombi", sn: "Ndakwira kombi" },
+  "journey.alight": { en: "I got off", sn: "Ndaburuka" },
+  "journey.waitCta": { en: "I am waiting", sn: "Ndakamirira" },
+  "journey.boardH": { en: "Which kombi?", sn: "Kombi ipi?" },
+  "journey.routeLabel": { en: "Route", sn: "Nzira" },
+  "journey.routePh": {
+    en: "Mt Pleasant Heights to Rezende",
+    sn: "Mt Pleasant Heights kusvika Rezende",
+  },
+  "journey.dirLabel": { en: "Which way?", sn: "Nekupi?" },
+  "journey.dirOut": { en: "Outbound", sn: "Kubuda" },
+  "journey.dirIn": { en: "Inbound", sn: "Kupinda" },
+  "journey.dirHint": {
+    en: "Outbound runs from the route's start toward its end. Inbound is the way back.",
+    sn: "Kubuda kunobva pakutanga kwenzira kuenda kumagumo. Kupinda ndiko kudzoka.",
+  },
+  "journey.dirNeeded": {
+    en: "Pick a direction first.",
+    sn: "Sarudza nzira yekuenda kutanga.",
+  },
+  "journey.fareLabel": { en: "What did you pay?", sn: "Wakabhadhara marii?" },
+  "journey.farePh": { en: "1.50", sn: "1.50" },
+  "journey.fareNote": {
+    en: "Leave it blank if you would rather not say.",
+    sn: "Isiya isina chinhu kana usingade kutaura.",
+  },
+  "journey.boardCta": { en: "Start the kombi leg", sn: "Tanga gumbo rekombi" },
+  "journey.cancel": { en: "Cancel", sn: "Rega" },
+  "journey.markCta": { en: "Mark a stop", sn: "Maka chiteshi" },
+  "journey.markH": { en: "Mark this spot", sn: "Maka nzvimbo ino" },
+  "journey.markKindLabel": { en: "What is it?", sn: "Chii ichi?" },
+  "journey.markKind.dropoff": { en: "Drop off", sn: "Pekuburukira" },
+  "journey.markKind.rank": { en: "Rank", sn: "Ranki" },
+  "journey.markKind.terminal": { en: "Terminal", sn: "Terminal" },
+  "journey.markKind.landmark": { en: "Landmark", sn: "Chiratidzo" },
+  "journey.markNameLabel": { en: "Name it (optional)", sn: "Itumidze (kana uchida)" },
+  "journey.markNamePh": { en: "Pamachurch", sn: "Pamachurch" },
+  "journey.markNameNote": {
+    en: "Leave it blank now and name it later on the saved trip.",
+    sn: "Isiya isina zita zvino ugozotumidza pane rwendo rwakachengetwa.",
+  },
+  "journey.markDrop": { en: "Drop the mark", sn: "Isa maka" },
+  "journey.markFixAge": {
+    en: "Using your last GPS fix from",
+    sn: "Tiri kushandisa GPS yako yekupedzisira ye",
+  },
+  "journey.markFixOld": {
+    en: "That fix is old. Wait for a fresh one before marking.",
+    sn: "GPS iyoyo yakwegura. Mirira itsva usati wamaka.",
+  },
+  "journey.markWaiting": {
+    en: "Waiting for a GPS fix before you can mark a spot.",
+    sn: "Takamirira GPS usati wakwanisa kumaka nzvimbo.",
+  },
+  "journey.marked": { en: "Marked", sn: "Zvamakwa" },
+  "journey.legsLabel": { en: "Legs", sn: "Magumbo" },
+  "journey.marksLabel": { en: "Marked stops", sn: "Zviteshi zvakamakwa" },
+  "journey.fareLine": { en: "Fare", sn: "Mari" },
+  "journey.partnerPending": {
+    en: "Saved on this phone. It will go to the network next time you are online.",
+    sn: "Zvachengetwa pafoni ino. Zvichaenda kunetwork paunenge wava online.",
+  },
 } as const satisfies Record<string, Entry>;
 
 export type DictKey = keyof typeof dict;

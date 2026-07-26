@@ -7,15 +7,25 @@
 // ask lives exactly at the save moment: agree uploads, decline keeps the
 // trace on this phone (no consent, no upload, M1 law). Denied, insecure
 // and unsupported GPS states are named cards, never silence.
+//
+// A partner (batch Partner) additionally tags the trip as they take it:
+// boarding opens a riding leg with its route, direction and what they
+// paid, getting off closes it, and a mark drops a stop where something
+// actually happened. Those controls exist only under a live partner
+// consent, because they only mean something when the trip is going to the
+// network; every other rider sees exactly the M1 screen they had before.
+// The tagging is written to the phone as it happens and uploads later or
+// never, same as the trace.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { JOURNEY_CONSENT_VERSION, type AppLanguage } from "@svika/shared";
-import { t } from "@/lib/dict";
+import { t, type DictKey } from "@/lib/dict";
 import { createClient } from "@/lib/supabase/client";
 import { JourneyRecorder, type RecorderSnapshot } from "@/lib/journey/recorder";
 import { RecordingWakeLock } from "@/lib/journey/wake-lock";
 import { syncJourney } from "@/lib/journey/sync";
+import { journeyModeFor, type BoardDetails } from "@/lib/journey/legs";
 import {
   deleteJourney,
   getActiveJourneyId,
@@ -24,20 +34,25 @@ import {
   putJourney,
   setActiveJourneyId,
   type LocalJourneyMode,
+  type LocalMark,
 } from "@/lib/journey/store";
 import { TraceMapLazy } from "@/components/map/TraceMapLazy";
 import { BackIcon } from "@/components/icons";
+import { BoardSheet, MarkSheet } from "./RecordSheets";
 
 interface RecordScreenProps {
   lang: AppLanguage;
   initialMode: LocalJourneyMode;
   /** True when the rider already holds an accepted journey consent. */
   hasConsent: boolean;
+  /** True when the rider holds a live accepted partner consent. */
+  isPartner: boolean;
   /** Compressed delays for tests and screen recordings (?gps=replay). */
   replay: boolean;
 }
 
 type Screen = "idle" | "recording" | "finish";
+type Sheet = "none" | "board" | "mark";
 
 function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
@@ -50,7 +65,13 @@ function formatElapsed(ms: number): string {
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 }
 
-export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordScreenProps) {
+export function RecordScreen({
+  lang,
+  initialMode,
+  hasConsent,
+  isPartner,
+  replay,
+}: RecordScreenProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const recorder = useMemo(() => new JourneyRecorder({ replay }), [replay]);
@@ -64,6 +85,8 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [wakeHeld, setWakeHeld] = useState(false);
+  const [sheet, setSheet] = useState<Sheet>("none");
+  const [markToast, setMarkToast] = useState<string | null>(null);
   const endedAtRef = useRef<number | null>(null);
 
   // recorder -> UI: snapshots carry counts; the trace grows point by point
@@ -112,6 +135,14 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
     return () => void lock.release();
   }, [screen]);
 
+  // the "marked" confirmation is a glance, not a state: it clears itself so
+  // the screen goes back to one action
+  useEffect(() => {
+    if (!markToast) return;
+    const id = setTimeout(() => setMarkToast(null), 3200);
+    return () => clearTimeout(id);
+  }, [markToast]);
+
   // the chip clock
   useEffect(() => {
     if (screen !== "recording") return;
@@ -135,9 +166,26 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
   };
 
   const stop = async () => {
+    setSheet("none");
     await recorder.stop();
     endedAtRef.current = Date.now();
     setScreen("finish");
+  };
+
+  const board = async (details: BoardDetails) => {
+    setSheet("none");
+    await recorder.board(details);
+  };
+
+  const alight = async () => {
+    setSheet("none");
+    await recorder.alight();
+  };
+
+  const dropMark = async (kind: LocalMark["kind"], name: string) => {
+    setSheet("none");
+    const mark = await recorder.mark(kind, name);
+    if (mark) setMarkToast(mark.name ?? t(lang, `journey.markKind.${kind}` as DictKey));
   };
 
   const finishSave = async (choice: "upload" | "agree" | "local") => {
@@ -150,7 +198,8 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
       ...journey,
       status: "complete",
       name: name.trim() || undefined,
-      mode,
+      // a tagged trip knows what it was; an untagged one keeps the pick
+      mode: journeyModeFor(snap?.legs ?? [], mode),
       endedAt: journey.endedAt ?? endedAtRef.current ?? Date.now(),
     });
     let saved = "local";
@@ -238,6 +287,9 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
 
   if (screen === "recording") {
     const startedAt = snap?.startedAt ?? now;
+    const legMode = snap?.legMode ?? "walking";
+    const riding = legMode === "riding";
+    const fixAgeMs = snap?.lastPoint ? now - snap.lastPoint.recordedAt : null;
     return (
       <main
         className="home-screen"
@@ -270,16 +322,75 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
               {formatDistance(snap?.distanceM ?? 0)}
             </span>
           </span>
+          {/* what the rider is doing right now, in the same glass grammar:
+              the leg number in mono because it is a figure, the mode in
+              words because it is not */}
+          {isPartner && (
+            <span className="record-pill svika-glass" data-testid="leg-chip">
+              {t(lang, "journey.legLabel")}
+              <span className="svika-mono-code" data-testid="leg-index">
+                {(snap?.legs.length ?? 1)}
+              </span>
+              <span data-testid="leg-mode">
+                {t(lang, `journey.legMode.${legMode}` as DictKey)}
+              </span>
+            </span>
+          )}
         </header>
         <div className="record-actions">
-          <button
-            className="auth-submit touch-target"
-            type="button"
-            onClick={() => void stop()}
-            data-testid="record-stop"
-          >
-            {t(lang, "journey.stop")}
-          </button>
+          {sheet === "board" && (
+            <BoardSheet
+              lang={lang}
+              onCancel={() => setSheet("none")}
+              onBoard={(details) => void board(details)}
+            />
+          )}
+          {sheet === "mark" && (
+            <MarkSheet
+              lang={lang}
+              fixAgeMs={fixAgeMs}
+              onCancel={() => setSheet("none")}
+              onMark={(kind, markName) => void dropMark(kind, markName)}
+            />
+          )}
+          {sheet === "none" && (
+            <>
+              {markToast && (
+                <p className="record-mark-note svika-glass" data-testid="mark-note">
+                  {t(lang, "journey.marked")}: {markToast}
+                </p>
+              )}
+              {isPartner && (
+                <div className="record-tag-row">
+                  <button
+                    className="record-tag-btn svika-glass touch-target"
+                    type="button"
+                    onClick={() => (riding ? void alight() : setSheet("board"))}
+                    data-testid={riding ? "record-alight" : "record-board"}
+                  >
+                    {t(lang, riding ? "journey.alight" : "journey.board")}
+                  </button>
+                  <button
+                    className="record-tag-btn svika-glass touch-target"
+                    type="button"
+                    disabled={!snap?.lastPoint}
+                    onClick={() => setSheet("mark")}
+                    data-testid="record-mark"
+                  >
+                    {t(lang, "journey.markCta")}
+                  </button>
+                </div>
+              )}
+              <button
+                className="auth-submit touch-target"
+                type="button"
+                onClick={() => void stop()}
+                data-testid="record-stop"
+              >
+                {t(lang, "journey.stop")}
+              </button>
+            </>
+          )}
         </div>
       </main>
     );
@@ -338,7 +449,28 @@ export function RecordScreen({ lang, initialMode, hasConsent, replay }: RecordSc
                   {snap?.pointCount ?? 0}
                 </dd>
               </div>
+              {isPartner && (
+                <>
+                  <div className="record-summary-row">
+                    <dt className="svika-meta">{t(lang, "journey.legsLabel")}</dt>
+                    <dd className="svika-mono-code" data-testid="finish-legs">
+                      {snap?.legs.length ?? 0}
+                    </dd>
+                  </div>
+                  <div className="record-summary-row">
+                    <dt className="svika-meta">{t(lang, "journey.marksLabel")}</dt>
+                    <dd className="svika-mono-code" data-testid="finish-marks">
+                      {snap?.markCount ?? 0}
+                    </dd>
+                  </div>
+                </>
+              )}
             </dl>
+            {isPartner && (
+              <p className="svika-meta record-sheet-hint" data-testid="finish-partner-note">
+                {t(lang, "partner.recordNote")}
+              </p>
+            )}
             <label className="svika-meta" htmlFor="journey-name">
               {t(lang, "journey.nameLabel")}
             </label>
