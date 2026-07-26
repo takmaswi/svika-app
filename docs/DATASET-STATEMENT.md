@@ -152,6 +152,20 @@ the step, so the linkage is a declaration and not a claim of complete
 coverage; anything counted from it is honest about the window it
 counted over.
 
+### Demand beacons (V8, 2026-07-26)
+
+A beacon is the shortest lived thing Svika stores: a rider, a stop, a
+route and an expiry twenty minutes out (migration 0044). It exists to be
+counted and then to disappear. Nothing is kept afterwards: there is no
+history table, no archive and no aggregate rolled up from expired
+beacons, so this data cannot become a demand dataset by accident. If a
+future feature wants to learn from demand over time, that is a new
+dataset with its own entry here and its own ruling, not a quiet
+retention change.
+
+What a conductor can see of it is a stop and an integer. What a rider
+can see of it is their own beacon. Nobody else sees anything.
+
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside

@@ -81,6 +81,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "Real, and a count rather than an estimate. The hwindi declares which kombi the shift is on, every fare cleared from that shift is stamped with the vehicle, and the card shows how many fares that kombi cleared in the last 20 minutes against its declared seats. The card names what it counted and over how long, so it can never read as a departure time; a kombi with no declared seats is counted but not measured. The declaration is skippable and stays a shift fact: no crew record, no roster, no assignment. Not AI.",
   },
   {
+    feature: "Demand beacon: who is waiting",
+    tier: 1,
+    detail:
+      "Real, and deliberately small. A rider taps once to say they are waiting at their stop; conductors working that route see a count per stop and nothing else. No rider id, name, time or destination can reach a conductor, because none of it leaves the counts function, and conductors cannot read the beacon table at all. Nothing can answer a beacon: no screen offers it and no table can record it, which is the structural reason this is a signal and never dispatch. Beacons expire in twenty minutes on their own, a rider can stop being counted at any time, and one rider holds one beacon.",
+  },
+  {
     feature: "Send a ride, not money",
     tier: 1,
     detail:

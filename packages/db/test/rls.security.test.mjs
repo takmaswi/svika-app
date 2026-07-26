@@ -1214,6 +1214,157 @@ check(
   }
 }
 
+// --- demand beacons (migration 0044, batch V8) ------------------------------
+// The hard boundary, proven rather than promised: a conductor sees counts and
+// only counts, cannot read the beacon table at all, cannot write anything back
+// (there is no write path to write), and cannot see demand on a route they do
+// not work. A rider can always stop being counted, and a stale beacon stops
+// counting itself.
+{
+  const { data: stopRow } = await anon
+    .from("route_stops")
+    .select("stop_id")
+    .eq("route_id", routeId)
+    .eq("direction", "outbound")
+    .order("seq")
+    .limit(1)
+    .maybeSingle();
+
+  if (!stopRow) {
+    skip("DB-1 a rider raises a beacon", "test route has no stops seeded");
+  } else {
+    const raised = await A.c.rpc("raise_beacon", {
+      p_route: routeId,
+      p_direction: "outbound",
+      p_stop: stopRow.stop_id,
+    });
+    check(
+      "DB-1 a rider raises a beacon at their own stop",
+      !raised.error && raised.data?.[0]?.outcome === "raised",
+      raised.error?.message ?? JSON.stringify(raised.data?.[0]),
+    );
+
+    const mine = await A.c.from("demand_beacons").select("id, rider_id");
+    check(
+      "DB-2 a rider sees their own beacon",
+      !mine.error && (mine.data ?? []).every((b) => b.rider_id === A.uid),
+      mine.error?.message,
+    );
+
+    const theirs = await B.c.from("demand_beacons").select("id");
+    check("DB-3 another rider sees no beacons at all", deniedOrEmpty(theirs));
+
+    const anonBeacons = await anon.from("demand_beacons").select("id");
+    check("DB-4 anon sees no beacons", deniedOrEmpty(anonBeacons));
+
+    // the conductor's whole window
+    const counts = await C.c.rpc("beacon_counts", {
+      p_route: routeId,
+      p_direction: "outbound",
+    });
+    check(
+      "DB-5 the conductor reads counts for a route they work",
+      !counts.error && Array.isArray(counts.data),
+      counts.error?.message,
+    );
+    const countCols = Object.keys(counts.data?.[0] ?? {}).sort();
+    check(
+      "DB-6 a count is a stop, a position and a number: no person, no time",
+      JSON.stringify(countCols) ===
+        JSON.stringify(["seq", "stop_id", "stop_name", "waiting"]),
+      countCols.join(","),
+    );
+    const atStop = (counts.data ?? []).find((r) => r.stop_id === stopRow.stop_id);
+    check(
+      "DB-7 the raised beacon shows up as a count, nothing more",
+      (atStop?.waiting ?? 0) >= 1,
+      JSON.stringify(atStop),
+    );
+
+    // the conductor cannot reach the rows themselves
+    const conductorRows = await C.c.from("demand_beacons").select("id, rider_id");
+    check(
+      "DB-8 the conductor cannot read the beacon table at all",
+      deniedOrEmpty(conductorRows),
+    );
+
+    // nor can anyone write one by hand, or answer one (there is nothing to
+    // answer with: no table in 0044 can hold a conductor's response)
+    const forge = await A.c.from("demand_beacons").insert({
+      rider_id: A.uid,
+      route_id: routeId,
+      direction: "outbound",
+      stop_id: stopRow.stop_id,
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+    check("DB-9 no client writes a beacon by hand", !!forge.error, forge.error?.message);
+
+    const riderCounts = await A.c.rpc("beacon_counts", {
+      p_route: routeId,
+      p_direction: "outbound",
+    });
+    check(
+      "DB-10 a rider cannot read demand: the counts door is the hwindi's",
+      !!riderCounts.error,
+      riderCounts.error?.message,
+    );
+
+    const anonCounts = await anon.rpc("beacon_counts", {
+      p_route: routeId,
+      p_direction: "outbound",
+    });
+    check("DB-11 anon cannot read demand either", !!anonCounts.error);
+
+    const anonMine = await anon.rpc("my_beacon");
+    check("DB-11b a guest has no beacon door at all", !!anonMine.error);
+
+    // one rider is in one place: a second beacon ends the first
+    const { data: otherStop } = await anon
+      .from("route_stops")
+      .select("stop_id")
+      .eq("route_id", routeId)
+      .eq("direction", "outbound")
+      .order("seq", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (otherStop && otherStop.stop_id !== stopRow.stop_id) {
+      await A.c.rpc("raise_beacon", {
+        p_route: routeId,
+        p_direction: "outbound",
+        p_stop: otherStop.stop_id,
+      });
+      // asked through the RPC so "live" is the database's clock, not this
+      // machine's: the two drift by seconds and the answer must not
+      const live = await A.c.rpc("my_beacon");
+      check(
+        "DB-12 one rider is in one place: the older beacon ended",
+        (live.data ?? []).length === 1 &&
+          live.data[0].stop_id === otherStop.stop_id,
+        JSON.stringify(live.data),
+      );
+    }
+
+    // and a rider can always stop being counted
+    const withdrawn = await A.c.rpc("withdraw_beacon");
+    check("DB-13 a rider can stop being counted", !withdrawn.error);
+    const afterWithdraw = await A.c.rpc("my_beacon");
+    check(
+      "DB-14 after withdrawing, nothing of theirs is live",
+      (afterWithdraw.data ?? []).length === 0,
+      JSON.stringify(afterWithdraw.data),
+    );
+    const afterCounts = await C.c.rpc("beacon_counts", {
+      p_route: routeId,
+      p_direction: "outbound",
+    });
+    check(
+      "DB-15 and the conductor's count drops with it",
+      (afterCounts.data ?? []).every((r) => r.waiting === 0),
+      JSON.stringify(afterCounts.data?.filter((r) => r.waiting > 0)),
+    );
+  }
+}
+
 // --- rider journeys (migration 0033) ---------------------------------------
 // A recorded trace is personal location data: consent gates the upload, RLS
 // scopes every read to the owner, the RPCs are the only doors, and a replayed

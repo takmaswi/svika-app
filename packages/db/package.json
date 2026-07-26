@@ -11,7 +11,8 @@
     "demo-reset": "node scripts/demo-reset.mjs",
     "ledger-test": "node test/ledger.invariants.test.mjs",
     "places-test": "node test/places.promotion.test.mjs",
-    "offline-test": "node test/offline.sync.test.mjs"
+    "offline-test": "node test/offline.sync.test.mjs",
+    "beacon-test": "node test/beacon.expiry.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.49.4"
