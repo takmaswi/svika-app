@@ -24,8 +24,15 @@ export default async function YourDataPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [profileRes, ticketsRes, postingsRes, tripsRes, consentsRes] =
-    await Promise.all([
+  const [
+    profileRes,
+    ticketsRes,
+    postingsRes,
+    tripsRes,
+    consentsRes,
+    journeysRes,
+    partnerRes,
+  ] = await Promise.all([
       supabase
         .from("profiles")
         .select("full_name, phone, preferred_language")
@@ -35,6 +42,17 @@ export default async function YourDataPage({
       supabase.from("ledger_postings").select("id", { count: "exact", head: true }),
       supabase.from("saved_trips").select("id", { count: "exact", head: true }),
       supabase.from("consent_records").select("id", { count: "exact", head: true }),
+      // recorded trips and, separately, the ones given to the network as a
+      // partner: a rider should be able to see the difference at a glance
+      supabase
+        .from("rider_journeys")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "complete"),
+      supabase
+        .from("rider_journeys")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "complete")
+        .not("partner_consent_version", "is", null),
     ]);
 
   const profile = profileRes.data;
@@ -43,6 +61,8 @@ export default async function YourDataPage({
     ["yourdata.tickets", ticketsRes.count ?? 0],
     ["yourdata.movements", postingsRes.count ?? 0],
     ["yourdata.savedTrips", tripsRes.count ?? 0],
+    ["yourdata.journeys", journeysRes.count ?? 0],
+    ["yourdata.partnerTrips", partnerRes.count ?? 0],
     ["yourdata.consents", consentsRes.count ?? 0],
   ] as const;
 

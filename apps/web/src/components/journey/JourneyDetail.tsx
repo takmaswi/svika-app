@@ -41,10 +41,13 @@ export function JourneyDetail({
   lang,
   id,
   saved,
+  isPartner,
 }: {
   lang: AppLanguage;
   id: string;
   saved?: string;
+  /** A live partner consent; the partner door only opens for the rest. */
+  isPartner: boolean;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const [detail, setDetail] = useState<Detail | null | "missing">(null);
@@ -236,6 +239,27 @@ export function JourneyDetail({
         <p className="svika-body journey-local-note" data-testid="journey-local-note">
           {t(lang, "journey.localNote")}
         </p>
+      )}
+
+      {/* the gentle partner door (batch Partner): offered once, right after
+          a trip is saved, to a rider who is not a partner yet. A link to
+          the full explanation, never a switch here: nobody opts into
+          sending data from a card they were not looking for */}
+      {saved && !isPartner && (
+        <section
+          className="svika-card wallet-panel svika-animate-fade-up"
+          data-testid="partner-door"
+        >
+          <h2 className="svika-title">{t(lang, "partner.savedDoorH")}</h2>
+          <p className="svika-body">{t(lang, "partner.savedDoorB")}</p>
+          <Link
+            className="auth-link touch-target"
+            href="/app/partner"
+            data-testid="partner-door-link"
+          >
+            {t(lang, "partner.savedDoorCta")}
+          </Link>
+        </section>
       )}
 
       <div className="journey-map svika-animate-fade-up">

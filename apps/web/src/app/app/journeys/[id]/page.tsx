@@ -1,4 +1,9 @@
 import { redirect } from "next/navigation";
+import {
+  hasActiveConsent,
+  PARTNER_CONSENT_VERSION,
+  type ConsentRecord,
+} from "@svika/shared";
 import { getLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { JourneyDetail } from "@/components/journey/JourneyDetail";
@@ -20,11 +25,22 @@ export default async function JourneyDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // the partner door only opens for somebody who is not one yet, so the
+  // screen needs to know which they are
+  const { data: partnerConsents } = await supabase
+    .from("consent_records")
+    .select("action, created_at")
+    .eq("user_id", user.id)
+    .eq("version", PARTNER_CONSENT_VERSION);
+  const isPartner = hasActiveConsent((partnerConsents ?? []) as ConsentRecord[]);
+
   return (
     <JourneyDetail
       lang={lang}
       id={id}
       saved={typeof saved === "string" ? saved : undefined}
+      isPartner={isPartner}
     />
   );
 }

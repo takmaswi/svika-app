@@ -6,9 +6,10 @@
 // only write path and they record consent in the same transaction.
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { EMERGENCY_CONSENT_VERSION } from "@svika/shared";
+import { EMERGENCY_CONSENT_VERSION, PARTNER_CONSENT_VERSION } from "@svika/shared";
 
 const PROFILE = "/app/profile";
+const PARTNER = "/app/partner";
 
 /** Updates the rider's own name and phone (column level grant from 0001). */
 export async function updateIdentity(formData: FormData): Promise<void> {
@@ -54,6 +55,36 @@ export async function setPref(formData: FormData): Promise<void> {
   );
   if (error) redirect(`${PROFILE}?err=prefs`);
   redirect(PROFILE);
+}
+
+/**
+ * Turns Svika Partner on or off. There is no partner column anywhere: the
+ * switch appends to the partner-v1 consent stream, and the newest row in
+ * that stream is the answer every server door reads (migration 0047). So
+ * the history of who agreed to what, and when they changed their mind, is
+ * the same append only record as every other consent, and turning it off
+ * is one row rather than a deletion.
+ *
+ * The switch posts from two places (the profile card and the partner
+ * screen) and returns to whichever asked.
+ */
+export async function setPartnerMode(formData: FormData): Promise<void> {
+  const on = String(formData.get("value") ?? "") === "on";
+  const back = String(formData.get("from") ?? "") === "profile" ? PROFILE : PARTNER;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase.from("consent_records").insert({
+    user_id: user.id,
+    action: on ? "accepted" : "withdrawn",
+    version: PARTNER_CONSENT_VERSION,
+  });
+  if (error) redirect(`${back}?err=partner`);
+  redirect(`${back}?saved=${on ? "partner-on" : "partner-off"}`);
 }
 
 /** Renames a saved trip in place. */

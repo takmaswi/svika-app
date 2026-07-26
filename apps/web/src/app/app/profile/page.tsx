@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import {
+  hasActiveConsent,
+  PARTNER_CONSENT_VERSION,
+  type ConsentRecord,
+} from "@svika/shared";
 import { getLang, t, type DictKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
@@ -11,6 +16,7 @@ import {
   removeEmergencyDetails,
   renameSavedTrip,
   saveEmergencyDetails,
+  setPartnerMode,
   setPref,
   updateIdentity,
 } from "@/lib/profile-actions";
@@ -63,8 +69,15 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [profileRes, tripsRes, ridesRes, prefsRes, emergencyRes, sinceRes] =
-    await Promise.all([
+  const [
+    profileRes,
+    tripsRes,
+    ridesRes,
+    prefsRes,
+    emergencyRes,
+    sinceRes,
+    partnerRes,
+  ] = await Promise.all([
       supabase
         .from("profiles")
         .select("full_name, phone, demo_sim")
@@ -90,8 +103,16 @@ export default async function ProfilePage({
       // visit's rides, not a stranger's. Null for named personas and real
       // riders, whose full history stands.
       supabase.rpc("my_demo_since"),
+      // partner mode has no column: the newest row in the partner-v1
+      // consent stream is the whole answer (migration 0047)
+      supabase
+        .from("consent_records")
+        .select("action, created_at")
+        .eq("user_id", user.id)
+        .eq("version", PARTNER_CONSENT_VERSION),
     ]);
 
+  const isPartner = hasActiveConsent((partnerRes.data ?? []) as ConsentRecord[]);
   const profile = profileRes.data;
   const trips = (tripsRes.data ?? []) as unknown as SavedTripRow[];
   const demoSince = typeof sinceRes.data === "string" ? sinceRes.data : null;
@@ -442,6 +463,44 @@ export default async function ProfilePage({
             </p>
           )}
           {errKey && <p className="auth-error svika-body">{t(lang, errKey)}</p>}
+        </section>
+
+        {/* Svika Partner (batch Partner): the opt in lives beside the other
+            consents, off by default, with the full bargain one tap away */}
+        <section className="svika-card wallet-panel" data-testid="profile-partner">
+          <h3 className="svika-title">{t(lang, "partner.title")}</h3>
+          <p className="svika-body partner-state" data-on={isPartner}>
+            {t(lang, isPartner ? "partner.on" : "partner.off")}
+          </p>
+          <p className="svika-body">{t(lang, "partner.doorB")}</p>
+          <form action={setPartnerMode}>
+            <input type="hidden" name="from" value="profile" />
+            <input type="hidden" name="value" value={isPartner ? "off" : "on"} />
+            <button
+              className={isPartner ? "auth-link touch-target" : "auth-submit touch-target"}
+              type="submit"
+              data-testid={isPartner ? "profile-partner-off" : "profile-partner-on"}
+            >
+              {t(lang, isPartner ? "partner.turnOff" : "partner.turnOn")}
+            </button>
+          </form>
+          <Link
+            className="auth-link touch-target"
+            href="/app/partner"
+            data-testid="profile-partner-link"
+          >
+            {t(lang, isPartner ? "partner.seeCta" : "partner.savedDoorCta")}
+          </Link>
+          {saved === "partner-on" && (
+            <p className="wallet-ok svika-body" data-testid="profile-partner-saved">
+              {t(lang, "partner.onNote")}
+            </p>
+          )}
+          {saved === "partner-off" && (
+            <p className="wallet-ok svika-body" data-testid="profile-partner-saved">
+              {t(lang, "partner.offNote")}
+            </p>
+          )}
         </section>
 
         <section className="svika-card wallet-panel" data-testid="profile-family">
