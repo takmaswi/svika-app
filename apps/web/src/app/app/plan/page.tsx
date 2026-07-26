@@ -6,6 +6,7 @@ import { fetchNetwork } from "@/lib/network";
 import { bookTrip, saveTrip } from "@/lib/actions";
 import { buildPlanOverlay } from "@/lib/map/plan-overlay";
 import { loadPlaces, resolvePlaceQuery, type GeoPlace } from "@/lib/geocode/search";
+import { fetchPublicPlaces } from "@/lib/geocode/public-places";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
 import { ArrowIcon, BackIcon } from "@/components/icons";
@@ -75,11 +76,16 @@ export default async function PlanPage({
   const from = resolveParam(network, fromRaw);
   const to = resolveParam(network, toRaw);
 
-  // D1: a destination that is not a stop may still be a known place
-  const placeResult =
-    to.stop === null && !UUID_RE.test(toRaw)
-      ? resolvePlaceQuery(loadPlaces(), toRaw)
-      : { match: null, suggestions: [] as GeoPlace[] };
+  // D1: a destination that is not a stop may still be a known place. The
+  // corpus is the committed OSM index plus public place names (M3): the
+  // city's own words join the search the moment the community agrees.
+  const searchingPlace = to.stop === null && !UUID_RE.test(toRaw);
+  const publicPlaces = searchingPlace
+    ? await fetchPublicPlaces(supabase, toRaw, loadPlaces())
+    : [];
+  const placeResult = searchingPlace
+    ? resolvePlaceQuery([...loadPlaces(), ...publicPlaces], toRaw)
+    : { match: null, suggestions: [] as GeoPlace[] };
   const destPlace = placeResult.match;
 
   const stopName = (id: string) => network.stops.find((s) => s.id === id)?.name ?? id;

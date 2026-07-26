@@ -2925,3 +2925,191 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
   margin: var(--space-4) 0 0;
   color: var(--color-ink-soft);
 }
+
+/* --- places layer (M3): name the city -------------------------------------
+   Extract only: nickname chips are the §7 map place chip (char rect rx 10,
+   mono 9px white text; night surface-dark + faint stroke), the naming pin
+   is the D1 walk tone place pin (deviation 5), shortcut lines ride the plan
+   walk tone inside the map. The personal chip's quieter soft ink fill is a
+   flagged spec gap recorded in the M3 gate report, not an invented style. */
+.places-intro {
+  margin-top: 0;
+}
+.places-map-frame {
+  margin-bottom: var(--space-4);
+}
+.places-map-frame .live-map {
+  height: 320px;
+  border-radius: var(--radius);
+  border: var(--border-card);
+}
+.places-pin-hint {
+  margin: 6px 2px 0;
+}
+
+/* §7 map place chip */
+.map-place-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: var(--color-char);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-weight: var(--weight-semibold);
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.map-place-chip-personal {
+  background: var(--color-soft-ink);
+}
+:root[data-theme="dark"] .map-place-chip {
+  background: var(--night-surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+:root[data-theme="dark"] .map-place-chip-personal {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map-place-chip {
+    background: var(--night-surface-dark);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  :root:not([data-theme="light"]) .map-place-chip-personal {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* the naming pin: D1 walk tone place pin as a DOM marker */
+.place-pick-pin {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-soft-ink);
+  border: 3px solid #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+:root[data-theme="dark"] .place-pick-pin {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: var(--night-surface-dark);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .place-pick-pin {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: var(--night-surface-dark);
+  }
+}
+
+/* recommended names: tappable chips, marigold when chosen (chip grammar) */
+.places-recommend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.place-recommend-chip,
+.place-kind-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-action-soft);
+  color: var(--color-action-soft-ink);
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.place-recommend-chip:active,
+.place-kind-chip:active {
+  transform: scale(0.99);
+}
+.place-recommend-chip[data-selected="true"],
+.place-kind-chip[data-selected="true"] {
+  background: var(--color-marigold);
+  color: var(--color-char);
+}
+.place-recommend-distance {
+  font-size: 11px;
+}
+
+/* the name field: card input grammar, mono never (names are words) */
+.places-name-label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+.places-name-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: var(--border-card);
+  background: var(--color-bg, #ffffff);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  margin-bottom: var(--space-3);
+}
+:root[data-theme="dark"] .places-name-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .places-name-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+}
+.places-kind-label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+.places-kind-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+/* named nearby rows with the report door */
+.places-nearby-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.places-nearby-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.places-nearby-name {
+  font-weight: var(--weight-semibold);
+}
+.places-nearby-scope {
+  flex: 1;
+}
+.places-report-btn {
+  min-height: 44px;
+}
+
+/* the door from trips into the places layer */
+.places-door {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  margin-bottom: var(--space-3);
+  text-decoration: none;
+  color: var(--color-ink);
+}

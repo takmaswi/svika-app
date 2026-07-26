@@ -82,6 +82,17 @@ export function JourneysList({ lang }: { lang: AppLanguage }) {
         <h1 className="svika-headline">{t(lang, "journey.listTitle")}</h1>
       </header>
 
+      {/* the door into the places layer (M3): trips grow into shortcuts and
+          names, so the naming surface lives beside the trips that feed it */}
+      <Link
+        href="/app/places"
+        className="places-door svika-card touch-target svika-animate-fade-up"
+        data-testid="places-door"
+      >
+        <span className="svika-title">{t(lang, "places.title")}</span>
+        <span className="svika-meta">{t(lang, "places.doorB")}</span>
+      </Link>
+
       {rows !== null && rows.length === 0 && (
         <p className="svika-body empty-note" data-testid="journeys-empty">
           {t(lang, "journey.listEmpty")}

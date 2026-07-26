@@ -972,6 +972,87 @@ export const dict = {
   "journey.shareCta": { en: "Create guide link", sn: "Gadzira link yenhungamiro" },
   "journey.shareRevoke": { en: "Stop sharing", sn: "Misa kugovera" },
   "journey.shareRevoked": { en: "The link is dead now.", sn: "Link yafa zvino." },
+  // --- places layer (M3): name the city. Personal first, promote by
+  // consensus; copy flags names, never people. Shona is machine drafted,
+  // rides the standing external translator pass. ----------------------------
+  "places.title": { en: "Name the city", sn: "Tumidza guta" },
+  "places.doorB": {
+    en: "Name stops, gates and shortcuts on your own map",
+    sn: "Tumidza zviteshi, magedhi nenzira dzekudimbudzira pamepu yako",
+  },
+  "places.intro": {
+    en: "Riders name the city the way Harare actually talks. What you save is yours alone until other riders agree.",
+    sn: "Vafambi vanotumidza guta sematauriro anoita Harare chaiwo. Zvaunochengeta ndezvako wega kusvika vamwe vafambi vabvumirana.",
+  },
+  "places.pinHint": {
+    en: "Tap the map to move the pin",
+    sn: "Baya pamepu kufambisa chibaiso",
+  },
+  "places.recommendH": {
+    en: "Names people use here",
+    sn: "Mazita anoshandiswa nevanhu pano",
+  },
+  "places.nameLabel": {
+    en: "What do people call this spot?",
+    sn: "Nzvimbo ino inonzi chii nevanhu?",
+  },
+  "places.kindLabel": { en: "What is it?", sn: "Chii ichi?" },
+  "places.kind.stop": { en: "Stop", sn: "Chiteshi" },
+  "places.kind.place": { en: "Place", sn: "Nzvimbo" },
+  "places.kind.gate": { en: "Gate", sn: "Gedhi" },
+  "places.kind.landmark": { en: "Landmark", sn: "Chiratidzo" },
+  "places.saveCta": { en: "Save this name", sn: "Chengeta zita iri" },
+  "places.outcome.success": {
+    en: "Saved to your map. A name goes public only when the community agrees.",
+    sn: "Zvachengetwa pamepu yako. Zita rinobuda pachena chete kana nharaunda yabvumirana.",
+  },
+  "places.outcome.blocked_word": {
+    en: "That name cannot be saved. Use the name people actually call this place.",
+    sn: "Zita iro harigoni kuchengetwa. Shandisa zita rinodaidzwa nevanhu chaizvo.",
+  },
+  "places.outcome.rate_limited": {
+    en: "You have named a lot today. Try again tomorrow.",
+    sn: "Watumidza zvakawanda nhasi. Edza zvakare mangwana.",
+  },
+  "places.outcome.invalid": {
+    en: "That name cannot be saved. Two to sixty letters.",
+    sn: "Zita iro harigoni kuchengetwa. Mavara maviri kusvika makumi matanhatu.",
+  },
+  "places.guestCta": { en: "Sign in to name places", sn: "Pinda kuti utumidze nzvimbo" },
+  "places.nearbyH": { en: "Named nearby", sn: "Zvakatumidzwa pedyo" },
+  "places.scope.personal": { en: "Only you see this", sn: "Ndiwe wega unozviona" },
+  "places.scope.suggested": {
+    en: "Suggested by riders",
+    sn: "Zvakakarakadzwa nevafambi",
+  },
+  "places.scope.public": { en: "Public name", sn: "Zita repachena" },
+  "places.report": { en: "Report this name", sn: "Mhan'ara zita iri" },
+  "places.reported": {
+    en: "Reported. Three independent reports hide a name.",
+    sn: "Zvamhan'arwa. Mhan'aro nhatu dzakazvimirira dzinovanza zita.",
+  },
+  "journey.shortcutH": { en: "Shortcut", sn: "Nzira yekudimbudzira" },
+  "journey.shortcutB": {
+    en: "Flag this walk as a shortcut and it draws on your places map. If other riders walk the same cut through, it can become public.",
+    sn: "Ratidza kufamba uku senzira yekudimbudzira igotarwa pamepu yako yenzvimbo. Kana vamwe vafambi vachifamba nenzira imwe chete, inogona kubuda pachena.",
+  },
+  "journey.shortcutCta": {
+    en: "Flag as a shortcut",
+    sn: "Ratidza senzira yekudimbudzira",
+  },
+  "journey.shortcutDone": {
+    en: "Flagged. It draws on your places map.",
+    sn: "Zvaratidzwa. Inotarwa pamepu yako yenzvimbo.",
+  },
+  "journey.shortcutInvalid": {
+    en: "This trip cannot be a shortcut. A shortcut is a walk between 30 m and 5 km.",
+    sn: "Rwendo urwu harugoni kuva nzira yekudimbudzira. Inofanira kuva kufamba kuri pakati pe 30 m ne 5 km.",
+  },
+  "journey.shortcutRate": {
+    en: "You have flagged a lot today. Try again tomorrow.",
+    sn: "Waratidza zvakawanda nhasi. Edza zvakare mangwana.",
+  },
+
   "guide.title": { en: "Trip guide", sn: "Nhungamiro yerwendo" },
   "guide.sharedTrip": { en: "A shared trip", sn: "Rwendo rwakagoverwa" },
   "guide.intro": {
@@ -1126,6 +1207,10 @@ export const dict = {
   "guest.why.record": {
     en: "Recording a journey needs an account: the trace belongs to you, and only you can delete it.",
     sn: "Kurekodha rwendo kunoda account: nzira ndeyako, uye ndiwe chete unogona kuidzima.",
+  },
+  "guest.why.name": {
+    en: "Naming a place needs an account: the name stays yours until the community agrees.",
+    sn: "Kutumidza nzvimbo kunoda account: zita rinoramba riri rako kusvika nharaunda yabvumirana.",
   },
   "guest.signInCta": { en: "Sign in with your phone", sn: "Pinda nefoni yako" },
   "guest.signInChip": { en: "Sign in", sn: "Pinda" },

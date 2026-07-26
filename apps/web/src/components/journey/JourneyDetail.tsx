@@ -51,6 +51,10 @@ export function JourneyDetail({
   const [share, setShare] = useState<LiveShare | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
   const [shareRevoked, setShareRevoked] = useState(false);
+  const [shortcutState, setShortcutState] = useState<
+    "none" | "exists" | "flagged" | "invalid" | "rate_limited"
+  >("none");
+  const [shortcutBusy, setShortcutBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +123,41 @@ export function JourneyDetail({
       cancelled = true;
     };
   }, [supabase, id]);
+
+  // a walking trip already flagged shows its state instead of the door
+  useEffect(() => {
+    if (!detail || detail === "missing" || detail.localOnly) return;
+    if (detail.mode === "kombi") return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("shortcut_paths")
+        .select("id")
+        .eq("source_journey_id", id)
+        .maybeSingle();
+      if (!cancelled && data) setShortcutState("exists");
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase, id, detail]);
+
+  const flagShortcut = async () => {
+    if (shortcutBusy) return;
+    setShortcutBusy(true);
+    const { data, error } = await supabase.rpc("flag_journey_shortcut", {
+      p_journey: id,
+    });
+    setShortcutBusy(false);
+    if (error) {
+      setShortcutState("invalid");
+      return;
+    }
+    const outcome = data?.[0]?.outcome as string | undefined;
+    if (outcome === "success") setShortcutState("flagged");
+    else if (outcome === "rate_limited") setShortcutState("rate_limited");
+    else setShortcutState("invalid");
+  };
 
   const createShare = async () => {
     if (shareBusy) return;
@@ -284,6 +323,47 @@ export function JourneyDetail({
           {shareRevoked && (
             <p className="wallet-ok svika-body" data-testid="journey-share-revoked">
               {t(lang, "journey.shareRevoked")}
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* M3: a saved walking trip can become a shortcut; the trace is the
+          shape, personal first, community by consensus like every name */}
+      {detail !== null && !detail.localOnly && detail.mode !== "kombi" && (
+        <section
+          className="svika-card wallet-panel svika-animate-fade-up svika-rise-4"
+          data-testid="journey-shortcut-section"
+        >
+          <h2 className="svika-title">{t(lang, "journey.shortcutH")}</h2>
+          <p className="svika-body">{t(lang, "journey.shortcutB")}</p>
+          {shortcutState === "none" && (
+            <button
+              className="auth-submit touch-target"
+              type="button"
+              disabled={shortcutBusy}
+              onClick={() => void flagShortcut()}
+              data-testid="journey-shortcut-flag"
+            >
+              {t(lang, "journey.shortcutCta")}
+            </button>
+          )}
+          {(shortcutState === "flagged" || shortcutState === "exists") && (
+            <p className="wallet-ok svika-body" data-testid="journey-shortcut-done">
+              {t(lang, "journey.shortcutDone")}{" "}
+              <Link className="auth-link" href="/app/places">
+                {t(lang, "places.title")}
+              </Link>
+            </p>
+          )}
+          {shortcutState === "invalid" && (
+            <p className="svika-body auth-error" data-testid="journey-shortcut-note">
+              {t(lang, "journey.shortcutInvalid")}
+            </p>
+          )}
+          {shortcutState === "rate_limited" && (
+            <p className="svika-body auth-error" data-testid="journey-shortcut-note">
+              {t(lang, "journey.shortcutRate")}
             </p>
           )}
         </section>

@@ -11,6 +11,7 @@ const WHY_KEY: Record<string, DictKey> = {
   pay: "guest.why.pay",
   save: "guest.why.save",
   record: "guest.why.record",
+  name: "guest.why.name",
 };
 
 export default async function LoginPage({
