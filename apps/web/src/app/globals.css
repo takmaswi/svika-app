@@ -2361,6 +2361,29 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
 }
 
 /* --- save a trip (plan page) --------------------------------------------- */
+/* V6: sending a ride is a quiet third option under the pay row, never a
+   competing CTA. Paying for your own ride stays the one primary action. */
+.plan-gift {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-1);
+}
+/* the gift screen: one primary action (hand the code over), a quiet line
+   about who Svika does not know, and taking it back underneath */
+.gift-send {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+}
+.gift-privacy,
+.gift-note {
+  margin: var(--space-2) 0 0;
+}
+.gift-revoke {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-2);
+}
 .plan-save {
   margin-top: var(--space-4);
   padding-top: var(--space-4);

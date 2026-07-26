@@ -18,6 +18,18 @@ interface PostingRow {
   ledger_transactions: { kind: string; memo: string | null } | null;
 }
 
+interface GiftRow {
+  ticket_id: string;
+  tickets: {
+    fare_cents: number;
+    routes: { name: string } | null;
+    board_codes:
+      | { code: string; valid_until: string }
+      | { code: string; valid_until: string }[]
+      | null;
+  } | null;
+}
+
 interface TransferRow {
   id: string;
   amount_cents: number;
@@ -46,7 +58,7 @@ export default async function WalletPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [balanceRes, accountsRes, transfersRes] = await Promise.all([
+  const [balanceRes, accountsRes, transfersRes, giftsRes] = await Promise.all([
     supabase
       .from("account_balances")
       .select("balance_cents")
@@ -57,6 +69,16 @@ export default async function WalletPage({
       .from("credit_transfers")
       .select(
         "id, amount_cents, claim_code, expires_at, transfer_events(event_type, created_at)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(10),
+    // V6: rides bought for someone else. RLS scopes this to the sender's own
+    // gifts, and the embedded ticket comes back only because the sender is
+    // still the ticket's buyer.
+    supabase
+      .from("ticket_gifts")
+      .select(
+        "ticket_id, tickets(fare_cents, routes(name), board_codes(code, valid_until))",
       )
       .order("created_at", { ascending: false })
       .limit(10),
@@ -86,6 +108,35 @@ export default async function WalletPage({
       return latest?.event_type === "sent";
     },
   );
+
+  // a gift is still on this list while nobody has boarded it: the sender can
+  // still hand it over or take it back. Status comes from the event stream,
+  // never from a column.
+  const giftRows = (giftsRes.data ?? []) as unknown as GiftRow[];
+  const giftStatusRes = giftRows.length
+    ? await supabase
+        .from("ticket_status")
+        .select("ticket_id, status")
+        .in(
+          "ticket_id",
+          giftRows.map((g) => g.ticket_id),
+        )
+    : { data: [] };
+  const giftStatus = new Map(
+    (giftStatusRes.data ?? []).map((s) => [s.ticket_id as string, s.status as string]),
+  );
+  const sentRides = giftRows
+    .filter((g) => (giftStatus.get(g.ticket_id) ?? "issued") === "issued")
+    .map((g) => {
+      const codes = g.tickets?.board_codes;
+      const code = Array.isArray(codes) ? codes[0]?.code : codes?.code;
+      return {
+        id: g.ticket_id,
+        fareCents: g.tickets?.fare_cents ?? 0,
+        routeName: g.tickets?.routes?.name ?? "",
+        code: code ?? "····",
+      };
+    });
 
   const claimMsgKey: DictKey | null =
     claimOutcome === "success"
@@ -175,6 +226,37 @@ export default async function WalletPage({
           </ul>
         )}
       </section>
+
+      {/* V6: rides sent live beside credit sent, because they answer the same
+          street moment. A gift the recipient has already used drops off this
+          list on its own: there is nothing left to hand over or take back. */}
+      {sentRides.length > 0 && (
+        <section
+          className="svika-card wallet-panel svika-animate-fade-up svika-rise-3"
+          data-testid="sent-rides"
+        >
+          <h2 className="svika-title">{t(lang, "gift.sentTitle")}</h2>
+          <ul className="transfer-list">
+            {sentRides.map((ride) => (
+              <li key={ride.id} className="transfer-item">
+                <div>
+                  <p className="svika-meta">
+                    {ride.routeName} ·{" "}
+                    <span className="svika-mono-code">{formatUsd(ride.fareCents)}</span>{" "}
+                    · {t(lang, "gift.sentPending")}
+                  </p>
+                  <p className="transfer-code svika-mono-code" data-testid="sent-ride-code">
+                    {ride.code}
+                  </p>
+                </div>
+                <Link className="auth-link" href={`/app/gift/${ride.id}`}>
+                  {t(lang, "gift.sentOpen")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="svika-card wallet-panel svika-animate-fade-up svika-rise-4">
         <h2 className="svika-title">{t(lang, "wallet.claimTitle")}</h2>

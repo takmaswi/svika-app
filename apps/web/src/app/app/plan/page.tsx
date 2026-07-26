@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getLang, t, type DictKey } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
 import { fetchNetwork } from "@/lib/network";
-import { bookTrip, saveTrip } from "@/lib/actions";
+import { bookTrip, giftRide, saveTrip } from "@/lib/actions";
 import { buildPlanOverlay } from "@/lib/map/plan-overlay";
 import { loadPlaces, resolvePlaceQuery, type GeoPlace } from "@/lib/geocode/search";
 import { fetchPublicPlaces } from "@/lib/geocode/public-places";
@@ -320,6 +320,24 @@ export default async function PlanPage({
                   {t(lang, "plan.reserveCash")}
                 </button>
               </form>
+            )}
+            {/* V6: a gift is one code handed over, so it needs a stop pair
+                and a single kombi. The link is quiet on purpose: paying for
+                your own ride stays the one primary action here. */}
+            {!isGuest && to.stop && plan.boardings === 1 && (
+              <form action={giftRide} className="plan-gift">
+                <input type="hidden" name="from" value={from.stop.id} />
+                <input type="hidden" name="to" value={to.stop.id} />
+                <button className="auth-link touch-target" type="submit" data-testid="gift-ride">
+                  {t(lang, "gift.planCta")}
+                </button>
+              </form>
+            )}
+            {err === "gifttransfer" && (
+              <p className="auth-error svika-body">{t(lang, "plan.giftTransfer")}</p>
+            )}
+            {err === "gift" && (
+              <p className="auth-error svika-body">{t(lang, "plan.giftErr")}</p>
             )}
           </>
         }

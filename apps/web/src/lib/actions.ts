@@ -205,6 +205,56 @@ export async function cancelTransfer(formData: FormData): Promise<void> {
 }
 
 /**
+ * Buys a ride for someone else (batch V6). The recipient needs no account and
+ * no wallet, only the board code, so a gift is a single direct leg: a code the
+ * sender can hand over in one message. A trip that needs a transfer is refused
+ * plainly rather than gifted as half a journey the recipient cannot finish.
+ */
+export async function giftRide(formData: FormData): Promise<void> {
+  const fromStop = String(formData.get("from") ?? "");
+  const toStop = String(formData.get("to") ?? "");
+  const back = `/app/plan?from=${encodeURIComponent(fromStop)}&to=${encodeURIComponent(toStop)}`;
+  if (!fromStop || !toStop || fromStop === toStop) redirect("/app");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?why=pay");
+
+  const network = await fetchNetwork(supabase);
+  const plan = planTrip(network, fromStop, toStop);
+  if (!plan) redirect(`${back}&err=noroute`);
+  const rideLegs = plan.legs.filter((l): l is RideLeg => l.type === "ride");
+  if (rideLegs.length !== 1) redirect(`${back}&err=gifttransfer`);
+
+  const leg = rideLegs[0]!;
+  const { data, error } = await supabase.rpc("gift_ticket", {
+    p_route: leg.routeId,
+    p_direction: leg.direction,
+    p_from_stop: leg.boardStopId,
+    p_to_stop: leg.alightStopId,
+  });
+  if (error) {
+    redirect(`${back}&err=${error.message.includes("insufficient") ? "balance" : "gift"}`);
+  }
+  const ticketId = (data as { ticket_id: string }[] | null)?.[0]?.ticket_id;
+  if (!ticketId) redirect(`${back}&err=gift`);
+  redirect(`/app/gift/${ticketId}`);
+}
+
+/** Takes a gifted ride back, if nobody has boarded it yet. */
+export async function revokeGift(formData: FormData): Promise<void> {
+  const ticket = String(formData.get("ticket") ?? "");
+  if (!ticket) redirect("/app/wallet");
+
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("revoke_gift", { p_ticket: ticket });
+  const outcome = (data as { outcome: string }[] | null)?.[0]?.outcome ?? "gift";
+  redirect(`/app/gift/${ticket}?done=${outcome}`);
+}
+
+/**
  * Books a parcel between two stops. Parcels ride one kombi, so the pair must
  * plan as a single direct leg; anything needing a transfer is refused with a
  * clear message instead of quietly booking half a journey.

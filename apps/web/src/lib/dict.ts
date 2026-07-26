@@ -590,6 +590,54 @@ export const dict = {
     en: "Position is demo movement. Plate, seats and counts come from the registry and the fare ledger.",
     sn: "Nzvimbo ndeyekuratidzira. Nhamba, zvigaro nehuwandu zvinobva muregistry nemubhuku remari.",
   },
+  // send a ride, not money (V6). The recipient is never named anywhere: the
+  // sender's own phone carries the code, and Svika never learns who they are.
+  "gift.planCta": { en: "Send this ride to someone", sn: "Tumira rwendo urwu kune mumwe" },
+  "gift.screenTitle": { en: "A ride you sent", sn: "Rwendo rwawatumira" },
+  "gift.codeLabel": { en: "Their board code", sn: "Kodhi yavo yekukwira" },
+  "gift.codeHint": {
+    en: "They show this to the hwindi. No account, no app.",
+    sn: "Vanoratidza hwindi iyi. Pasina account, pasina app.",
+  },
+  "gift.sendCta": { en: "Send the code", sn: "Tumira kodhi" },
+  "gift.copyCta": { en: "Copy the code", sn: "Koperani kodhi" },
+  "gift.copiedCta": { en: "Copied", sn: "Zvakopwa" },
+  "gift.shareMessage": {
+    en: "I have paid your kombi fare. {trip}. Show the hwindi this code: {code}. It works until {time}.",
+    sn: "Ndakubhadharira kombi. {trip}. Ratidza hwindi kodhi iyi: {code}. Inoshanda kusvika na{time}.",
+  },
+  "gift.privacy": {
+    en: "Svika never learns who you sent it to. Your own phone carries the message.",
+    sn: "Svika haizivi kuti wakatumira ani. Foni yako ndiyo inotakura shoko.",
+  },
+  "gift.revokeCta": { en: "Take it back", sn: "Dzosa" },
+  "gift.stampBoarded": { en: "Boarded", sn: "Vakwira" },
+  "gift.stampBack": { en: "Taken back", sn: "Yadzoswa" },
+  "gift.boardedNote": {
+    en: "Somebody boarded with this code. The fare is settled.",
+    sn: "Mumwe munhu akwira nekodhi iyi. Mari yagadziriswa.",
+  },
+  "gift.revokedNote": {
+    en: "Taken back. The fare is in your wallet again.",
+    sn: "Yadzoswa. Mari yadzokera muwallet yako.",
+  },
+  "gift.tooLate": {
+    en: "Too late: somebody already boarded with this code.",
+    sn: "Yanonoka: mumwe munhu atokwira nekodhi iyi.",
+  },
+  "gift.backToWallet": { en: "Back to wallet", sn: "Dzokera kuwallet" },
+  "gift.sentTitle": { en: "Rides you sent", sn: "Nzendo dzawatumira" },
+  "gift.sentPending": { en: "waiting to be used", sn: "yakamirira kushandiswa" },
+  "gift.sentOpen": { en: "Open", sn: "Vhura" },
+  "plan.giftTransfer": {
+    en: "This trip changes kombi, so it cannot be sent as one code yet.",
+    sn: "Rwendo urwu runochinja kombi, saka harugoni kutumirwa sekodhi imwe.",
+  },
+  "plan.giftErr": {
+    en: "That ride could not be sent. Try again.",
+    sn: "Rwendo urwu harwuna kukwanisa kutumirwa. Edza zvakare.",
+  },
+
   // last kombi countdown (V7). Every line says "usually": this is a
   // percentile over past evenings, never a timetable and never a promise.
   "lastKombi.title": { en: "Last kombi on {route}", sn: "Kombi yekupedzisira pa{route}" },

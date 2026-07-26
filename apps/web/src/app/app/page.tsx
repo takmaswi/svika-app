@@ -118,6 +118,7 @@ export default async function RiderHome({
     profileRes,
     kombiBoardRes,
     placeNames,
+    giftsRes,
   ] = await Promise.all([
     supabase
       .from("account_balances")
@@ -160,7 +161,7 @@ export default async function RiderHome({
     supabase
       .from("tickets")
       .select(
-        "from_stop_id, to_stop_id, purchased_at, from_stop:stops!tickets_from_stop_id_fkey(name), to_stop:stops!tickets_to_stop_id_fkey(name)",
+        "id, from_stop_id, to_stop_id, purchased_at, from_stop:stops!tickets_from_stop_id_fkey(name), to_stop:stops!tickets_to_stop_id_fkey(name)",
       )
       .eq("kind", "fare")
       .gte("purchased_at", lookbackIso)
@@ -177,11 +178,21 @@ export default async function RiderHome({
     supabase.rpc("kombi_board"),
     // batch M3 ruling 3: the names the city agreed on, over the corridor
     fetchCorridorPlaceNames(supabase),
+    // batch V6: rides this rider bought for somebody else. They are the
+    // buyer, so the tickets are theirs under RLS, but they are not the
+    // rider: these must never be offered to board and must never teach the
+    // commute miner a habit nobody has.
+    supabase.from("ticket_gifts").select("ticket_id"),
   ]);
 
   const balance = balanceRes.data?.balance_cents ?? 0;
   const savedTrips = (savedRes.data ?? []) as unknown as SavedTripRow[];
-  const tickets = (ticketsRes.data ?? []) as unknown as TicketRow[];
+  const gifted = new Set(
+    (giftsRes.data ?? []).map((g) => g.ticket_id as string),
+  );
+  const tickets = ((ticketsRes.data ?? []) as unknown as TicketRow[]).filter(
+    (ticket) => !gifted.has(ticket.id),
+  );
   const fullName = profileRes.data?.full_name ?? null;
   const toWord = t(lang, "common.to");
 
@@ -215,14 +226,16 @@ export default async function RiderHome({
   // the alert plays on any stage clock; the mined route, the live ETA and the
   // basis label stay real. See docs/SPINE-2-COMMUTE-ALERTS.md.
   interface HistoryRow {
+    id: string;
     from_stop_id: string;
     to_stop_id: string;
     purchased_at: string;
     from_stop: { name: string } | null;
     to_stop: { name: string } | null;
   }
-  const facts: RideFact[] = ((historyRes.data ?? []) as unknown as HistoryRow[]).map(
-    (r) => ({
+  const facts: RideFact[] = ((historyRes.data ?? []) as unknown as HistoryRow[])
+    .filter((r) => !gifted.has(r.id))
+    .map((r) => ({
       fromStopId: r.from_stop_id,
       toStopId: r.to_stop_id,
       fromName: r.from_stop?.name ?? "",
