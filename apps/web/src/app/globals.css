@@ -2361,6 +2361,62 @@ body:has(.home-screen) .demo-account-chip ~ .guardian-chip {
 }
 
 /* --- save a trip (plan page) --------------------------------------------- */
+/* V4 live fare board: the day as it happened, one bar per hour that carried
+   a fare. Bars are park toned because they are information and not a warning
+   (the §2 calm tone, deviation 13 grammar); nothing here is an opinion. */
+.fare-board {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.fare-board .peek-label {
+  margin: 0;
+}
+.fare-board-line {
+  margin: 0;
+}
+.fare-board-range {
+  color: var(--color-ink-soft);
+}
+.fare-board-hours {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 68px;
+}
+.fare-board-hour {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+.fare-board-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-park, #d9e8cc);
+}
+.fare-board-hour-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+}
+.fare-board-counted,
+.fare-board-basis {
+  margin: 0;
+  color: var(--color-ink-soft);
+}
+
 /* V6: sending a ride is a quiet third option under the pay row, never a
    competing CTA. Paying for your own ride stays the one primary action. */
 .plan-gift {

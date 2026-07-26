@@ -590,6 +590,21 @@ export const dict = {
     en: "Position is demo movement. Plate, seats and counts come from the registry and the fare ledger.",
     sn: "Nzvimbo ndeyekuratidzira. Nhamba, zvigaro nehuwandu zvinobva muregistry nemubhuku remari.",
   },
+  // live fare board (V4): what riders actually paid today. History, never
+  // editorial: no line here judges a fare or guesses the next one.
+  "fareBoard.title": { en: "What riders paid today", sn: "Zvakabhadharwa nhasi" },
+  "fareBoard.typical": { en: "Most paid {fare}", sn: "Vazhinji vakabhadhara {fare}" },
+  "fareBoard.range": { en: "from {low} to {high}", sn: "kubva {low} kusvika {high}" },
+  "fareBoard.counted": {
+    en: "{count} fares counted so far today",
+    sn: "Mari {count} dzaverengwa nhasi",
+  },
+  "fareBoard.busiest": { en: "busiest around {hour}", sn: "yakanyanya kubatikana {hour}" },
+  "fareBoard.basis": {
+    en: "Counted from digital tickets on this route. Not a prediction and not a recommendation.",
+    sn: "Kuverengwa kwematikiti edhijitari panzira iyi. Haisi fungidziro kana zano.",
+  },
+
   // demand beacon (V8): a signal, never a dispatch. The law line is on
   // screen because a rider deserves to know exactly what they just told the
   // world, and exactly what nobody can do with it.

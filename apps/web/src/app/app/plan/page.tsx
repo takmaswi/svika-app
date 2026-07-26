@@ -10,11 +10,14 @@ import { fetchPublicPlaces } from "@/lib/geocode/public-places";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { HomeSheet } from "@/components/home/HomeSheet";
 import { LastKombiCard } from "@/components/plan/LastKombiCard";
+import { FareBoard } from "@/components/plan/FareBoard";
 import { planLastKombi } from "@/lib/last-kombi";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 import {
   formatMinuteOfDay,
   formatUsd,
+  summariseFareBoard,
+  type FareBucket,
   planToPoint,
   planTrip,
   resolveStopQuery,
@@ -188,6 +191,25 @@ export default async function PlanPage({
   const lastKombi = await planLastKombi(
     supabase,
     plan.legs.filter((leg) => leg.type === "ride"),
+  );
+
+  // V4: what riders on the first ride leg's route actually paid today. One
+  // group by, one pure summariser, no opinion. An empty day shows nothing.
+  const firstRide = plan.legs.find((leg) => leg.type === "ride");
+  const fareBucketsRes = firstRide
+    ? await supabase.rpc("fares_paid_today", {
+        p_route: firstRide.routeId,
+        p_direction: firstRide.direction,
+      })
+    : { data: null };
+  const fareBoard = summariseFareBoard(
+    ((fareBucketsRes.data ?? []) as { hour: number; fare_cents: number; tickets: number }[]).map(
+      (r): FareBucket => ({
+        hour: r.hour,
+        fareCents: r.fare_cents,
+        tickets: r.tickets,
+      }),
+    ),
   );
 
   const overlay = buildPlanOverlay(
@@ -442,6 +464,20 @@ export default async function PlanPage({
               )}
             </form>
           ))}
+
+        {fareBoard && (
+          <FareBoard
+            board={fareBoard}
+            strings={{
+              title: t(lang, "fareBoard.title"),
+              typical: t(lang, "fareBoard.typical"),
+              range: t(lang, "fareBoard.range"),
+              counted: t(lang, "fareBoard.counted"),
+              busiest: t(lang, "fareBoard.busiest"),
+              basis: t(lang, "fareBoard.basis"),
+            }}
+          />
+        )}
 
         <Link
           className="auth-link touch-target"

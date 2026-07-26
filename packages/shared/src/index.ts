@@ -10,3 +10,4 @@ export * from "./trace-guide";
 export * from "./place-wordlist";
 export * from "./plan-trace-mismatch";
 export * from "./last-kombi";
+export * from "./fare-board";
