@@ -150,3 +150,28 @@ changes. Ratified by Mhofu on the M3 gate (2026-07-26).
 
 Note for the home map (ruling 3): public names render there in the
 unmodified section 7 chip, so that placement adds no deviation of its own.
+
+## 15. Loading skeletons (M4, spec gap, awaiting ratification)
+
+**The gap:** DESIGN.md has no loading state. Every rider screen in this app is
+a server render that waits on the database, so on the reference device (cheap
+Android, slow connection) the honest choice is between a white page and
+something that says "this is coming".
+
+**Built by the extract only rule, from what the spec does have:** the section 8
+card, the section 12 rise, and park toned bars standing in for lines of copy.
+No spinner (the spec has none, and a spinner says "wait" rather than "here is
+what is coming"), no new colour, no new shape. By night the bars become the
+same white wash the night overlay cards use, because park would glow on char.
+The pulse stops entirely under reduced motion, per the spec's own motion law,
+and the skeleton announces itself to screen readers because a visual shimmer
+says nothing to a rider who cannot see it.
+
+**Where it applies:** the eight data screens whose shape is known before the
+data lands (wallet, journeys, family, places, owner, profile, parcel,
+intelligence). Screens whose whole shape depends on the answer (the plan
+screen, a ticket) deliberately have none: a skeleton that guesses wrong makes
+the screen jump when the real content arrives, which is worse than waiting.
+
+**For Mhofu:** ratify the treatment, or replace it with a spec addition of your
+own. Nothing else in the app depends on the choice.

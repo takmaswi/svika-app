@@ -51,3 +51,33 @@ test.describe("saved trips", () => {
     await expect(page.locator(".home-pick", { hasText: "Town trip" })).toHaveCount(0);
   });
 });
+
+// M4 (the D1 follow-up): a trip to a named place saves the same way a stop
+// pair does, and the quick pick replans it. saved_trips carries the
+// destination's own name and coordinates now (migration 0046) rather than
+// pretending a place is a stop.
+test.describe("saving a trip to a place", () => {
+  test("a place destination saves and comes back as a quick pick", async ({ page }) => {
+    await loginAs(page, "RIDER");
+    const nickname = `Place ${Date.now().toString(36).slice(-4)}`;
+
+    await page.goto(
+      `/app/plan?from=${encodeURIComponent("2nd boom gate")}&to=${encodeURIComponent("University of Zimbabwe")}`,
+    );
+    await expect(page.getByTestId("home-sheet")).toBeVisible({ timeout: 20_000 });
+    await page.locator(".home-sheet-grabber").click();
+
+    await page.fill("#nickname", nickname);
+    await page.locator(".plan-save-cta").click();
+    await expect(page.getByTestId("trip-saved")).toBeVisible({ timeout: 20_000 });
+
+    // the quick pick names the place and replans to it
+    await page.goto("/app?sheet=open");
+    const pick = page.locator(".home-pick", { hasText: nickname });
+    await expect(pick).toBeVisible({ timeout: 20_000 });
+    await expect(pick).toContainText("University of Zimbabwe");
+    await pick.locator(".home-pick-link").click();
+    await expect(page).toHaveURL(/to=University/i, { timeout: 20_000 });
+    await expect(page.getByTestId("plan-trade")).toBeVisible();
+  });
+});

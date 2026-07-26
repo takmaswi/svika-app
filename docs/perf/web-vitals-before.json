@@ -1,0 +1,79 @@
+{
+  "profile": {
+    "viewport": {
+      "width": 360,
+      "height": 740
+    },
+    "cpuSlowdown": 4,
+    "network": "Fast 3G (1.6 Mbps down, 150 ms RTT)",
+    "server": "http://localhost:3200"
+  },
+  "routes": [
+    {
+      "route": "landing",
+      "path": "/",
+      "fcpMs": 3362,
+      "lcpMs": 4591,
+      "cls": 0,
+      "domContentLoadedMs": 3539,
+      "transferredKb": 533,
+      "requests": 26,
+      "wallClockMs": 11453
+    },
+    {
+      "route": "home",
+      "path": "/app",
+      "fcpMs": 3575,
+      "lcpMs": 3575,
+      "cls": 0,
+      "domContentLoadedMs": 4440,
+      "transferredKb": 593,
+      "requests": 25,
+      "wallClockMs": 9354
+    },
+    {
+      "route": "plan",
+      "path": "/app/plan?from=2nd%20boom%20gate&to=Rezende%20Rank",
+      "fcpMs": 3595,
+      "lcpMs": 3595,
+      "cls": 0.0014,
+      "domContentLoadedMs": 3720,
+      "transferredKb": 755,
+      "requests": 25,
+      "wallClockMs": 12382
+    },
+    {
+      "route": "kombis",
+      "path": "/app/kombis",
+      "fcpMs": 2548,
+      "lcpMs": 3296,
+      "cls": 0.0407,
+      "domContentLoadedMs": 2716,
+      "transferredKb": 228,
+      "requests": 13,
+      "wallClockMs": 7511
+    },
+    {
+      "route": "wallet",
+      "path": "/app/wallet",
+      "fcpMs": 3200,
+      "lcpMs": 3931,
+      "cls": 0.0002,
+      "domContentLoadedMs": 3325,
+      "transferredKb": 240,
+      "requests": 13,
+      "wallClockMs": 8196
+    },
+    {
+      "route": "places",
+      "path": "/app/places",
+      "fcpMs": 2088,
+      "lcpMs": 3113,
+      "cls": 0.0001,
+      "domContentLoadedMs": 2094,
+      "transferredKb": 560,
+      "requests": 17,
+      "wallClockMs": 9185
+    }
+  ]
+}
