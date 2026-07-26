@@ -423,7 +423,7 @@ export default async function PlanPage({
           )}
         </ol>
 
-        {to.stop && isGuest && (
+        {(to.stop || destPlace) && isGuest && (
           <Link
             className="auth-link touch-target"
             href={`/login?why=save&next=${encodeURIComponent(planUrl)}`}
@@ -432,7 +432,7 @@ export default async function PlanPage({
             {t(lang, "guest.saveLink")}
           </Link>
         )}
-        {to.stop &&
+        {(to.stop || destPlace) &&
           !isGuest &&
           (justSaved ? (
             <p className="svika-body plan-saved" data-testid="trip-saved">
@@ -441,7 +441,18 @@ export default async function PlanPage({
           ) : (
             <form action={saveTrip} className="plan-save">
               <input type="hidden" name="from" value={from.stop.id} />
-              <input type="hidden" name="to" value={to.stop.id} />
+              {to.stop ? (
+                <input type="hidden" name="to" value={to.stop.id} />
+              ) : (
+                // M4 (the D1 follow-up): a place destination saves its own
+                // name and coordinates, so the quick pick replans the same
+                // trip later without needing a stop that does not exist
+                <>
+                  <input type="hidden" name="dest" value={destPlace!.name} />
+                  <input type="hidden" name="destLat" value={destPlace!.lat} />
+                  <input type="hidden" name="destLng" value={destPlace!.lng} />
+                </>
+              )}
               <label className="svika-meta" htmlFor="nickname">
                 {t(lang, "plan.saveTitle")}
               </label>

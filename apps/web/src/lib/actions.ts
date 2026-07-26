@@ -143,9 +143,20 @@ export async function bookTrip(formData: FormData): Promise<void> {
 export async function saveTrip(formData: FormData): Promise<void> {
   const fromStop = String(formData.get("from") ?? "");
   const toStop = String(formData.get("to") ?? "");
+  // M4 (the D1 follow-up): a saved trip can now end at a named place instead
+  // of a stop. The destination's own name and coordinates are stored, which
+  // is exactly what the planner needs to rebuild the same plan later.
+  const destName = String(formData.get("dest") ?? "").trim();
+  const destLat = Number(formData.get("destLat"));
+  const destLng = Number(formData.get("destLng"));
   const nickname = String(formData.get("nickname") ?? "").trim();
-  const back = `/app/plan?from=${encodeURIComponent(fromStop)}&to=${encodeURIComponent(toStop)}`;
-  if (!fromStop || !toStop || fromStop === toStop) redirect("/app");
+  const toParam = toStop || destName;
+  const back = `/app/plan?from=${encodeURIComponent(fromStop)}&to=${encodeURIComponent(toParam)}`;
+  const toPlace = !toStop && destName !== "";
+  if (!fromStop || !toParam || fromStop === toStop) redirect("/app");
+  if (toPlace && !(Number.isFinite(destLat) && Number.isFinite(destLng))) {
+    redirect(`${back}&err=save`);
+  }
   if (nickname.length < 1 || nickname.length > 40) redirect(`${back}&err=nickname`);
 
   const supabase = await createClient();
@@ -154,15 +165,39 @@ export async function saveTrip(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { error } = await supabase.from("saved_trips").upsert(
-    {
+  let error;
+  if (toPlace) {
+    // A place trip's uniqueness lives in a PARTIAL index (a stop pair trip
+    // has a null dest_name and must not collide with it), and PostgREST
+    // cannot infer ON CONFLICT from a partial index. So saving the same place
+    // again replaces the old row rather than upserting onto it. Plain rider
+    // owned data under RLS, no money, so a replace is safe.
+    await supabase
+      .from("saved_trips")
+      .delete()
+      .eq("rider_id", user.id)
+      .eq("from_stop_id", fromStop)
+      .eq("dest_name", destName);
+    ({ error } = await supabase.from("saved_trips").insert({
       rider_id: user.id,
       from_stop_id: fromStop,
-      to_stop_id: toStop,
+      to_stop_id: null,
+      dest_name: destName,
+      dest_lat: destLat,
+      dest_lng: destLng,
       nickname,
-    },
-    { onConflict: "rider_id,from_stop_id,to_stop_id" },
-  );
+    }));
+  } else {
+    ({ error } = await supabase.from("saved_trips").upsert(
+      {
+        rider_id: user.id,
+        from_stop_id: fromStop,
+        to_stop_id: toStop,
+        nickname,
+      },
+      { onConflict: "rider_id,from_stop_id,to_stop_id" },
+    ));
+  }
   if (error) redirect(`${back}&err=save`);
   redirect(`${back}&saved=1`);
 }

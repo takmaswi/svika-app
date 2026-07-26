@@ -54,7 +54,9 @@ interface SavedTripRow {
   id: string;
   nickname: string;
   from_stop_id: string;
-  to_stop_id: string;
+  /** null on a trip saved to a named place (M4, the D1 follow-up). */
+  to_stop_id: string | null;
+  dest_name: string | null;
   from_stop: { name: string } | null;
   to_stop: { name: string } | null;
 }
@@ -128,7 +130,7 @@ export default async function RiderHome({
     supabase
       .from("saved_trips")
       .select(
-        "id, nickname, from_stop_id, to_stop_id, from_stop:stops!saved_trips_from_stop_id_fkey(name), to_stop:stops!saved_trips_to_stop_id_fkey(name)",
+        "id, nickname, from_stop_id, to_stop_id, dest_name, from_stop:stops!saved_trips_from_stop_id_fkey(name), to_stop:stops!saved_trips_to_stop_id_fkey(name)",
       )
       .order("created_at", { ascending: false })
       .limit(4),
@@ -213,9 +215,14 @@ export default async function RiderHome({
   const etaProvider = homeEtaProvider(corridorStopIds);
   const etaByTrip = new Map<string, EtaEstimate>();
   for (const trip of savedTrips) {
+    // A trip saved to a place (M4) has no alight stop to aim at, so the
+    // spine cannot measure that leg and the provider falls back to its mock
+    // twin, which the basis label on the card already says out loud. Working
+    // out the alight stop would mean replanning every quick pick on every
+    // home render; it is not worth that, and a wrong number would be worse.
     etaByTrip.set(
       trip.id,
-      await etaProvider.estimate(trip.from_stop_id, trip.to_stop_id),
+      await etaProvider.estimate(trip.from_stop_id, trip.to_stop_id ?? ""),
     );
   }
 
@@ -708,14 +715,17 @@ export default async function RiderHome({
                   <li key={trip.id} className="home-pick svika-card">
                     <Link
                       className="home-pick-link touch-target"
-                      href={`/app/plan?from=${trip.from_stop_id}&to=${trip.to_stop_id}`}
+                      href={`/app/plan?from=${trip.from_stop_id}&to=${encodeURIComponent(
+                        trip.to_stop_id ?? trip.dest_name ?? "",
+                      )}`}
                     >
                       <span className="home-pick-body">
                         <span className="svika-body home-pick-name">
                           {trip.nickname}
                         </span>
                         <span className="svika-meta">
-                          {trip.from_stop?.name} {toWord} {trip.to_stop?.name}
+                          {trip.from_stop?.name} {toWord}{" "}
+                          {trip.to_stop?.name ?? trip.dest_name}
                         </span>
                       </span>
                     </Link>

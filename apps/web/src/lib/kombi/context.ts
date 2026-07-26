@@ -19,7 +19,13 @@ export interface KombiStopContext {
 
 export function riderStopContext(
   corridorRows: CorridorStopRowLike[],
-  savedTrip: { from_stop_id: string; to_stop_id: string } | null | undefined,
+  // to_stop_id is null on a trip saved to a named place (M4): that trip
+  // cannot say which way along the corridor the rider is going, so it is
+  // treated as no saved trip at all and the default rank answers.
+  savedTrip:
+    | { from_stop_id: string; to_stop_id: string | null }
+    | null
+    | undefined,
 ): KombiStopContext | null {
   if (corridorRows.length < 2) return null;
   const orderedIds = corridorRows.map((r) => r.stop_id);
@@ -31,7 +37,7 @@ export function riderStopContext(
     inbound: corridorRows[0]!.stops?.name ?? "",
   };
 
-  if (savedTrip) {
+  if (savedTrip && savedTrip.to_stop_id) {
     const direction = tripDirection(
       orderedIds,
       savedTrip.from_stop_id,
