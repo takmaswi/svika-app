@@ -80,6 +80,25 @@ synthetic e2e walks (mocked browser geolocation, named as such) and the
 real 2026-07-07 walking leg replayed through the app for the M1 gate
 evidence (real geometry, replay timestamps).
 
+### Place names and shortcuts (M3, 2026-07-26)
+
+Batch M3 lets riders name the city: `place_names` and `shortcut_paths`
+(migration 0038) hold names and walking shapes riders typed and flagged
+by hand. A row is born personal, readable only by its author under RLS
+(the PL checks in the security suite); community rows (suggested,
+public) are minted only by the scheduled counting rule described in
+AI-USAGE-MAP.md and carry no author column at all: aggregated knowledge,
+not personal data. The rate limit attempt log stores outcomes only,
+never the typed name: a rejected name is not ours to keep. anonymise_me
+deletes a rider's personal names and shortcuts; community rows stay,
+exactly like any other promoted history. As of this date the tables hold
+only team test artifacts: the promotion suite and the naming e2e write
+uniquely named rows at random spots away from the corridor, clean up
+their personal rows, and hide their own community rows through the
+report rail, so nothing they made surfaces in search, recommendations or
+rendering. No real crowd data exists yet; when it does, this file gains
+its counts and provenance first.
+
 ### What is deliberately not collected
 
 No background location tracking of people, no data from anyone outside

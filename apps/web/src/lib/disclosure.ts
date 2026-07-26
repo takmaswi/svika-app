@@ -14,7 +14,7 @@ export interface DisclosureRow {
 }
 
 // The date the canonical register was last updated (docs/DISCLOSURE-REGISTER.md).
-export const DISCLOSURE_UPDATED = "2026-07-25";
+export const DISCLOSURE_UPDATED = "2026-07-26";
 
 export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
   {
@@ -198,6 +198,12 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
     tier: 1,
     detail:
       "Real. A link exists only after both sides act: the guardian mints a rate limited invite code, the child enters it on their own phone, and either side ends it instantly. While a link is on, the child's app always shows a visible chip on every screen: no silent tracking, by design. The guardian sees the linked child's fare trips as status words only (booked, on the kombi, arrived), never board codes, fares, wallet or coordinates, RLS proven. Safe arrival is the rider's own tap appended to the event stream; the taking longer than usual flag is a plain timing rule over the route's typical duration and its copy flags trips, never people. No SMS or messaging vendor: the guardian contact link travels through the phone's own share sheet.",
+  },
+  {
+    feature: "Places layer: names and shortcuts (M3)",
+    tier: 1,
+    detail:
+      "Real. Riders name stops, gates and landmarks; a saved walking trip flags as a shortcut. Everything a rider types is born personal and visible to them alone, RLS proven. Promotion to a suggested then public community name is a counting rule, not a model: three independent established authors at the same spot with a similar name, then five distinct authors tapping the suggestion, shortcuts by a distance bound between walked shapes, all run by a scheduled pass. Safety rails are server enforced: daily caps and burst limits with outcome only attempt logs (never the typed name), a bilingual wordlist screened on the phone and again by the server before even a personal save, and a report door where three distinct reporters hide a community name. History is never rewritten and no rail ever names a person. Public names join the destination search the moment they are public.",
   },
   {
     feature: "Guest mode (V2)",

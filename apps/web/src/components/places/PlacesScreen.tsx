@@ -207,8 +207,9 @@ export function PlacesScreen({
       p_place: placeId,
     });
     if (!error && data?.[0]?.outcome === "success") {
+      // the row keeps its reported note for this visit even when the third
+      // report just hid the name; the map catches up on the next load
       setReported((prev) => new Set(prev).add(placeId));
-      void refreshNearby();
     }
   };
 
