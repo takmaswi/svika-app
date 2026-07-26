@@ -5,7 +5,7 @@ working against the live database. Tier 2 is clickable with a fixed or
 simulated backend, always labelled on screen. Tier 3 lives in slides only and
 never in code. We never present a Tier 2 surface as live to judges.
 
-Last updated: 2026-07-26 (V4 live fare board row added; V8 demand beacon row added; V6 gifted rides row added; V7 last kombi countdown row added; V5 rank pulse row added, kombi board row corrected now that fares carry a vehicle. Earlier: V3 guardian mode row added. Earlier: product branch P1 strip removed demo door, story mode, sandbox shelf and vision scene rows; the frozen main deployment keeps its own register).
+Last updated: 2026-07-26, the product branch close (see docs/PRODUCT-BRANCH-CLOSE-REPORT.md). Goal 8 added five rows: V5 rank pulse, V7 last kombi countdown, V6 gifted rides, V8 demand beacon, V4 live fare board, and corrected the kombi board row now that fares carry a vehicle. Earlier: V3 guardian mode row added. Earlier: product branch P1 strip removed demo door, story mode, sandbox shelf and vision scene rows; the frozen main deployment keeps its own register).
 
 This register is mirrored on screen at /register (a judge can open it from the landing footer). The page reads apps/web/src/lib/disclosure.ts; keep that module and this file in step in the same commit.
 

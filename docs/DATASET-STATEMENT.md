@@ -4,7 +4,7 @@ What data Svika runs on, what is real, what is synthetic, and how the
 synthetic gets checked against the real. This file is maintained: it changes
 in the same commit as any change to the data. Rubric anchor: C3.
 
-Last updated: 2026-07-24.
+Last updated: 2026-07-26, the product branch close.
 
 ## Real data
 
@@ -267,6 +267,17 @@ Until step 1 is possible, the honesty line is: the detector is real and its
 evaluation is real, but it is proven on data whose shape we chose. The
 config assumptions are flagged, the seed is committed, and every synthetic
 row is labelled in the schema, on screen, and here.
+
+## State at the product branch close (2026-07-26)
+
+Real: two corridor rides recorded by the team on 2026-07-07, the OSM extract
+and everything derived from it, the fare ledger as it actually stands, and
+the rider recorded journeys, place names, feedback and vehicle linked fares
+that the team's own test accounts have produced. Generated and labelled:
+the watchdog's ticket history, the evening service history (V7), the moving
+kombi positions, and the placeholder voice recordings. Nothing else exists.
+
+No data from anyone outside the team has entered this system.
 
 ## Licensing and rights
 

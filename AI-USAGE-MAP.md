@@ -39,5 +39,8 @@ Each spine is a purpose built model measured against a named baseline. Do not re
 ## The dataset
 The Shona to English transport lingo dataset is ours to build, label, and own. It is the moat and the reason native AI becomes viable. Rent the engine now, build the data asset in parallel, drop the dependency once the dataset is big enough to fine tune on.
 
+## The state of this file at the product branch close (2026-07-26)
+Goal 8 added five features and not one of them is AI: rank pulse (a count), the last kombi countdown (a percentile), gifted rides (a purchase and a refund), the demand beacon (counting rows) and the fare board (a group by). That is the point. Every one of them was a candidate for a model and every one of them is better as arithmetic, which is exactly what the rubric asks a team to be able to say. The three spines are still the only models, and they still keep their baselines and metrics tables.
+
 ## One line summary
 Gemini 2.5 Flash resolves language today and is replaced by a self hosted fine tuned model in production. The three spines (ETA, commute alerts, anomaly) are the real AI and stay custom. Trip planning, saving trips, and voice are not AI.
