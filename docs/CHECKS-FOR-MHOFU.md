@@ -4,7 +4,7 @@ Open questions and numbers that need your eyes. None of them block the build.
 Work continues on documented assumptions; you review this list when phase 1
 is done. Each item says what was assumed and what changes if you disagree.
 
-Last updated: 2026-07-25.
+Last updated: 2026-07-26.
 
 ## 1. Watchdog simulator numbers (task 5)
 
@@ -171,3 +171,37 @@ fast). Both lists are machine drafted. They need:
 Deliberately not hand polished in the meantime: guessing at this list is
 exactly the failure mode the pass exists to catch. Growing the list is a
 migration by design, so its history stays reviewable.
+
+## 14. The recording queue has no cap (C10, batch Partner, OPEN)
+
+Logged on your instruction at the Goal 9 close so it does not get forgotten.
+Inherited from M1, not introduced by the partner batch, and the one item in
+the gps-logger audit that this batch named as **not fixed**.
+
+What happens today: a journey recorded on the phone keeps every one of its
+local points in IndexedDB forever, including after the server has confirmed
+them. Nothing prunes and nothing counts. A partner who records a full data
+day of walks and rides will eventually reach the browser's storage quota,
+and when that happens the failure has no name: the write simply fails and
+the recorder does not say why. On a cheap Android with a nearly full phone
+this arrives sooner than on a test machine.
+
+The proposed cap, which needs your ruling before any code deletes anything:
+
+- drop the point rows of a journey once it is **saved and the server has
+  confirmed** it, keeping the journey itself, its legs, its marked stops and
+  its summary (distance, duration, mode) so the trip and the contribution
+  counts survive untouched,
+- keep the points of the most recent few saved journeys so a rider can still
+  look back at a trace they just walked,
+- keep every unsynced journey forever regardless, since that is the offline
+  first promise and the whole point of the local queue, and
+- if the quota is hit anyway, stop the recording with a named message the
+  rider can act on instead of a silent failure.
+
+Why it is parked rather than done: pruning is code that deletes a rider's
+own data, and the conservative option at a gate is not to start doing that
+on the back of a report. It also wants a number from you (how many recent
+traces are worth keeping) that no test can supply. Nothing breaks in the
+meantime; this is a wall a heavy partner meets after many days, not a bug a
+demo hits.

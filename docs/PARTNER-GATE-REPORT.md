@@ -1,8 +1,12 @@
 # Partner gate report — Svika Partner: data collection comes into the app
 
-Date: 2026-07-26 · Branch: product · Status: **PASSED, awaiting rulings**
+Date: 2026-07-26 · Branch: product · Status: **PASSED, ruled**
 (commits 586cb44..9ab2d4e, never pushed, never deployed; migrations 0047
 and 0048, both additive, demo machinery untouched)
+
+All eight open questions are ruled below: four by Mhofu on 2026-07-26, four
+taken conservatively on his instruction and standing until he says otherwise.
+No ruling changed a line of code; all four of his confirmed what shipped.
 
 Goal 9. Bring corridor data collection into the main app as a consented
 rider facing feature, close the gaps between what the standalone field
@@ -95,8 +99,9 @@ re imported.
 
 - **C10, storage pressure.** The in app recorder inherits the same
   unbounded IndexedDB growth. A saved and uploaded journey could drop its
-  local points once the server confirms them; it does not yet. Logged for
-  Mhofu below rather than quietly left out.
+  local points once the server confirms them; it does not yet. Ruled at the
+  close (item 7 below) and carried as a named follow up with a proposed cap:
+  `docs/CHECKS-FOR-MHOFU.md` item 14.
 - The logger's own bugs are **not** patched in `tools/gps-logger`. It is
   frozen as the record of how the first real data was collected (step 5),
   marked superseded, and its 28 tests still pass as they always did.
@@ -258,39 +263,62 @@ pattern was invented.
 - No new DESIGN.md deviation is claimed; nothing here needed a pattern the
   spec does not cover.
 
-## Open questions for Mhofu
+## Rulings
 
-These are decisions I made to keep moving. Each is reversible and each
-wants a ruling.
+The eight questions this batch carried, and how each was settled.
 
-1. **The consent model.** Partner mode is a consent stream (`partner-v1`),
-   not a preference row, so the history of who agreed and when is append
-   only like every other consent. Correct?
-2. **Where the tagging controls live.** They appear only under a live
-   partner consent, so a rider who just wants to record a walk keeps the
-   plain M1 screen. The alternative was showing them to everyone and letting
-   partner mode decide only what uploads. I chose the quieter screen.
-3. **Rows already contributed stay contributed** when a rider turns partner
-   mode off. The notice says so plainly ("What you already sent stays part
-   of the map"), and `anonymise_me` still removes everything. The
-   alternative is retracting contributions on opt out, which would mean the
-   network can silently lose road geometry that other riders' estimates now
-   stand on.
-4. **`mixed` now means a transfer** (two or more kombis), derived from the
-   legs rather than from the chip the rider tapped before starting. This
-   changes what an existing `mixed` row means in principle; in practice no
-   real rider data exists yet.
-5. **The caps**, proposed and unratified: 60 legs and 200 marks per trip,
-   90 seconds before a GPS fix is too stale to mark on. All three are
-   sanity walls far above real use, not tuned numbers.
-6. **The route is a maintainer's call.** `--partner` takes a `--route CODE`
-   and the pipeline infers direction from geometry, ignoring the typed route
-   name entirely. That means partner trips do not self file onto routes, and
-   a batch is a deliberate act. I think that is right for a network with one
-   coded route; it needs revisiting when there are twenty.
-7. **C10 is still open**: a saved and uploaded journey could drop its local
-   points once the server confirms them, and does not. On a cheap phone a
-   full data day will eventually hit the storage quota with no named
-   failure. Inherited from M1, not introduced here, and not fixed here.
-8. **The Shona strings** in this batch are machine drafted and ride the
-   standing external translator pass, same as M3 and D2.
+### Ruled by Mhofu, 2026-07-26
+
+1. **The consent model — partner mode is a consent stream. RULED YES.**
+   Helping with data collection is consent, not a settings preference, so it
+   lives with the same machinery as every other consent: `partner-v1`, append
+   only, newest row wins, off by default. No boolean column anywhere. This is
+   what shipped in 0047; nothing changed.
+2. **Tagging controls appear only for partners. RULED YES.** A rider
+   recording a plain walk keeps the plain M1 screen and never sees a data
+   collection button they did not ask for. The alternative (show the controls
+   to everyone, let partner mode decide only what uploads) is rejected.
+3. **Rows already contributed stay contributed on opt out. RULED YES,**
+   because the notice says so plainly before anyone agrees ("What you already
+   sent stays part of the map"). Opting out stops new collection; it does not
+   pull road geometry out from under other riders' estimates. Identity is
+   covered by the existing anonymise path on the your data page, which still
+   removes everything the rider ever sent.
+4. **`mixed` means a transfer, derived from the legs. RULED YES.** Two or
+   more riding legs make a trip mixed, whatever chip the rider tapped before
+   starting.
+
+### Taken conservatively on Mhofu's instruction, 2026-07-26
+
+Each of these takes the cautious option and stands until he rules otherwise.
+
+5. **The caps stay exactly as shipped and do not move on a hunch.** 60 legs
+   and 200 marks per trip, 90 seconds before a GPS fix is too stale to mark
+   on. They are sanity walls far above real use, not tuned numbers, and the
+   conservative reading is that a wall you have never hit is a wall you leave
+   standing. Raising any of them waits for a real field ride that actually
+   hits one, and happens in a migration so the change stays reviewable.
+6. **A partner trip never files itself onto a route.** `--partner` keeps
+   taking a hand named `--route CODE`, keeps inferring direction from
+   geometry rather than from the route name a rider typed, and keeps
+   `--dry-run` as the first thing a maintainer runs. Nothing a rider records
+   enters the network without a person deciding it should. This is the slower
+   option on purpose; it needs revisiting when there are twenty coded routes,
+   not one.
+7. **C10 is not fixed quietly here.** A saved and uploaded journey still
+   keeps its local points forever, so a full data day on a cheap phone will
+   eventually reach the browser storage quota with no named failure.
+   Inherited from M1, not introduced by this batch. The conservative option
+   is not to start deleting a rider's local data on the back of a gate
+   report, so it is logged instead as **CHECKS item 14** with a proposed cap
+   (prune the points of journeys the server has already confirmed, keep the
+   most recent few, and fail by name rather than by quota) and it waits for a
+   ruling before any code deletes anything.
+8. **The Shona in this batch is placeholder and is labelled as such.**
+   Roughly 60 new keys (`partner.*`, `journey.leg*`, `journey.mark*`,
+   `yourdata.journeys`, `yourdata.partnerTrips`) are machine drafted and ride
+   the standing external translator pass under CHECKS item 5. Nothing partner
+   facing is presented as verified Shona. The worksheet
+   (`docs/shona-translation-worksheet.csv`) is not topped up here because it
+   is open on Mhofu's desk mid fill; the key list above is what the top up
+   needs when he is done with it.
