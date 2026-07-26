@@ -70,13 +70,25 @@ describe("sync batching", () => {
     expect(planBatches([pt(0), pt(1)], 1)).toHaveLength(0);
   });
 
-  test("the RPC row carries the 0033 column names", () => {
+  test("the RPC row carries the 0033 column names plus 0047's leg", () => {
     expect(toRpcPoint(pt(7))).toEqual({
       seq: 7,
       lat: -17.8,
       lng: 31,
       accuracy_m: 10,
       recorded_at: new Date(7000).toISOString(),
+      leg_index: 0,
     });
+  });
+
+  test("a point recorded before legs existed still uploads, on leg 0", () => {
+    // migration 0047 made leg_index optional at the door and defaulted the
+    // column, so an IndexedDB row written by the M1 recorder is still valid
+    const { legIndex: _dropped, ...legacy } = pt(3);
+    expect(toRpcPoint(legacy).leg_index).toBe(0);
+  });
+
+  test("the leg a point was captured on rides with it", () => {
+    expect(toRpcPoint({ ...pt(4), legIndex: 2 }).leg_index).toBe(2);
   });
 });

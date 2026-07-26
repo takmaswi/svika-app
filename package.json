@@ -20,6 +20,7 @@
     "db:places-test": "pnpm --filter @svika/db places-test",
     "db:offline-test": "pnpm --filter @svika/db offline-test",
     "db:beacon-test": "pnpm --filter @svika/db beacon-test",
+    "db:partner-test": "pnpm --filter @svika/db partner-test",
     "spine:ingest": "pnpm --filter @svika/spine ingest",
     "spine:train": "pnpm --filter @svika/spine train",
     "watchdog:eval": "pnpm --filter @svika/spine watchdog:eval",

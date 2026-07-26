@@ -1542,6 +1542,455 @@ check(
   check("JN-15 anon cannot open a journey", !!anonUpsert.error);
 }
 
+// --- Svika Partner (migration 0047) -----------------------------------------
+// Partner mode is a consent stream and nothing else. Without a live accepted
+// partner-v1 row the two doors refuse outright, so a trip's legs, marked
+// stops and fare notes never leave the phone. With one they land, the
+// journey carries the stamp the pipeline reads, and a named mark is born
+// personal in the places layer under the same rails as any other name.
+//
+// The load bearing check in this block is PA-15: turning partner mode on
+// does not widen who can read a rider's raw trace by one row.
+{
+  const A = await signIn("RIDER_A");
+  const B = await signIn("RIDER_B");
+
+  const isoAt = (minutes) => new Date(Date.now() + minutes * 60_000).toISOString();
+  const legSet = (endMinutes = 30) => [
+    { leg_index: 0, mode: "walking", started_at: isoAt(0), ended_at: isoAt(3) },
+    { leg_index: 1, mode: "waiting", started_at: isoAt(3), ended_at: isoAt(6) },
+    {
+      leg_index: 2,
+      mode: "riding",
+      route_name: "Heights to Rezende",
+      direction: "outbound",
+      fare_cents: 150,
+      started_at: isoAt(6),
+      ended_at: isoAt(endMinutes),
+    },
+  ];
+  // a per-run spot in empty country, far from the demo corridor (the M3
+  // pollution rule: a named mark is a real personal place name)
+  const spot = {
+    lat: -19.62 - Math.random() * 0.2,
+    lng: 30.35 + Math.random() * 0.3,
+  };
+
+  // journey consent stands; partner consent is explicitly withdrawn
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "accepted", version: "journey-v1" });
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "withdrawn", version: "partner-v1" });
+
+  const jP = crypto.randomUUID();
+  const opened = await A.c.rpc("upsert_rider_journey", {
+    p_journey: jP,
+    p_mode: "kombi",
+    p_started_at: new Date().toISOString(),
+  });
+  check(
+    "PA-0 a non partner still records and uploads a trip exactly as before",
+    !opened.error,
+    opened.error?.message,
+  );
+
+  const legsRefused = await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jP,
+    p_legs: legSet(),
+  });
+  check(
+    "PA-1 no partner consent means the leg set is refused",
+    (legsRefused.error?.message ?? "").includes("partner consent missing"),
+    legsRefused.error?.message,
+  );
+  const markRefused = await A.c.rpc("add_rider_journey_mark", {
+    p_journey: jP,
+    p_mark_seq: 0,
+    p_leg_index: 2,
+    p_kind: "rank",
+    p_name: null,
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  check(
+    "PA-2 no partner consent means a marked stop is refused",
+    (markRefused.error?.message ?? "").includes("partner consent missing"),
+    markRefused.error?.message,
+  );
+  const unstamped = await A.c
+    .from("rider_journeys")
+    .select("partner_consent_version")
+    .eq("id", jP)
+    .single();
+  check(
+    "PA-3 a trip recorded outside partner mode carries no partner stamp",
+    !unstamped.error && unstamped.data?.partner_consent_version === null,
+    unstamped.error?.message,
+  );
+
+  // the rider opts in
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "accepted", version: "partner-v1" });
+
+  const legsLanded = await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jP,
+    p_legs: legSet(),
+  });
+  check(
+    "PA-4 with partner consent the leg set lands",
+    !legsLanded.error && legsLanded.data === 3,
+    legsLanded.error?.message ?? String(legsLanded.data),
+  );
+  const stamped = await A.c
+    .from("rider_journeys")
+    .select("partner_consent_version")
+    .eq("id", jP)
+    .single();
+  check(
+    "PA-5 contributing stamps the trip with the consent that covered it",
+    !stamped.error && stamped.data?.partner_consent_version === "partner-v1",
+    stamped.error?.message,
+  );
+
+  // the leg set settles rather than appends: correcting a route replaces it
+  const legsResettled = await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jP,
+    p_legs: legSet(45),
+  });
+  const legRows = await A.c
+    .from("rider_journey_legs")
+    .select("leg_index, mode, route_name, direction, fare_cents")
+    .eq("journey_id", jP)
+    .order("leg_index");
+  const ridingLeg = (legRows.data ?? []).find((l) => l.mode === "riding");
+  check(
+    "PA-6 the leg set settles instead of doubling, and a fare note rides with the riding leg",
+    !legsResettled.error &&
+      legsResettled.data === 3 &&
+      (legRows.data ?? []).length === 3 &&
+      ridingLeg?.route_name === "Heights to Rezende" &&
+      ridingLeg?.direction === "outbound" &&
+      ridingLeg?.fare_cents === 150,
+    legsResettled.error?.message ?? JSON.stringify(legRows.data),
+  );
+
+  const markName = `Pamaka ${Date.now().toString(36)}`;
+  const marked = await A.c.rpc("add_rider_journey_mark", {
+    p_journey: jP,
+    p_mark_seq: 0,
+    p_leg_index: 2,
+    p_kind: "rank",
+    p_name: markName,
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  const markId = marked.data?.[0]?.mark_id ?? null;
+  const nameOutcome = marked.data?.[0]?.name_outcome ?? null;
+  check(
+    "PA-7 a marked stop lands and its name goes through the naming rails",
+    !marked.error && !!markId && ["success", "rate_limited"].includes(nameOutcome),
+    marked.error?.message ?? JSON.stringify(marked.data),
+  );
+
+  if (nameOutcome === "rate_limited") {
+    skip(
+      "PA-8 a named mark is born personal in the places layer",
+      "places daily cap from earlier runs; rerun tomorrow",
+    );
+  } else {
+    const born = await A.c
+      .from("place_names")
+      .select("id, scope, author_id")
+      .eq("name", markName)
+      .maybeSingle();
+    check(
+      "PA-8 a named mark is born personal in the places layer, never a network stop",
+      !born.error && born.data?.scope === "personal" && born.data?.author_id === A.uid,
+      born.error?.message ?? JSON.stringify(born.data),
+    );
+  }
+
+  const replayed = await A.c.rpc("add_rider_journey_mark", {
+    p_journey: jP,
+    p_mark_seq: 0,
+    p_leg_index: 2,
+    p_kind: "rank",
+    p_name: markName,
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  check(
+    "PA-9 a replayed mark is the same mark: a dropped connection never doubles one",
+    !replayed.error &&
+      replayed.data?.[0]?.mark_id === markId &&
+      replayed.data?.[0]?.name_outcome === "existing",
+    replayed.error?.message ?? JSON.stringify(replayed.data),
+  );
+
+  // cross rider walls
+  const crossLegs = await B.c
+    .from("rider_journey_legs")
+    .select("leg_index")
+    .eq("journey_id", jP);
+  check("PA-10 rider B cannot read rider A's legs", deniedOrEmpty(crossLegs));
+  const crossMarks = await B.c
+    .from("rider_journey_marks")
+    .select("id")
+    .eq("journey_id", jP);
+  check("PA-11 rider B cannot read rider A's marked stops", deniedOrEmpty(crossMarks));
+
+  await B.c
+    .from("consent_records")
+    .insert({ user_id: B.uid, action: "accepted", version: "partner-v1" });
+  const crossSaveLegs = await B.c.rpc("save_rider_journey_legs", {
+    p_journey: jP,
+    p_legs: legSet(),
+  });
+  check(
+    "PA-12 rider B cannot rewrite rider A's legs even as a partner",
+    !!crossSaveLegs.error,
+    crossSaveLegs.error?.message,
+  );
+  const crossMark = await B.c.rpc("add_rider_journey_mark", {
+    p_journey: jP,
+    p_mark_seq: 99,
+    p_leg_index: 0,
+    p_kind: "landmark",
+    p_name: null,
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  check(
+    "PA-13 rider B cannot mark a stop on rider A's trip",
+    !!crossMark.error,
+    crossMark.error?.message,
+  );
+
+  // no direct write path, not even for the owner
+  const forgeLeg = await A.c.from("rider_journey_legs").insert({
+    journey_id: jP,
+    leg_index: 9,
+    mode: "riding",
+    started_at: new Date().toISOString(),
+  });
+  check("PA-14 even the owner cannot write a leg directly", !!forgeLeg.error);
+  const forgeMark = await A.c.from("rider_journey_marks").insert({
+    journey_id: jP,
+    mark_seq: 9,
+    leg_index: 0,
+    kind: "rank",
+    lat: spot.lat,
+    lng: spot.lng,
+    recorded_at: new Date().toISOString(),
+    marked_at: new Date().toISOString(),
+  });
+  check("PA-15 even the owner cannot write a mark directly", !!forgeMark.error);
+
+  // THE partner promise: contributing does not widen who reads the trace
+  await A.c.rpc("append_rider_journey_points", {
+    p_journey: jP,
+    p_points: [
+      {
+        seq: 0,
+        lat: spot.lat,
+        lng: spot.lng,
+        accuracy_m: 8,
+        recorded_at: new Date().toISOString(),
+        leg_index: 2,
+      },
+    ],
+  });
+  const traceB = await B.c
+    .from("rider_journey_points")
+    .select("seq")
+    .eq("journey_id", jP);
+  const traceAnon = await anon
+    .from("rider_journey_points")
+    .select("seq")
+    .eq("journey_id", jP);
+  const traceA = await A.c
+    .from("rider_journey_points")
+    .select("seq, leg_index")
+    .eq("journey_id", jP);
+  check(
+    "PA-16 a partner's raw trace stays theirs: no other rider and no guest reads it",
+    deniedOrEmpty(traceB) && deniedOrEmpty(traceAnon),
+  );
+  check(
+    "PA-17 the leg a point was captured on rides with it, no wall clock join",
+    !traceA.error && traceA.data?.[0]?.leg_index === 2,
+    traceA.error?.message ?? JSON.stringify(traceA.data),
+  );
+
+  const anonLegs = await anon.from("rider_journey_legs").select("leg_index");
+  check("PA-18 anon sees zero legs", deniedOrEmpty(anonLegs));
+  const anonMarks = await anon.from("rider_journey_marks").select("id");
+  check("PA-19 anon sees zero marked stops", deniedOrEmpty(anonMarks));
+
+  // a saved trip is history: the leg set closes with it
+  await A.c.rpc("complete_rider_journey", {
+    p_journey: jP,
+    p_name: "Partner test trip",
+    p_mode: "kombi",
+    p_ended_at: new Date().toISOString(),
+    p_distance_m: 1200,
+  });
+  const legsAfterSave = await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jP,
+    p_legs: legSet(),
+  });
+  check(
+    "PA-20 a saved trip accepts no more legs",
+    (legsAfterSave.error?.message ?? "").includes("journey is not recording"),
+    legsAfterSave.error?.message,
+  );
+
+  // turning it off shuts the doors again, from the next call
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "withdrawn", version: "partner-v1" });
+  const jAfterOff = crypto.randomUUID();
+  await A.c.rpc("upsert_rider_journey", {
+    p_journey: jAfterOff,
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  const afterOff = await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jAfterOff,
+    p_legs: legSet(),
+  });
+  const keptStamp = await A.c
+    .from("rider_journeys")
+    .select("partner_consent_version")
+    .eq("id", jP)
+    .single();
+  check(
+    "PA-21 turning partner mode off closes the doors again",
+    (afterOff.error?.message ?? "").includes("partner consent missing"),
+    afterOff.error?.message,
+  );
+  check(
+    "PA-22 what was already contributed stays contributed, as the notice says",
+    !keptStamp.error && keptStamp.data?.partner_consent_version === "partner-v1",
+    keptStamp.error?.message,
+  );
+
+  // discarding takes the tagging with it (0048): an unsaved trip's shape,
+  // route, fare and marked stops are the same "chose not to hand over" as
+  // its trace, and 0047 left them standing
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "accepted", version: "partner-v1" });
+  const jDiscard = crypto.randomUUID();
+  await A.c.rpc("upsert_rider_journey", {
+    p_journey: jDiscard,
+    p_mode: "kombi",
+    p_started_at: new Date().toISOString(),
+  });
+  await A.c.rpc("save_rider_journey_legs", {
+    p_journey: jDiscard,
+    p_legs: legSet(),
+  });
+  await A.c.rpc("add_rider_journey_mark", {
+    p_journey: jDiscard,
+    p_mark_seq: 0,
+    p_leg_index: 2,
+    p_kind: "terminal",
+    p_name: null,
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  await A.c.rpc("discard_rider_journey", { p_journey: jDiscard });
+  const legsGone = await A.c
+    .from("rider_journey_legs")
+    .select("leg_index")
+    .eq("journey_id", jDiscard);
+  const marksGone = await A.c
+    .from("rider_journey_marks")
+    .select("id")
+    .eq("journey_id", jDiscard);
+  check(
+    "PA-24 discarding a recording takes its legs and marked stops with it",
+    !legsGone.error &&
+      !marksGone.error &&
+      (legsGone.data ?? []).length === 0 &&
+      (marksGone.data ?? []).length === 0,
+    JSON.stringify({ legs: legsGone.data?.length, marks: marksGone.data?.length }),
+  );
+
+  // a name the wordlist already refused is not kept on the mark either
+  const jFoul = crypto.randomUUID();
+  await A.c.rpc("upsert_rider_journey", {
+    p_journey: jFoul,
+    p_mode: "walk",
+    p_started_at: new Date().toISOString(),
+  });
+  const foul = await A.c.rpc("add_rider_journey_mark", {
+    p_journey: jFoul,
+    p_mark_seq: 0,
+    p_leg_index: 0,
+    p_kind: "landmark",
+    p_name: "Pa mhata rank",
+    p_lat: spot.lat,
+    p_lng: spot.lng,
+    p_accuracy_m: 8,
+    p_recorded_at: new Date().toISOString(),
+    p_marked_at: new Date().toISOString(),
+  });
+  const foulRow = await A.c
+    .from("rider_journey_marks")
+    .select("name, place_name_id")
+    .eq("journey_id", jFoul)
+    .maybeSingle();
+  check(
+    "PA-25 a mark keeps its geometry but never a name the wordlist refused",
+    !foul.error &&
+      foul.data?.[0]?.name_outcome === "blocked_word" &&
+      foulRow.data !== null &&
+      foulRow.data?.name === null &&
+      foulRow.data?.place_name_id === null,
+    foul.error?.message ?? JSON.stringify({ foul: foul.data, row: foulRow.data }),
+  );
+  await A.c.rpc("discard_rider_journey", { p_journey: jFoul });
+  await A.c
+    .from("consent_records")
+    .insert({ user_id: A.uid, action: "withdrawn", version: "partner-v1" });
+
+  // the partner stream must never move the app gate or the journey gate
+  const gateRows = await A.c
+    .from("consent_records")
+    .select("action, version, created_at")
+    .eq("user_id", A.uid)
+    .eq("version", "v1")
+    .order("created_at", { ascending: false })
+    .limit(1);
+  check(
+    "PA-23 the partner stream never moves the app consent gate",
+    !gateRows.error && gateRows.data?.[0]?.action === "accepted",
+    gateRows.error?.message ?? JSON.stringify(gateRows.data),
+  );
+
+  await A.c.rpc("discard_rider_journey", { p_journey: jAfterOff });
+}
+
 // --- journey shares (migration 0034) ----------------------------------------
 // The guide link: a saved journey shared as a 128 bit capability. The
 // anonymous viewer gets the trace with relative time offsets and nothing
