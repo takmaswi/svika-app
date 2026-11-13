@@ -1,7 +1,8 @@
 // Launch Step 3: what the planner suggests while the rider types, from two
 // letters. Kombi stops first (they plan exactly), then the committed OSM
 // place index and the public crowd names. Read only, no rider data; the
-// query is not stored. Behind the front_door flag.
+// query is not stored. Behind the front_door flag. Stops come from the
+// public network, so synthetic test stops are never offered (ruling 3).
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { flagOn } from "@/lib/flags-server";
@@ -13,6 +14,7 @@ import {
   type GeoPlace,
 } from "@/lib/geocode/search";
 import { fetchPublicPlaces } from "@/lib/geocode/public-places";
+import { fetchPublicNetwork } from "@/lib/public-network";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +39,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const supabase = await createClient();
   const corpus = loadPlaces();
-  const [stopsRes, publicPlaces] = await Promise.all([
-    supabase.from("stops").select("name, lat, lng"),
+  const [network, publicPlaces] = await Promise.all([
+    fetchPublicNetwork(supabase),
     fetchPublicPlaces(supabase, q, corpus),
   ]);
-  const stops: GeoPlace[] = ((stopsRes.data ?? []) as Omit<GeoPlace, "kind">[]).map(
-    (s) => ({ ...s, kind: "place" }),
-  );
+  const stops: GeoPlace[] = network.stops.map((s) => ({
+    name: s.name,
+    lat: s.lat,
+    lng: s.lng,
+    kind: "place",
+  }));
 
   const stopHits = suggestPlaces(stops, q, LIMIT);
   const taken = new Set(stopHits.map((s) => s.name.toLowerCase()));

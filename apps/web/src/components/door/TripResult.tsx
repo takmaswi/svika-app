@@ -15,7 +15,7 @@ import {
 } from "@svika/shared";
 import { t } from "@/lib/i18n";
 import { flagOn } from "@/lib/flags-server";
-import { fetchNetwork } from "@/lib/network";
+import { fetchPublicNetwork } from "@/lib/public-network";
 import { buildPlanOverlay } from "@/lib/map/plan-overlay";
 import { loadPlaces, resolvePlaceQuery } from "@/lib/geocode/search";
 import { fetchPublicPlaces } from "@/lib/geocode/public-places";
@@ -143,7 +143,7 @@ export async function TripResult({
   toRaw: string;
   justSaved: boolean;
 }) {
-  const network = await fetchNetwork(supabase);
+  const network = await fetchPublicNetwork(supabase);
   const myLocation = t(lang, "planner.myLocation");
   const [from, to] = await Promise.all([
     resolveEnd(supabase, network, fromRaw, myLocation),
