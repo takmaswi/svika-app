@@ -36,9 +36,16 @@ export type FlagSet = ReadonlySet<LaunchFlag>;
 export const PREVIEW_COOKIE = "svika_preview";
 export const PITCH_COOKIE = "svika_pitch";
 
+/**
+ * A door token shorter than this is refused outright, so an empty or lazy
+ * env value can never open a door. The live tokens are 48 random hex
+ * characters (192 bits).
+ */
+export const MIN_TOKEN_LENGTH = 24;
+
 /** Length safe comparison so a token is not leaked one character at a time. */
 export function tokenMatches(given: string | undefined, expected: string | undefined): boolean {
-  if (!given || !expected || expected.length < 16) return false;
+  if (!given || !expected || expected.length < MIN_TOKEN_LENGTH) return false;
   if (given.length !== expected.length) return false;
   let diff = 0;
   for (let i = 0; i < expected.length; i++) {

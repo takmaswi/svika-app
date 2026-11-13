@@ -3,6 +3,7 @@
 import { describe, expect, test } from "vitest";
 import {
   LAUNCH_FLAGS,
+  MIN_TOKEN_LENGTH,
   isHiddenPath,
   parseFlagList,
   resolveFlags,
@@ -40,6 +41,8 @@ describe("tokenMatches", () => {
     expect(tokenMatches("", "")).toBe(false);
     expect(tokenMatches("short", "short")).toBe(false);
     expect(tokenMatches(undefined, PREVIEW)).toBe(false);
+    const almost = "x".repeat(MIN_TOKEN_LENGTH - 1);
+    expect(tokenMatches(almost, almost)).toBe(false);
   });
   test("matches only the exact token", () => {
     expect(tokenMatches(PREVIEW, PREVIEW)).toBe(true);
