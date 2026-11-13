@@ -172,7 +172,17 @@ Deliberately not hand polished in the meantime: guessing at this list is
 exactly the failure mode the pass exists to catch. Growing the list is a
 migration by design, so its history stays reviewable.
 
-## 14. The recording queue has no cap (C10, batch Partner, OPEN)
+## 14. The recording queue has no cap (C10, batch Partner) — CLOSED 2026-11-13
+
+Closed by launch Step 0 exactly as proposed below, with 5 as the number of
+recent traces kept (`KEEP_RECENT_TRACES` in `apps/web/src/lib/journey/policy.ts`;
+change it there if you want a different number). Points are dropped only for
+saved trips the server has fully confirmed; journey rows, legs and marks are
+never pruned; unsynced trips are never touched; a full phone stops the
+recording with a named message and goes straight to the save screen. Unit
+tests in `apps/web/test/journey-policy.test.ts`.
+
+Original note:
 
 Logged on your instruction at the Goal 9 close so it does not get forgotten,
 and confirmed there: this stays a written plan, not silent deletion.
@@ -207,7 +217,17 @@ traces are worth keeping) that no test can supply. Nothing breaks in the
 meantime; this is a wall a heavy partner meets after many days, not a bug a
 demo hits.
 
-## 15. The PMTiles file is not hosted, so the live map rides MapTiler (opened 2026-07-27, OPEN)
+## 15. The PMTiles file is not hosted, so the live map rides MapTiler (opened 2026-07-27) — CLOSED 2026-11-13
+
+Closed by launch Step 0: migration 0049 creates a public read only `map`
+bucket in Supabase Storage (no client write policy; RLS checks MT-1 to MT-3
+prove guests and riders cannot write), `tools/map-tiles/upload-pmtiles.mjs`
+uploads the extract with the service role key from `.env.local`, range
+requests answer 206, and `NEXT_PUBLIC_MAP_PMTILES_URL` in Vercel points at it.
+`NEXT_PUBLIC_MAP_PROVIDER` stays unset, as warned below. Re-run the upload
+script after every `pnpm map:tiles`.
+
+Original note:
 
 Logged on your instruction at the main merge and first production deploy.
 Nothing is broken: this is the adapter chain doing exactly what it was
@@ -248,7 +268,15 @@ PMTiles file is hosted, the self hosted file would silently never be used and
 this item would look fixed while nothing changed. The variable is now unset,
 which is the documented default.
 
-## 16. The V1 answer home e2e test is outvoted by the demo account's own history (opened 2026-07-27, OPEN)
+## 16. The V1 answer home e2e test is outvoted by the demo account's own history (opened 2026-07-27) — CLOSED 2026-11-13
+
+Closed by launch Step 0 with the first option: a fresh fixture account,
+`demo.takunda.v2@svika.app`, created by the seed. The retired account keeps
+its ledger history untouched. `v1-answer-home.spec.ts:27` passes again. Strays
+older than the miner's 28 day lookback stop counting, so the fixture holds
+unless more than 56 stray rides land inside one 28 day window.
+
+Original note:
 
 The one red in the wall at the main merge, ruled by you as "merge now, log it
 for a proper fix". It is a test staging problem, not a product defect, and it
