@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import "@svika/ui/styles.css";
-// launch-v2 system, scoped to :root[data-ui="v2"]: inert until ui_v2 is on
-import "@svika/ui/launch-v2.css";
 import "./globals.css";
+// launch-v2 system, scoped to :root[data-ui="v2"]: inert until ui_v2 is on,
+// and last so it wins every tie with the pre launch styles
+import "@svika/ui/launch-v2.css";
 import { getLang } from "@/lib/i18n";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { flagOn } from "@/lib/flags-server";

@@ -466,8 +466,8 @@
 :root[data-ui="v2"] .v2-only { display: revert; }
 .v2-form-error { margin: 0; align-items: center; font-weight: 600; color: var(--v2-ink); }
 .v2-form-error:empty { display: none; }
-:root[data-ui="v2"] :is(.auth-input, .home-search-pill, .v2-input)[aria-invalid="true"],
-:root[data-ui="v2"] :is(.auth-input, .home-search-pill, .v2-input)[aria-invalid="true"]:focus { border-color: var(--v2-field-error); }
+:root[data-ui="v2"] :is(.auth-input, .places-name-input, .home-search-pill, .v2-input)[aria-invalid="true"],
+:root[data-ui="v2"] :is(.auth-input, .places-name-input, .home-search-pill, .v2-input)[aria-invalid="true"]:focus { border-color: var(--v2-field-error); }
 
 .v2-meter { display: flex; gap: 4px; margin-top: 2px; }
 .v2-meter span { flex: 1; height: 5px; border-radius: 999px; background: var(--v2-track); }
@@ -545,8 +545,10 @@
 :root[data-ui="v2"] .picker-card,
 :root[data-ui="v2"] .wallet-panel { border: none; box-shadow: var(--v2-card-shadow); border-radius: var(--v2-r-tile); }
 :root[data-ui="v2"] .auth-input,
+:root[data-ui="v2"] .places-name-input,
 :root[data-ui="v2"] .home-search-pill { border: 2px solid transparent; background: var(--v2-field-bg); border-radius: var(--v2-r-field); min-height: 54px; font-size: 16px; }
 :root[data-ui="v2"] .auth-input:focus,
+:root[data-ui="v2"] .places-name-input:focus,
 :root[data-ui="v2"] .home-search-pill:focus { border-color: var(--v2-field-focus); background: var(--v2-field-focus-bg); }
 :root[data-ui="v2"] .svika-body { font-size: 16px; }
 
@@ -568,6 +570,19 @@
 :root[data-ui="v2"] .guest-signin-chip {
   background: var(--v2-signin-bg); color: var(--v2-signin-ink) !important;
   font-size: 14px; font-weight: var(--v2-signin-weight); text-decoration: none;
+}
+
+/* plan Step 1.2, one grid: 20px screen edge, 16px card padding, 12px
+   between cards, 24px between sections */
+:root[data-ui="v2"] .shell { padding-inline: var(--v2-edge); }
+:root[data-ui="v2"] .wallet-panel { margin-top: var(--v2-gap-section); padding: var(--v2-pad); gap: var(--v2-gap-card); }
+:root[data-ui="v2"] .wallet-panel + .wallet-panel { margin-top: var(--v2-gap-card); }
+:root[data-ui="v2"] .home-pick-list { gap: var(--v2-gap-card); }
+
+/* back buttons take the approved round button (BackButton, Trip-Result) */
+:root[data-ui="v2"] .back-btn {
+  width: var(--v2-target); height: var(--v2-target); border: none;
+  background: var(--v2-hero-button); color: var(--v2-ink);
 }
 
 /* the sheet over the map (Trip-Result, Rank-Page sheet values) */
