@@ -797,6 +797,11 @@ export const dict = {
     en: "Every feature in this demo, and exactly what is happening behind it. We never present a staged surface as live.",
     sn: "Chimiro chega chega mudemo ino, nezviri kuitika seri kwacho. Hatimboratidzi chinhu chakagadzirirwa sechiri kushanda.",
   },
+  // launch profile: the public register covers only what the launch app shows
+  "register.launchIntro": {
+    en: "Every feature you can use in Svika today, and exactly what is happening behind it. Nothing on this list is staged.",
+    sn: "Chimiro chega chega chaunogona kushandisa muSvika nhasi, nezviri kuitika seri kwacho. Hapana pane rondedzero ino chakagadzirirwa.",
+  },
   "register.tier1": { en: "Real and live", sn: "Chechokwadi, chiri kushanda" },
   "register.tier1Note": {
     en: "Working against the live database.",
@@ -1543,6 +1548,24 @@ export const dict = {
   "journey.partnerPending": {
     en: "Saved on this phone. It will go to the network next time you are online.",
     sn: "Zvachengetwa pafoni ino. Zvichaenda kunetwork paunenge wava online.",
+  },
+  // Launch profile (Step 0, rulings 2 and 3): the real road, no simulated
+  // kombis. Shona is a placeholder draft until the translator pass.
+  "places.mapAria": {
+    en: "Map. Tap where the place is to drop a pin.",
+    sn: "Mepu. Baya panzvimbo iyoyo kuti uise pini.",
+  },
+  "launch.mapAria": {
+    en: "Map of the Heights to Rezende road with its stops.",
+    sn: "Mepu yemugwagwa weHeights kusvika Rezende nezviteshi zvawo.",
+  },
+  "launch.mapSoonH": {
+    en: "Live kombis on the map: coming soon",
+    sn: "Makombi ari kufamba pamepu: achauya munguva pfupi",
+  },
+  "launch.mapSoon": {
+    en: "Record your trips to help us get there.",
+    sn: "Rekodha nzendo dzako kuti utibatsire kusvika ipapo.",
   },
 } as const satisfies Record<string, Entry>;
 

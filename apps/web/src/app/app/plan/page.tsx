@@ -12,6 +12,7 @@ import { HomeSheet } from "@/components/home/HomeSheet";
 import { LastKombiCard } from "@/components/plan/LastKombiCard";
 import { FareBoard } from "@/components/plan/FareBoard";
 import { planLastKombi } from "@/lib/last-kombi";
+import { flagOn } from "@/lib/flags-server";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 import {
   formatMinuteOfDay,
@@ -62,6 +63,8 @@ export default async function PlanPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const lang = await getLang();
+  // launch profile: no simulated kombis, no generated evenings, no paid rides
+  const launch = await flagOn("launch");
   const params = await searchParams;
   const fromRaw = typeof params.from === "string" ? params.from : "";
   const toRaw = typeof params.to === "string" ? params.to : "";
@@ -188,15 +191,17 @@ export default async function PlanPage({
   // V7: the last kombi warning, but only while the rider can still act on it.
   // Off-peak hours and routes with too little evening history say nothing at
   // all rather than guessing.
-  const lastKombi = await planLastKombi(
-    supabase,
-    plan.legs.filter((leg) => leg.type === "ride"),
-  );
+  const lastKombi = launch
+    ? null
+    : await planLastKombi(
+        supabase,
+        plan.legs.filter((leg) => leg.type === "ride"),
+      );
 
   // V4: what riders on the first ride leg's route actually paid today. One
   // group by, one pure summariser, no opinion. An empty day shows nothing.
   const firstRide = plan.legs.find((leg) => leg.type === "ride");
-  const fareBucketsRes = firstRide
+  const fareBucketsRes = firstRide && !launch
     ? await supabase.rpc("fares_paid_today", {
         p_route: firstRide.routeId,
         p_direction: firstRide.direction,
@@ -223,11 +228,12 @@ export default async function PlanPage({
       <div className="home-map">
         <LiveMapLazy
           labels={{
-            ariaLabel: t(lang, "map.ariaLabel"),
+            ariaLabel: t(lang, launch ? "launch.mapAria" : "map.ariaLabel"),
             demoChip: t(lang, "map.demoChip"),
             unavailable: t(lang, "map.unavailable"),
           }}
           overlay={overlay ?? undefined}
+          vehicles={!launch}
         />
       </div>
 
@@ -298,7 +304,7 @@ export default async function PlanPage({
             {err === "noroute" && (
               <p className="auth-error svika-body">{t(lang, "plan.noRoute")}</p>
             )}
-            {isGuest ? (
+            {launch ? null : isGuest ? (
               // the OTP wall stands exactly here: the guest saw the route,
               // the time and the fare; paying is the identity moment
               <div className="plan-pay">
@@ -346,7 +352,7 @@ export default async function PlanPage({
             {/* V6: a gift is one code handed over, so it needs a stop pair
                 and a single kombi. The link is quiet on purpose: paying for
                 your own ride stays the one primary action here. */}
-            {!isGuest && to.stop && plan.boardings === 1 && (
+            {!launch && !isGuest && to.stop && plan.boardings === 1 && (
               <form action={giftRide} className="plan-gift">
                 <input type="hidden" name="from" value={from.stop.id} />
                 <input type="hidden" name="to" value={to.stop.id} />

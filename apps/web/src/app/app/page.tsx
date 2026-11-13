@@ -50,6 +50,8 @@ import { riderStopContext } from "@/lib/kombi/context";
 import { joinFleetProfiles, type KombiBoardRow } from "@/lib/kombi/fleet";
 import { kombiStrings } from "@/lib/kombi/strings";
 import { SIM_VEHICLES } from "@/lib/map/sim-config";
+import { flagOn } from "@/lib/flags-server";
+import { LaunchHome, type LaunchSavedTrip } from "@/components/home/LaunchHome";
 
 interface SavedTripRow {
   id: string;
@@ -101,6 +103,46 @@ export default async function RiderHome({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // launch profile (Step 0): the honest home, no simulated kombis, no
+  // arrival estimates, no wallet or tickets (rulings 3 and 14)
+  if (await flagOn("launch")) {
+    const [savedRes, profileRes, placeNames] = await Promise.all([
+      user
+        ? supabase
+            .from("saved_trips")
+            .select(
+              "id, nickname, from_stop_id, to_stop_id, dest_name, from_stop:stops!saved_trips_from_stop_id_fkey(name), to_stop:stops!saved_trips_to_stop_id_fkey(name)",
+            )
+            .order("created_at", { ascending: false })
+            .limit(4)
+        : Promise.resolve({ data: [] }),
+      user
+        ? supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      fetchCorridorPlaceNames(supabase),
+    ]);
+    const trips: LaunchSavedTrip[] = ((savedRes.data ?? []) as unknown as SavedTripRow[]).map(
+      (trip) => ({
+        id: trip.id,
+        nickname: trip.nickname,
+        fromStopId: trip.from_stop_id,
+        to: trip.to_stop_id ?? trip.dest_name ?? "",
+        fromName: trip.from_stop?.name ?? "",
+        toName: trip.to_stop?.name ?? trip.dest_name ?? "",
+      }),
+    );
+    return (
+      <LaunchHome
+        lang={lang}
+        theme={theme}
+        signedIn={Boolean(user)}
+        fullName={(profileRes.data as { full_name: string | null } | null)?.full_name ?? null}
+        savedTrips={trips}
+        placeNames={placeNames}
+      />
+    );
+  }
+
   // guest mode (batch V2): the same map and search, no personal panels,
   // the sign in door says why an account exists
   if (!user) return <GuestHome lang={lang} theme={theme} />;

@@ -4,11 +4,16 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { LiveMapLazy } from "@/components/map/LiveMapLazy";
 import { ArrowIcon } from "@/components/icons";
 import { REPO_URL } from "@/lib/site";
+import { redirect } from "next/navigation";
+import { flagOn } from "@/lib/flags-server";
 
 // The front door (screen 1 grammar): the Kombi highlight headline, the live
 // map grown into the hero, one primary CTA into sign in, and the quiet
 // register/privacy/repo footer. No theatre.
 export default async function LandingPage() {
+  // launch profile: the trip planner is the front door (ruling 2), so the
+  // old landing with its simulated hero map goes straight to it
+  if (await flagOn("launch")) redirect("/app");
   const lang = await getLang();
 
   return (

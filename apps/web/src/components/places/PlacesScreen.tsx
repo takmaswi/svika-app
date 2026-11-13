@@ -231,7 +231,9 @@ export function PlacesScreen({
       <div className="places-map-frame svika-animate-fade-up svika-rise-2">
         <PlacesMapLazy
           labels={{
-            ariaLabel: t(lang, "map.ariaLabel"),
+            // this map never carries kombis, so it never borrows the live
+            // map's label
+            ariaLabel: t(lang, "places.mapAria"),
             unavailable: t(lang, "map.unavailable"),
           }}
           center={center}
