@@ -48,6 +48,8 @@ On 0a847b5 (13 Nov 2026):
 - e2e 100 passed, 1 skipped, one worker against one production build. The skip is `v7-last-kombi` "hours before the last kombi", which skips itself when the Harare clock is too late in the day to stage a quiet hour (the run ended after 22:00)
 - RLS 292 passed, 0 failed, 0 skipped
 
-## Live check
+## Live check (svika-web.vercel.app, deploy dpl_83f9wcHNE9fBUogQFrd884ALqtaS from a clean clone of 614583a, 360px)
 
-LIVE
+- Public: `/app` shows the old home (no front door), `/places/suggest` answers 404 (front_door off until Step 12).
+- With the preview key, signed out, location at Market Square Rank: search card 328 by 64; typed "Avondale", first suggestion "Avondale Shops (King George Rd), Kombi stop"; three interactions to the step card: To Avondale Shops (King George Rd), fare Not yet, 23 min, 1 kombi; walk to Market Square Rank 1 min, board the Market Square Rank to Avondale Shops kombi, get off at Avondale Shops 22 min. Start trip pill 324 by 58, first win card shown, no console errors (`live-home.png`, `live-trip.png`).
+- `/places/suggest?q=Synthetic` live answered `[]`.
