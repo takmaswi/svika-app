@@ -1865,7 +1865,7 @@ export const dict = {
     sn: "Waedza kakawanda nezita iri. Mira maminitsi {count}, wozoedza zvakare.",
   },
   "acct.lockedWait.one": {
-    en: "Too many tries for this username. Wait 1 minute, then try again.",
+    en: "Too many tries for this username. Wait {count} minute, then try again.",
     sn: "Waedza kakawanda nezita iri. Mira miniti {count}, wozoedza zvakare.",
   },
   "acct.rateLimitedWait": {
@@ -1873,7 +1873,7 @@ export const dict = {
     sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira maminitsi {count}, wozoedza zvakare.",
   },
   "acct.rateLimitedWait.one": {
-    en: "Too many tries from this network. Wait 1 minute, then try again.",
+    en: "Too many tries from this network. Wait {count} minute, then try again.",
     sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira miniti {count}, wozoedza zvakare.",
   },
   "acct.recoverTitle": {
