@@ -729,6 +729,11 @@ export const dict = {
     en: "Your name, phone number and language choice are stored with your account.",
     sn: "Zita rako, nhamba yefoni nemutauro waunosarudza zvinochengetwa neakaunti yako.",
   },
+  // a username account (launch Step 2) holds no name and no phone number
+  "consent.point1Username": {
+    en: "Your username and language choice are stored with your account.",
+    sn: "Zita rako rekushandisa nemutauro waunosarudza zvinochengetwa neakaunti yako.",
+  },
   "consent.point2": {
     en: "Every ticket and wallet movement is kept. Money history is never edited or deleted.",
     sn: "Tikiti rimwe nerimwe nekufamba kwemari zvinochengetwa. Nhoroondo yemari haigadziridzwe kana kudzimwa.",

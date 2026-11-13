@@ -30,8 +30,9 @@ export default async function ConsentPage({
     .eq("version", CONSENT_VERSION);
   if (hasActiveConsent((data ?? []) as ConsentRecord[])) redirect("/app");
 
+  const usernameAccount = user.user_metadata?.account === "username";
   const points = [
-    "consent.point1",
+    usernameAccount ? "consent.point1Username" : "consent.point1",
     "consent.point2",
     "consent.point3",
     "consent.point4",
