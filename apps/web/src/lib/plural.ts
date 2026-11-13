@@ -1,76 +1,44 @@
-// Plurals from the i18n plural rules (plan Step 1.8: never "1 kombis").
-// Each entry gives the CLDR "one" and "other" forms per language; Shona
-// noun classes change the prefix, not a suffix ("kombi imwe", "makombi 3"),
-// which is why whole phrases live here, not a bolted on "s".
+// Plurals from the CLDR plural rules (plan Step 1.8: never "1 kombis").
+//
+// Every count phrase lives in the translation file (lib/dict.ts) twice: the
+// "other" form under its key and the "one" form under `<key>.one`. Whole
+// phrases, because Shona changes the noun class prefix rather than adding
+// a suffix ("kombi 1", "makombi 3"). English and Shona share the CLDR rule
+// (one for exactly 1), read here from Intl.PluralRules rather than assumed.
 import type { AppLanguage } from "@svika/shared";
-
-type Forms = { one: string; other: string };
-type PluralEntry = { en: Forms; sn: Forms };
-
-export const plurals = {
-  kombis: {
-    en: { one: "{count} kombi", other: "{count} kombis" },
-    sn: { one: "kombi {count}", other: "makombi {count}" },
-  },
-  riders: {
-    en: { one: "{count} rider", other: "{count} riders" },
-    sn: { one: "mutasvi {count}", other: "vatasvi {count}" },
-  },
-  minutes: {
-    en: { one: "{count} min", other: "{count} min" },
-    sn: { one: "{count} min", other: "{count} min" },
-  },
-  minWalk: {
-    en: { one: "{count} min walk", other: "{count} min walk" },
-    sn: { one: "kufamba {count} min", other: "kufamba {count} min" },
-  },
-  reports: {
-    en: { one: "{count} report", other: "{count} reports" },
-    sn: { one: "mushumo {count}", other: "mishumo {count}" },
-  },
-  confirmations: {
-    en: { one: "{count} rider boarded here this week", other: "{count} riders boarded here this week" },
-    sn: { one: "mutasvi {count} akakwira pano svondo rino", other: "vatasvi {count} vakakwira pano svondo rino" },
-  },
-  fixesLive: {
-    en: { one: "{count} of your fixes is live", other: "{count} of your fixes are live" },
-    sn: { one: "kugadzirisa kwako {count} kuri kushanda", other: "kugadzirisa kwako {count} kuri kushanda" },
-  },
-  helped: {
-    en: { one: "You helped {count} rider this week", other: "You helped {count} riders this week" },
-    sn: { one: "Wabatsira mutasvi {count} svondo rino", other: "Wabatsira vatasvi {count} svondo rino" },
-  },
-  moreToQualify: {
-    en: {
-      one: "{count} more contribution to qualify for this week's reward",
-      other: "{count} more contributions to qualify for this week's reward",
-    },
-    sn: {
-      one: "Wasara nechipo {count} kuti upinde mumubairo wesvondo rino",
-      other: "Wasara nezvipo {count} kuti upinde mumubairo wesvondo rino",
-    },
-  },
-  boardings: {
-    en: { one: "{count} kombi", other: "{count} kombis" },
-    sn: { one: "kombi {count}", other: "makombi {count}" },
-  },
-} as const satisfies Record<string, PluralEntry>;
-
-export type PluralKey = keyof typeof plurals;
+import { dict, t, type DictKey } from "./dict";
 
 const rules = new Map<AppLanguage, Intl.PluralRules>();
 function ruleFor(lang: AppLanguage): Intl.PluralRules {
   let r = rules.get(lang);
   if (!r) {
-    r = new Intl.PluralRules(lang === "sn" ? "sn" : "en");
+    r = new Intl.PluralRules(lang);
     rules.set(lang, r);
   }
   return r;
 }
 
-/** "1 kombi", "3 kombis"; Shona and English from the CLDR plural rules. */
-export function tp(lang: AppLanguage, key: PluralKey, count: number): string {
-  const forms: Forms = plurals[key][lang];
-  const category = ruleFor(lang).select(count) === "one" ? "one" : "other";
-  return forms[category].replaceAll("{count}", String(count));
+/** The dict key for this count: `<key>.one` when the rule says one and it exists. */
+export function pluralKey(lang: AppLanguage, key: DictKey, count: number): DictKey {
+  const one = `${key}.one`;
+  return ruleFor(lang).select(count) === "one" && one in dict ? (one as DictKey) : key;
+}
+
+/** "1 kombi", "3 kombis", "kombi 1", "makombi 3". */
+export function tp(lang: AppLanguage, key: DictKey, count: number): string {
+  return t(lang, pluralKey(lang, key, count)).replaceAll("{count}", String(count));
+}
+
+/** The phrase split around its number, so the count can sit in mono. */
+export function tpParts(lang: AppLanguage, key: DictKey, count: number): [string, string] {
+  const [before = "", after = ""] = t(lang, pluralKey(lang, key, count)).split("{count}");
+  return [before, after];
+}
+
+/**
+ * For client components handed both forms by the server: true when the
+ * live languages say "one" (English and Shona share the CLDR rule).
+ */
+export function isOne(count: number): boolean {
+  return ruleFor("en").select(count) === "one";
 }

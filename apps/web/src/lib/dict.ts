@@ -120,7 +120,6 @@ export const dict = {
   "plan.alightAt": { en: "Get off at", sn: "Burukira pa" },
   "plan.totalFare": { en: "Total fare", sn: "Mari yese" },
   "plan.about": { en: "About", sn: "Inoda kukwana" },
-  "plan.boardings": { en: "kombis", sn: "makombi" },
   "plan.payWallet": { en: "Pay from wallet", sn: "Bhadhara newallet" },
   "plan.reserveCash": {
     en: "Reserve, pay cash on board",
@@ -564,7 +563,6 @@ export const dict = {
   // minutes, read against its declared seats. Never a departure time.
   "kombi.pulseLabel": { en: "Cleared just now", sn: "Dzabhadharwa izvozvi" },
   "kombi.pulseCount": { en: "{fares} of {seats}", sn: "{fares} pa {seats}" },
-  "kombi.pulseCountOnly": { en: "{fares} fares", sn: "Mari {fares}" },
   "kombi.pulseQuiet": {
     en: "Nothing cleared here yet",
     sn: "Hapana chabhadharwa pano",
@@ -589,8 +587,8 @@ export const dict = {
     sn: "Hapasati pane mari dzakasimbiswa pakombi iyi. Rekodhi inovakwa apo makondakita anobhadharisa pano.",
   },
   "kombi.trustFares": {
-    en: "{count} verified fares across {days} days in the last 30.",
-    sn: "Mari {count} dzakasimbiswa pamazuva {days} mumazuva makumi matatu apfuura.",
+    en: "{fares} verified across {days} in the last 30.",
+    sn: "{fares} dzakasimbiswa pa{days} mumazuva makumi matatu apfuura.",
   },
   "kombi.trustDriftLine": {
     en: "On {days} days the busiest hour cleared more fares than the declared seats.",
@@ -1581,6 +1579,90 @@ export const dict = {
   "launch.mapSoonH": {
     en: "Live kombis on the map: coming soon",
     sn: "Makombi ari kufamba pamepu: achauya munguva pfupi",
+  },
+  "count.kombis": {
+    en: "{count} kombis",
+    sn: "makombi {count}",
+  },
+  "count.kombis.one": {
+    en: "{count} kombi",
+    sn: "kombi {count}",
+  },
+  "count.riders": {
+    en: "{count} riders",
+    sn: "vatasvi {count}",
+  },
+  "count.riders.one": {
+    en: "{count} rider",
+    sn: "mutasvi {count}",
+  },
+  "count.reports": {
+    en: "{count} reports",
+    sn: "mishumo {count}",
+  },
+  "count.reports.one": {
+    en: "{count} report",
+    sn: "mushumo {count}",
+  },
+  "count.days": {
+    en: "{count} days",
+    sn: "mazuva {count}",
+  },
+  "count.days.one": {
+    en: "{count} day",
+    sn: "zuva {count}",
+  },
+  "count.fares": {
+    en: "{count} fares",
+    sn: "mari {count}",
+  },
+  "count.fares.one": {
+    en: "{count} fare",
+    sn: "mari {count}",
+  },
+  "count.confirmations": {
+    en: "{count} riders boarded here this week",
+    sn: "vatasvi {count} vakakwira pano svondo rino",
+  },
+  "count.confirmations.one": {
+    en: "{count} rider boarded here this week",
+    sn: "mutasvi {count} akakwira pano svondo rino",
+  },
+  "count.fixesLive": {
+    en: "{count} of your fixes are live",
+    sn: "kugadzirisa kwako {count} kuri kushanda",
+  },
+  "count.fixesLive.one": {
+    en: "{count} of your fixes is live",
+    sn: "kugadzirisa kwako {count} kuri kushanda",
+  },
+  "count.helped": {
+    en: "You helped {count} riders this week",
+    sn: "Wabatsira vatasvi {count} svondo rino",
+  },
+  "count.helped.one": {
+    en: "You helped {count} rider this week",
+    sn: "Wabatsira mutasvi {count} svondo rino",
+  },
+  "count.moreToQualify": {
+    en: "{count} more contributions to qualify for this week's reward",
+    sn: "Wasara nezvipo {count} kuti upinde mumubairo wesvondo rino",
+  },
+  "count.moreToQualify.one": {
+    en: "{count} more contribution to qualify for this week's reward",
+    sn: "Wasara nechipo {count} kuti upinde mumubairo wesvondo rino",
+  },
+  "eta.cardMeasured.one": {
+    en: "It is measured from {count} real ride we recorded on this road, phone in hand.",
+    sn: "Inoyerwa kubva parwendo {count} chairwo rwatakarekodha pamugwagwa uyu.",
+  },
+  "intel.rung1B.one": {
+    en: "The number you see is a plain average over segment times from {count} real ride recorded on this road, phone in hand. Its label on every screen says so.",
+    sn: "Nhamba yaunoona iavhareji yenguva dzezvikamu kubva parwendo {count} chairwo rwakarekodhwa munzira ino. Chiratidzo chayo pascreen yega yega chinozvitaura.",
+  },
+  "fareBoard.counted.one": {
+    en: "{count} fare counted so far today",
+    sn: "Mari {count} yaverengwa nhasi",
   },
   "launch.sheetOpen": {
     en: "Show your trips and more",

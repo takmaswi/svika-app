@@ -13,7 +13,11 @@ export interface KombiStrings {
   seatsUnknown: string;
   pulseLabel: string;
   pulseCount: string;
-  pulseCountOnly: string;
+  /** count phrases, other and one forms (plan Step 1.8) */
+  fares: string;
+  faresOne: string;
+  days: string;
+  daysOne: string;
   pulseState: {
     quiet: string;
     loading: string;
@@ -51,7 +55,10 @@ export function kombiStrings(lang: AppLanguage): KombiStrings {
     seatsUnknown: t(lang, "kombi.seatsUnknown"),
     pulseLabel: t(lang, "kombi.pulseLabel"),
     pulseCount: t(lang, "kombi.pulseCount"),
-    pulseCountOnly: t(lang, "kombi.pulseCountOnly"),
+    fares: t(lang, "count.fares"),
+    faresOne: t(lang, "count.fares.one"),
+    days: t(lang, "count.days"),
+    daysOne: t(lang, "count.days.one"),
     pulseState: {
       quiet: t(lang, "kombi.pulseQuiet"),
       loading: t(lang, "kombi.pulseLoading"),

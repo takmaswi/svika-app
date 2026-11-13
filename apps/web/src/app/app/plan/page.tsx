@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLang, t, type DictKey } from "@/lib/i18n";
+import { tpParts } from "@/lib/plural";
 import { createClient } from "@/lib/supabase/server";
 import { fetchNetwork } from "@/lib/network";
 import { bookTrip, giftRide, saveTrip } from "@/lib/actions";
@@ -201,6 +202,7 @@ export default async function PlanPage({
   // V4: what riders on the first ride leg's route actually paid today. One
   // group by, one pure summariser, no opinion. An empty day shows nothing.
   const firstRide = plan.legs.find((leg) => leg.type === "ride");
+  const [boardingsBefore, boardingsAfter] = tpParts(lang, "count.kombis", plan.boardings);
   const fareBucketsRes = firstRide && !launch
     ? await supabase.rpc("fares_paid_today", {
         p_route: firstRide.routeId,
@@ -264,8 +266,9 @@ export default async function PlanPage({
                 {t(lang, "plan.about")}{" "}
                 <span className="svika-mono-code">{totalMinutes}</span>{" "}
                 {t(lang, "common.minutes")} ·{" "}
-                <span className="svika-mono-code">{plan.boardings}</span>{" "}
-                {t(lang, "plan.boardings")}
+                {boardingsBefore}
+                <span className="svika-mono-code">{plan.boardings}</span>
+                {boardingsAfter}
               </p>
             </div>
             {tradeLine && (
@@ -490,6 +493,7 @@ export default async function PlanPage({
               typical: t(lang, "fareBoard.typical"),
               range: t(lang, "fareBoard.range"),
               counted: t(lang, "fareBoard.counted"),
+              countedOne: t(lang, "fareBoard.counted.one"),
               busiest: t(lang, "fareBoard.busiest"),
               basis: t(lang, "fareBoard.basis"),
             }}

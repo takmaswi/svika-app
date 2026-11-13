@@ -3,6 +3,7 @@
 // number comes from, how many recorded rides sit behind it, and what
 // improves it. One place builds the copy so the home, the share viewer and
 // any future surface stay word for word consistent.
+import { tp } from "./plural";
 import type { AppLanguage } from "@svika/shared";
 import { t } from "./dict";
 import type { EtaEstimate } from "./map/eta";
@@ -27,7 +28,7 @@ export function etaBasisCard(lang: AppLanguage, eta: EtaEstimate): EtaBasisCard 
   const lines = eta.isMock
     ? [t(lang, "eta.cardDemo"), t(lang, "eta.cardDemoWhen")]
     : [
-        t(lang, "eta.cardMeasured").replace("{count}", String(eta.rides)),
+        tp(lang, "eta.cardMeasured", eta.rides),
         t(lang, "eta.cardModel"),
         t(lang, "eta.cardImprove"),
       ];

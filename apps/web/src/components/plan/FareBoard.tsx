@@ -5,6 +5,7 @@
 // A server component: the numbers come from one group by (migration 0045) and
 // one pure summariser (@svika/shared fare-board), so there is nothing here for
 // a client bundle to carry.
+import { isOne } from "@/lib/plural";
 import { formatUsd, type FareBoard as Board } from "@svika/shared";
 
 export interface FareBoardStrings {
@@ -16,6 +17,7 @@ export interface FareBoardStrings {
   range: string;
   /** "{count} fares so far today" */
   counted: string;
+  countedOne: string;
   /** "busiest around {hour}" */
   busiest: string;
   /** the standing not-AI line */
@@ -69,7 +71,10 @@ export function FareBoard({
       </ol>
 
       <p className="svika-meta fare-board-counted" data-testid="fare-board-counted">
-        {strings.counted.replace("{count}", String(board.tickets))}
+        {(isOne(board.tickets) ? strings.countedOne : strings.counted).replace(
+          "{count}",
+          String(board.tickets),
+        )}
         {board.busiestHour !== null &&
           ` · ${strings.busiest.replace("{hour}", hourLabel(board.busiestHour))}`}
       </p>

@@ -9,6 +9,12 @@
 import type { KombiProfile } from "@/lib/kombi/fleet";
 import type { VehicleEta } from "@/lib/kombi/vehicle-eta";
 import type { KombiStrings } from "@/lib/kombi/strings";
+import { isOne } from "@/lib/plural";
+
+/** "1 fare", "3 fares": the form the plural rule picks, with its number. */
+function countPhrase(n: number, one: string, other: string): string {
+  return (isOne(n) ? one : other).replace("{count}", String(n));
+}
 
 export interface TerminusNames {
   outbound: string;
@@ -91,7 +97,7 @@ export function KombiFacts({ profile, eta, stopName, terminus, strings }: KombiF
                   ? strings.pulseCount
                       .replace("{fares}", String(pulse.fares))
                       .replace("{seats}", String(pulse.capacity))
-                  : strings.pulseCountOnly.replace("{fares}", String(pulse.fares))}
+                  : countPhrase(pulse.fares, strings.faresOne, strings.fares)}
               </span>
               <span className="peek-route-sub">{strings.pulseState[pulse.state]}</span>
             </span>
@@ -111,8 +117,8 @@ export function KombiFacts({ profile, eta, stopName, terminus, strings }: KombiF
         {trust !== "unverified" && facts && (
           <p className="svika-body kombi-trust-line">
             {strings.trustFares
-              .replace("{count}", String(facts.verifiedFares30d))
-              .replace("{days}", String(facts.fareDays30d))}
+              .replace("{fares}", countPhrase(facts.verifiedFares30d, strings.faresOne, strings.fares))
+              .replace("{days}", countPhrase(facts.fareDays30d, strings.daysOne, strings.days))}
           </p>
         )}
         {trust === "drift" && facts && (

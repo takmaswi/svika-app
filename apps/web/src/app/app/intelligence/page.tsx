@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLang, t } from "@/lib/i18n";
+import { tp } from "@/lib/plural";
 import { createClient } from "@/lib/supabase/server";
 import { BackIcon } from "@/components/icons";
 import metrics from "../../../../../../services/spine/metrics/metrics.json";
@@ -39,7 +40,7 @@ export default async function IntelligencePage() {
       <section className="svika-card wallet-panel svika-animate-fade-up svika-rise-2">
         <h2 className="svika-title">{t(lang, "intel.rung1H")}</h2>
         <p className="svika-body">
-          {t(lang, "intel.rung1B").replace("{count}", String(metrics.journeys))}
+          {tp(lang, "intel.rung1B", metrics.journeys)}
         </p>
       </section>
 
