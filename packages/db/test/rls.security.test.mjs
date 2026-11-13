@@ -2651,5 +2651,23 @@ check(
   check("FB-14 the mismatch table is append only for clients", !!mmEdit.error);
 }
 
+// ---- 0049 map tiles bucket (CHECKS 15) ------------------------------------
+// The bucket is public READ on purpose (OpenStreetMap derived tiles, no rider
+// data); nobody but the service role may write, replace or delete in it.
+{
+  const probe = new Blob([new Uint8Array([1, 2, 3])], { type: "application/octet-stream" });
+  const anonUp = await anon.storage.from("map").upload(`rls-probe-${Date.now()}.pmtiles`, probe);
+  check("MT-1 a guest cannot upload into the map bucket", !!anonUp.error);
+  const riderUp = await A.c.storage
+    .from("map")
+    .upload("harare.pmtiles", probe, { upsert: true });
+  check("MT-2 a rider cannot overwrite the Harare tiles", !!riderUp.error);
+  const riderDel = await A.c.storage.from("map").remove(["harare.pmtiles"]);
+  check(
+    "MT-3 a rider cannot delete the Harare tiles",
+    !!riderDel.error || (riderDel.data ?? []).length === 0,
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
