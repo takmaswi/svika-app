@@ -2,6 +2,9 @@ import Link from "next/link";
 import { getLang, t, type DictKey } from "@/lib/i18n";
 import { LoginForm } from "@/components/LoginForm";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { flagOn } from "@/lib/flags-server";
+import { AccountShell } from "@/components/accounts/AccountShell";
+import { SignInForm } from "@/components/accounts/SignInForm";
 
 // The wall moments (batch V2) arrive here carrying ?why=pay|save|record so
 // the prompt says exactly which moment needed identity, above the general
@@ -24,6 +27,21 @@ export default async function LoginPage({
   const why = typeof params.why === "string" ? (WHY_KEY[params.why] ?? null) : null;
   const nextRaw = typeof params.next === "string" ? params.next : "";
   const nextPath = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/app";
+
+  // Launch Step 2: username sign in for everyone. Phone OTP stays only for
+  // test and owner accounts (plan 2.4), at ?method=phone, linked from nowhere.
+  if ((await flagOn("accounts")) && params.method !== "phone") {
+    return (
+      <AccountShell
+        title={t(lang, "acct.signInTitle")}
+        body={why ? t(lang, why) : t(lang, "acct.signInBody")}
+        backHref="/app"
+        backLabel={t(lang, "common.back")}
+      >
+        <SignInForm lang={lang} nextPath={nextPath} />
+      </AccountShell>
+    );
+  }
 
   return (
     <main className="auth">
