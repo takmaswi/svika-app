@@ -39,7 +39,9 @@ export default defineConfig({
       url: "http://localhost:3000",
       reuseExistingServer: true,
       timeout: 120_000,
-      env: { E2E_AUTH: "on" },
+      // the launch preview token lets launch specs turn every launch flag
+      // on for their own browser context (e2e/launch-helpers.ts)
+      env: { E2E_AUTH: "on", SVIKA_PREVIEW_TOKEN: "e2e-launch-preview-token-0001" },
     },
     {
       // the hwindi surface, driven by the redeem flow specs
