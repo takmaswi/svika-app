@@ -58,3 +58,9 @@ Every account gets a wallet the moment it is created. Wallets, tickets, journeys
 - unit 547 (shared 114, conductor 37, spine 101, web 295)
 - e2e 95 passed, 0 skipped, one worker against one production build
 - RLS 292 passed, 0 failed (AU-1 to AU-16 new in this step)
+
+## Live check (svika-web.vercel.app, deploy dpl_EHS3XcPWUcDDvgREygq4boy6U7Mp from a clean clone of b67ff2e, 360px)
+
+- Public: `/signup` answers 404 (accounts flag off until Step 12).
+- With the preview key: back button 48 by 48; the availability line said "This username is free" (the browser called the function from the live origin, so CORS holds); a real sign up showed the Recovery-Code screen with one heading and a code in three groups of four; the consent screen said "Your username and language choice" and no phone number; signed in by username; delete my account ran through the live server action and the function and landed on the front door; the old username and password then failed with "That username and password do not match."
+- Database afterwards: no username row and no auth row for the probe, its emptied profile kept (`live-signup.png`, `live-recovery-code.png`).
