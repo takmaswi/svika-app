@@ -14,6 +14,7 @@ import { LastKombiCard } from "@/components/plan/LastKombiCard";
 import { FareBoard } from "@/components/plan/FareBoard";
 import { planLastKombi } from "@/lib/last-kombi";
 import { flagOn } from "@/lib/flags-server";
+import { TripResult } from "@/components/door/TripResult";
 import { ArrowIcon, BackIcon } from "@/components/icons";
 import {
   formatMinuteOfDay,
@@ -77,6 +78,20 @@ export default async function PlanPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // launch Step 3: the approved Trip-Result step card, from a stop, a place
+  // or the rider's location
+  if (await flagOn("front_door")) {
+    return (
+      <TripResult
+        lang={lang}
+        supabase={supabase}
+        signedIn={Boolean(user)}
+        fromRaw={fromRaw}
+        toRaw={toRaw}
+        justSaved={justSaved}
+      />
+    );
+  }
   // guest mode (batch V2): planning and fares are world readable network
   // data, so a guest plans freely; the wall stands exactly at pay and save
   const isGuest = !user;
