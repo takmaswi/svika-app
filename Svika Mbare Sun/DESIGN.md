@@ -216,3 +216,43 @@ place chip → kombis fade in → countdown ticks.
   rgba(255,255,255,.18) — intentional theme grammar, not a defect.
 - Screen 3 trip-plan sheet uses `padding:0 18px 18px` while home sheet is
   `0 18px` with fixed height — intentional (auto-height vs fixed peek).
+
+## 16. Launch v2 (approved 13 Nov 2026, supersedes this spec where they differ)
+
+The 16 screens in `launch-v2/*.dc.html` are the visual truth for the public
+launch (docs/LAUNCH-CROWD-PLAN.md). Their values are copied into
+`packages/ui/launch-v2.css`, scoped to `:root[data-ui="v2"]` so the pre
+launch app is untouched until the `ui_v2` flag is on. What changes against
+sections 1 to 15:
+
+- **Surfaces are borderless.** The 1.5px char card, pill, field and key
+  outlines (§8) are retired. Depth is char tinted: cards
+  `0 10px 28px rgba(22,29,24,.10)`, the raised search card
+  `0 16px 36px rgba(22,29,24,.18)`, floating buttons
+  `0 6px 16px rgba(22,29,24,.14)`, the CTA `0 10px 26px rgba(31,77,46,.30)`.
+  Night cards are `rgba(255,255,255,.06)` with no shadow.
+- **Soft surface `#F4F5F1`** for chips, fields, stat cells and notices
+  (night `rgba(255,255,255,.07)`), track `#E1E3DA`.
+- **Hero band.** Marigold `#F5B301` by day, `#10150F` by night, radius
+  `0 0 34px 34px` (short heroes 30px, the planner 28px), with the drawn kombi
+  driving in (`drive` .9s, then `bob` 2.4s; speed lines by day, headlight beam
+  by night). The 64px search card overlaps it by 34px.
+- **Radii:** tile 22, sheet 28, search 20, field and stat 16, go chip 14,
+  icon chip 12, nav 24, nav item 18.
+- **Bottom nav:** dark floating bar (`#161D18` day, `#10150F` night) 64px
+  high, 14px from the edges, three tabs Plan, Ranks, Me, the active tab a
+  marigold 52px pill with char label 700.
+- **Fields:** visible 13px/600 label, 54px input on the soft surface with a
+  2px transparent border that turns forest (marigold at night) on focus or
+  when valid, inline helper text in Svika copy, never the browser bubble.
+- **Step card:** numbered 36px rail chips (walk soft, board marigold, get off
+  char with marigold numeral), a 2px rail line, Plex Mono times.
+- **Ticket stub dashes** (2px dashed rail colour) mark money moments.
+- **Targets:** 44px in the reference files, 48px minimum in product.
+- **Motion:** `rise` .55s `cubic-bezier(.2,.8,.3,1)` staggered .05 to .42s,
+  press `scale(0.99)` with a spring back, sheets 240ms, screens about 320ms,
+  skeleton shimmer instead of spinners, all off under reduced motion.
+- **Live kombi map** is "coming soon" in a fixed 110px slot that later swaps
+  to a live preview without relayout.
+
+Gaps found while building are logged in `docs/launch/DESIGN-GAPS.md`.
