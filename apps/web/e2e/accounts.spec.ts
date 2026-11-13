@@ -10,6 +10,9 @@ const username = `e2e_${Date.now().toString(36)}`.slice(0, 20);
 // random so the leaked password check can never have seen it
 const password = `Kombi rider ${Math.random().toString(36).slice(2, 10)}`;
 const newPassword = `Rank walk ${Math.random().toString(36).slice(2, 10)}`;
+const thirdPassword = `Mbare stop ${Math.random().toString(36).slice(2, 10)}`;
+const LOCKED =
+  /^Too many tries for this username\. Wait 1[45] minutes, then try again\.$/;
 const CODE_RE = /^[A-Z0-9]{4} [A-Z0-9]{4} [A-Z0-9]{4}$/;
 
 async function signedOut(context: BrowserContext): Promise<void> {
@@ -37,6 +40,7 @@ test.describe.configure({ mode: "serial" });
 test.describe("username accounts", () => {
   test.setTimeout(120_000);
   let firstCode = "";
+  let secondCode = "";
 
   test.beforeEach(async ({ context }) => {
     await enableLaunchPreview(context);
@@ -106,7 +110,7 @@ test.describe("username accounts", () => {
     await page.locator("#code").fill(firstCode);
     await page.locator("#new-password").fill(newPassword);
     await page.getByTestId("recover-submit").click();
-    const secondCode = await readCode(page);
+    secondCode = await readCode(page);
     expect(secondCode).not.toBe(firstCode);
 
     // the old code is dead
@@ -129,10 +133,40 @@ test.describe("username accounts", () => {
     await expect(page.getByTestId("profile-chip")).toBeVisible({ timeout: 20_000 });
   });
 
-  test("delete my account erases the sign in, and five misses lock the name", async ({
+  test("five misses lock the username for a stated wait, and the saved code still works", async ({
+    page,
+    context,
+  }) => {
+    await signedOut(context);
+    // the last sign in succeeded, so the count starts from zero here
+    for (let i = 0; i < 5; i++) {
+      await signIn(page, `wrong guess ${i}`);
+      await expect(page.getByTestId("account-error")).toHaveText(
+        "That username and password do not match.",
+      );
+    }
+    // locked: even the right password is refused, with the minutes left
+    await signIn(page, newPassword);
+    await expect(page.getByTestId("account-error")).toHaveText(LOCKED);
+
+    // nobody can lock the owner out on purpose: the saved code still works
+    await page.goto("/recover");
+    await page.locator("#username").fill(username);
+    await page.locator("#code").fill(secondCode);
+    await page.locator("#new-password").fill(thirdPassword);
+    await page.getByTestId("recover-submit").click();
+    await readCode(page);
+
+    // and the recovery lifts the lock
+    await signedOut(context);
+    await signIn(page, thirdPassword);
+    await expect(page.getByTestId("profile-chip")).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("delete my account removes the sign in and the recovery code", async ({
     page,
   }) => {
-    await signIn(page, newPassword);
+    await signIn(page, thirdPassword);
     await expect(page.getByTestId("profile-chip")).toBeVisible({ timeout: 20_000 });
     await page.goto("/app/privacy");
     await page.getByTestId("delete-data").click();
@@ -140,22 +174,17 @@ test.describe("username accounts", () => {
     await page.waitForURL((url) => !url.pathname.startsWith("/app/privacy"));
 
     // the account can no longer be reached with its old details
-    await signIn(page, newPassword);
+    await signIn(page, thirdPassword);
     await expect(page.getByTestId("account-error")).toHaveText(
       "That username and password do not match.",
     );
-    // misses so far in this run: one in the sign in test, the old password
-    // after recovery, and the one above; two more make five, and the sixth
-    // try is refused before any password is checked
-    for (let i = 0; i < 2; i++) {
-      await signIn(page, `wrong guess ${i}`);
-      await expect(page.getByTestId("account-error")).toHaveText(
-        "That username and password do not match.",
-      );
-    }
-    await signIn(page, newPassword);
+    await page.goto("/recover");
+    await page.locator("#username").fill(username);
+    await page.locator("#code").fill(secondCode);
+    await page.locator("#new-password").fill(`${thirdPassword}x`);
+    await page.getByTestId("recover-submit").click();
     await expect(page.getByTestId("account-error")).toHaveText(
-      "Too many tries for this username. Wait 15 minutes, then try again.",
+      "That username and recovery code do not match.",
     );
   });
 });
