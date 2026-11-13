@@ -213,7 +213,9 @@ export async function TripResult({
             </span>
             <span className="v2-stat">
               <span className="v2-stat-l">{t(lang, "trip.kombis")}</span>
-              <span className="v2-stat-n">{result.plan.boardings}</span>
+              <span className="v2-stat-n" data-testid="trip-kombis">
+                {result.plan.boardings}
+              </span>
             </span>
           </div>
           <span className="v2-trip-note">{t(lang, "trip.noteNoFare")}</span>
