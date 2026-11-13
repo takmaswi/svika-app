@@ -53,3 +53,21 @@ One production build, servers started once, e2e with one worker.
 | unit | 531 passed: shared 114, spine 101, conductor 37, web 279 |
 | e2e | 89 passed, 0 failed, 0 skipped (35 spec files, 13.2 min) |
 | db:security-test | 276 passed, 0 failed, 0 skipped (no database change in this step) |
+
+## Lighthouse accessibility (Lighthouse 12, mobile, live site with the preview cookie)
+
+| screen | before (Step 0 deploy) | after (this deploy) |
+| --- | --- | --- |
+| `/app` launch home | 100, one unweighted failure: label not in name (the ND chip, and the sheet toggle labelled "Show wallet and tickets") | 100, no failures |
+| `/app/plan` with a trip | 100 (measured without a trip, which redirects home) | 100, no failures |
+| `/register` | 100, the ND chip | 100, no failures |
+| `/login` | 100, the ND chip | 100, no failures |
+| `/privacy` | 100, the ND chip | 100, no failures |
+
+Target 95 plus: met and held. Note on method: Lighthouse drops the preview cookie across a redirect, so a URL that redirects measures the public pre launch page instead (that is where the remaining arrival basis label mismatch lives, on the public home the launch replaces).
+
+## Live check (svika-web.vercel.app, deploy dpl_DQsaEUGWdBx4gjg6TGHjHu9XVf5b from a clean clone of f600f7b, 360px)
+
+- Public, flags off: no `data-ui`, the pre launch app unchanged (ND chip still there).
+- With the preview cookie: `data-ui="v2"`; one 48px language button, no ND chip; map credits folded bottom left; an empty search answers "Type where you are starting from." and stays on `/app`; a one kombi trip reads "About 27 min, 1 kombi".
+- Screenshots: `live-home-error.png`, `live-plan-one-kombi.png`.
