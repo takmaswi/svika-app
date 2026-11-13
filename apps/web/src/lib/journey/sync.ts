@@ -15,7 +15,7 @@
 // behind.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { toRpcLeg } from "./legs";
-import { planBatches, toRpcPoint, tracesToPrune } from "./policy";
+import { isFullyConfirmed, planBatches, toRpcPoint, tracesToPrune } from "./policy";
 import {
   deletePoints,
   getJourney,
@@ -186,7 +186,9 @@ export async function pruneConfirmedTraces(): Promise<number> {
   const ids = tracesToPrune(await listJourneys());
   for (const id of ids) {
     const journey = await getJourney(id);
-    if (!journey) continue;
+    // read again at delete time: a trip that is no longer fully confirmed
+    // (or was never) keeps every point
+    if (!journey || !isFullyConfirmed(journey)) continue;
     await deletePoints(id);
     await putJourney({ ...journey, pointsPruned: true });
   }

@@ -109,21 +109,22 @@ export function isFullyConfirmed(j: LocalJourney): boolean {
 }
 
 /**
- * The journeys whose local POINTS may be dropped: saved, fully confirmed by
- * the server, and older than the KEEP_RECENT_TRACES newest saved trips.
- * The journey row itself (summary, legs, marks) is never pruned, and an
- * unsynced or still recording journey is never a candidate: the offline
- * first promise keeps those forever.
+ * The journeys whose local POINTS may be dropped: fully confirmed by the
+ * server and older than the KEEP_RECENT_TRACES newest CONFIRMED trips. Only
+ * confirmed traces count toward the ones kept, so a burst of trips waiting
+ * to sync never pushes a confirmed trace off the phone. The journey row
+ * itself (summary, legs, marks) is never pruned, and an unsynced or still
+ * recording journey is never a candidate: the offline first promise keeps
+ * those forever.
  */
 export function tracesToPrune(
   journeys: readonly LocalJourney[],
   keep = KEEP_RECENT_TRACES,
 ): string[] {
-  const saved = journeys
-    .filter((j) => j.status === "complete")
-    .sort((a, b) => (b.endedAt ?? b.startedAt) - (a.endedAt ?? a.startedAt));
-  return saved
+  return journeys
+    .filter(isFullyConfirmed)
+    .sort((a, b) => (b.endedAt ?? b.startedAt) - (a.endedAt ?? a.startedAt))
     .slice(keep)
-    .filter((j) => isFullyConfirmed(j) && !j.pointsPruned)
+    .filter((j) => !j.pointsPruned)
     .map((j) => j.id);
 }

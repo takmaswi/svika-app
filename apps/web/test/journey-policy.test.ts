@@ -135,6 +135,20 @@ describe("tracesToPrune", () => {
     expect(tracesToPrune(journeys)).toEqual([]);
   });
 
+  test("only server confirmed traces count toward the ones kept", () => {
+    // five newer trips still waiting to sync must not push a confirmed
+    // trace off the phone: the rider keeps five confirmed traces as well
+    const journeys = [
+      ...Array.from({ length: KEEP_RECENT_TRACES }, (_, i) =>
+        saved(`waiting${i}`, 2_000_000 + i, { serverKnown: false, syncedThrough: -1 }),
+      ),
+      ...Array.from({ length: KEEP_RECENT_TRACES }, (_, i) => saved(`ok${i}`, 1_000_000 + i)),
+    ];
+    expect(tracesToPrune(journeys)).toEqual([]);
+    const oneMore = [...journeys, saved("oldest", 10)];
+    expect(tracesToPrune(oneMore)).toEqual(["oldest"]);
+  });
+
   test("does not prune the same trip twice", () => {
     const journeys = [
       ...Array.from({ length: KEEP_RECENT_TRACES }, (_, i) => saved(`new${i}`, 1_000_000 + i)),
