@@ -17,17 +17,20 @@ export function LiveMapLazy({
   placeNames,
   camera,
   onKombiTap,
+  vehicles,
 }: {
   labels: LiveMapLabels;
   overlay?: LiveMapOverlay;
   placeNames?: LiveMapPlaceName[];
   camera?: "corridor" | "boarding";
   onKombiTap?: (id: string) => void;
+  vehicles?: boolean;
 }) {
   return (
     <Inner
       labels={labels}
       overlay={overlay}
+      vehicles={vehicles}
       placeNames={placeNames}
       camera={camera}
       onKombiTap={onKombiTap}

@@ -122,7 +122,21 @@ interface LiveMapProps {
    * the camera frames the planned trip above the sheet.
    */
   camera?: "corridor" | "boarding";
+  /**
+   * Launch profile (ruling 3): false draws the real road, stops and plan
+   * with NO simulated kombis and no "demo movement" chip. Defaults to true
+   * so the pitch build and every existing caller are unchanged.
+   */
+  vehicles?: boolean;
 }
+
+/** A feed with nothing on it: the honest map while live tracking is coming soon. */
+const NO_VEHICLES: VehicleFeed = {
+  subscribe(listener) {
+    listener([]);
+    return () => {};
+  },
+};
 
 /** The active Mbare Sun map theme, from the same signals the CSS tokens use. */
 function currentMapTheme(): MapTheme {
@@ -409,6 +423,7 @@ export function LiveMap({
   placeNames,
   camera = "corridor",
   onKombiTap,
+  vehicles = true,
 }: LiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // the map effect mounts once; the ref keeps the latest handler in reach
@@ -576,10 +591,12 @@ export function LiveMap({
 
       // The fixed epoch keeps these markers in step with the server side
       // ETA caller, which measures from the same simulated fleet.
-      const feed: VehicleFeed = new SimulatedVehicleFeed(simConfig, SIM_VEHICLES, {
-        tickMs: TICK_MS,
-        epochMs: SIM_EPOCH_MS,
-      });
+      const feed: VehicleFeed = vehicles
+        ? new SimulatedVehicleFeed(simConfig, SIM_VEHICLES, {
+            tickMs: TICK_MS,
+            epochMs: SIM_EPOCH_MS,
+          })
+        : NO_VEHICLES;
       feedRef.current = feed;
 
       const bounds = overlay
@@ -849,13 +866,15 @@ export function LiveMap({
         role="img"
         aria-label={labels.ariaLabel}
       />
-      <span className="live-map-chip svika-glass" data-testid="demo-chip">
-        <span className="svika-live-dot">
-          <span className="svika-ripple-ring" aria-hidden />
-          <span className="svika-pulse-dot" aria-hidden />
+      {vehicles && (
+        <span className="live-map-chip svika-glass" data-testid="demo-chip">
+          <span className="svika-live-dot">
+            <span className="svika-ripple-ring" aria-hidden />
+            <span className="svika-pulse-dot" aria-hidden />
+          </span>
+          {labels.demoChip}
         </span>
-        {labels.demoChip}
-      </span>
+      )}
       {camera === "boarding" && ready && labels.viewWhole && labels.viewNear && (
         <button
           type="button"
