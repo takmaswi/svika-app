@@ -3,19 +3,20 @@
 import type { ReactNode } from "react";
 import { BackButton } from "@/components/v2/parts";
 
+export type ShellText = {
+  title: string;
+  body: string;
+  backHref: string;
+  backLabel: string;
+};
+
 export function AccountShell({
   title,
   body,
   backHref,
   backLabel,
   children,
-}: {
-  title: string;
-  body: string;
-  backHref: string;
-  backLabel: string;
-  children: ReactNode;
-}) {
+}: ShellText & { children: ReactNode }) {
   return (
     <main className="v2-screen v2-account">
       <div className="v2-hero v2-hero-short">

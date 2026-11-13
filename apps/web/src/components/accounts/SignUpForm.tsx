@@ -19,6 +19,7 @@ import { ShieldV2 } from "@/components/v2/icons";
 import { PasswordField } from "./PasswordField";
 import { RecoveryCodeView } from "./RecoveryCodeView";
 import { ServerError } from "./ServerError";
+import { AccountShell, type ShellText } from "./AccountShell";
 
 const USERNAME_RE = /^[a-z0-9_.]{3,20}$/;
 const NAME_HELP: Record<NameState, DictKey> = {
@@ -28,7 +29,7 @@ const NAME_HELP: Record<NameState, DictKey> = {
   invalid: "acct.nameRules",
 };
 
-export function SignUpForm({ lang }: { lang: AppLanguage }) {
+export function SignUpForm({ lang, shell }: { lang: AppLanguage; shell: ShellText }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [nameState, setNameState] = useState<NameState | null>(null);
@@ -55,6 +56,7 @@ export function SignUpForm({ lang }: { lang: AppLanguage }) {
     };
   }, [clean]);
 
+  // the code screen stands alone, with no hero (approved Recovery-Code)
   if (done)
     return <RecoveryCodeView lang={lang} username={done.username} code={done.code} />;
 
@@ -79,64 +81,66 @@ export function SignUpForm({ lang }: { lang: AppLanguage }) {
 
   const nameOk = nameState === "free";
   return (
-    <form
-      className="v2-form v2-account-form v2-rise"
-      onSubmit={submit}
-      data-testid="signup-form"
-    >
-      <div className="v2-field">
-        <label className="v2-field-label" htmlFor="username">
-          {t(lang, "acct.username")}
-        </label>
-        <input
-          id="username"
-          name="username"
-          className="v2-input"
-          data-state={nameOk ? "ok" : undefined}
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          pattern="[A-Za-z0-9_.]{3,20}"
-          maxLength={20}
-          aria-describedby="username-help"
-          data-error={t(lang, "acct.nameRules")}
+    <AccountShell {...shell}>
+      <form
+        className="v2-form v2-account-form v2-rise"
+        onSubmit={submit}
+        data-testid="signup-form"
+      >
+        <div className="v2-field">
+          <label className="v2-field-label" htmlFor="username">
+            {t(lang, "acct.username")}
+          </label>
+          <input
+            id="username"
+            name="username"
+            className="v2-input"
+            data-state={nameOk ? "ok" : undefined}
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            pattern="[A-Za-z0-9_.]{3,20}"
+            maxLength={20}
+            aria-describedby="username-help"
+            data-error={t(lang, "acct.nameRules")}
+          />
+          <span
+            id="username-help"
+            className={`v2-help${nameOk ? " v2-help-ok" : ""}`}
+            aria-live="polite"
+            data-testid="username-help"
+          >
+            {t(lang, nameState ? NAME_HELP[nameState] : "acct.nameRules")}
+          </span>
+        </div>
+        <PasswordField
+          lang={lang}
+          id="password"
+          name="password"
+          label={t(lang, "acct.password")}
+          autoComplete="new-password"
+          meter
+          value={password}
+          onChange={setPassword}
         />
-        <span
-          id="username-help"
-          className={`v2-help${nameOk ? " v2-help-ok" : ""}`}
-          aria-live="polite"
-          data-testid="username-help"
-        >
-          {t(lang, nameState ? NAME_HELP[nameState] : "acct.nameRules")}
-        </span>
-      </div>
-      <PasswordField
-        lang={lang}
-        id="password"
-        name="password"
-        label={t(lang, "acct.password")}
-        autoComplete="new-password"
-        meter
-        value={password}
-        onChange={setPassword}
-      />
-      <div className="v2-notice">
-        <span className="v2-notice-icon" aria-hidden>
-          <ShieldV2 />
-        </span>
-        <span>{t(lang, "acct.notice")}</span>
-      </div>
-      <FormCheck fallback={t(lang, "acct.pwShort")} />
-      <ServerError message={error} />
-      <CtaPill testId="signup-submit" disabled={busy}>
-        {t(lang, "acct.create")}
-      </CtaPill>
-      <Link className="v2-textlink" href="/login">
-        {t(lang, "acct.haveAccount")}
-      </Link>
-    </form>
+        <div className="v2-notice">
+          <span className="v2-notice-icon" aria-hidden>
+            <ShieldV2 />
+          </span>
+          <span>{t(lang, "acct.notice")}</span>
+        </div>
+        <FormCheck fallback={t(lang, "acct.pwShort")} />
+        <ServerError message={error} />
+        <CtaPill testId="signup-submit" disabled={busy}>
+          {t(lang, "acct.create")}
+        </CtaPill>
+        <Link className="v2-textlink" href="/login">
+          {t(lang, "acct.haveAccount")}
+        </Link>
+      </form>
+    </AccountShell>
   );
 }
