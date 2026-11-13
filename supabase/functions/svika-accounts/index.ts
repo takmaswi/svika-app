@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
       default:
         return fail("bad_request");
     }
-  } catch (_err) {
+  } catch {
     return fail("server_error", 500);
   }
 });
