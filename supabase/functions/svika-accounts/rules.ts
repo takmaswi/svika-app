@@ -14,17 +14,31 @@ export const MIN_PASSWORD = 8;
 export const MAX_PASSWORD = 72; // bcrypt ceiling
 
 // lockout and rate rails
+/**
+ * Five wrong passwords for one username inside 15 minutes lock that username.
+ * The lock lifts on its own: a refused try is never logged, so it cannot
+ * extend the lock, and the username opens again 15 minutes after the fifth
+ * miss at the latest. A correct sign in or a recovery clears the count.
+ */
 export const SIGN_IN_FAILS_PER_USER = 5;
 export const SIGN_IN_WINDOW_MIN = 15;
+/**
+ * The one allowance per network address, the same for wrong passwords, wrong
+ * recovery codes and username lookups: 30 inside a rolling 15 minutes.
+ */
 export const FAILS_PER_ORIGIN = 30;
+export const ORIGIN_WINDOW_MIN = SIGN_IN_WINDOW_MIN;
 /**
  * Account creations per network address per hour. Mobile networks put many
  * riders behind one address, so this is a burst brake, not a per person cap.
  */
 export const SIGN_UPS_PER_ORIGIN_HOUR = 10;
-export const RECOVER_FAILS_PER_USER_HOUR = 5;
-/** "Is this username free" lookups per network address per hour. */
-export const CHECKS_PER_ORIGIN_HOUR = 120;
+/**
+ * Recovery has no lock per username, so nobody can lock a rider out of their
+ * own recovery on purpose. Guessing is held back per address (FAILS_PER_ORIGIN)
+ * and by the code itself: 12 symbols from 31 is about 7.9e17 codes.
+ */
+export const RECOVERY_CODE_SPACE = 31 ** 12;
 /** The attempt log keeps rows this long, then the function deletes them. */
 export const ATTEMPT_RETENTION_DAYS = 30;
 
@@ -95,8 +109,46 @@ export function signUpAllowed(signUpsFromOriginLastHour: number): boolean {
   return signUpsFromOriginLastHour < SIGN_UPS_PER_ORIGIN_HOUR;
 }
 
-export function checkAllowed(checksFromOriginLastHour: number): boolean {
-  return checksFromOriginLastHour < CHECKS_PER_ORIGIN_HOUR;
+/** One logged attempt, as the lock rules read it (`at` in epoch ms). */
+export interface Attempt {
+  kind: "sign_up" | "sign_in" | "recover" | "check";
+  ok: boolean;
+  at: number;
+}
+
+/**
+ * When a rolling limit lifts: `limit` events inside `windowMs` hold it shut
+ * until the oldest of the last `limit` events leaves the window. Null when
+ * the limit is not reached. Event times in epoch ms, any order.
+ */
+export function limitLiftsAt(times: number[], limit: number, windowMs: number, now: number): number | null {
+  const inside = times.filter((t) => now - t < windowMs).sort((a, b) => a - b);
+  if (inside.length < limit) return null;
+  return inside[inside.length - limit]! + windowMs;
+}
+
+/**
+ * When a username's sign in lock lifts, or null when it is open. Only wrong
+ * passwords since the last success count; a correct sign in or a recovery
+ * with the saved code starts the count again.
+ */
+export function signInLockLiftsAt(attempts: Attempt[], now: number): number | null {
+  const lastOk = Math.max(
+    0,
+    ...attempts.filter((a) => a.ok && (a.kind === "sign_in" || a.kind === "recover")).map((a) => a.at),
+  );
+  const misses = attempts.filter((a) => a.kind === "sign_in" && !a.ok && a.at > lastOk).map((a) => a.at);
+  return limitLiftsAt(misses, SIGN_IN_FAILS_PER_USER, SIGN_IN_WINDOW_MIN * 60_000, now);
+}
+
+/** When one network address may try again, or null when it is under the allowance. */
+export function originLiftsAt(times: number[], now: number): number | null {
+  return limitLiftsAt(times, FAILS_PER_ORIGIN, ORIGIN_WINDOW_MIN * 60_000, now);
+}
+
+/** Whole seconds to wait, at least one, for the retry_after the screens show. */
+export function secondsUntil(liftsAt: number, now: number): number {
+  return Math.max(1, Math.ceil((liftsAt - now) / 1000));
 }
 
 /**

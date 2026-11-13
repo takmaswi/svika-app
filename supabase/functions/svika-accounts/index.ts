@@ -19,27 +19,29 @@
 // this function directly, so that address is the rider's own; a call relayed
 // through the web server would put every rider in Vercel's bucket.
 //
-// Actions (POST JSON): check_username, sign_up, sign_in, recover. Deleting
-// an account is the web app's own anonymise path plus forget_my_username
-// (lib/actions.ts): with the username gone the hidden address is unreachable. Responses are
+// Actions (POST JSON): check_username, sign_up, sign_in, recover, and
+// delete_account, the last step of delete my account: the web app runs
+// anonymise_me and forget_my_username as the rider (lib/actions.ts), then
+// this removes the auth user itself (migration 0051). Responses are
 // { ok: true, ... } or { ok: false, error: <code> } with Svika error codes
 // the web app turns into Svika copy.
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 import {
   ATTEMPT_RETENTION_DAYS,
-  FAILS_PER_ORIGIN,
-  RECOVER_FAILS_PER_USER_HOUR,
+  ORIGIN_WINDOW_MIN,
   RESERVED,
-  SIGN_IN_FAILS_PER_USER,
   SIGN_IN_WINDOW_MIN,
+  type Attempt,
   breachCount,
-  checkAllowed,
   checkPassword,
   checkUsername,
   clientAddress,
   hibpQuery,
   originHash,
+  originLiftsAt,
+  secondsUntil,
   sha256Hex,
+  signInLockLiftsAt,
   signUpAllowed,
   syntheticEmail,
 } from "./rules.ts";
@@ -61,6 +63,9 @@ function reply(body: Json, status = 200): Response {
   });
 }
 const fail = (error: string, status = 400) => reply({ ok: false, error }, status);
+/** A refusal that says how long to wait, so the screen can tell the rider. */
+const wait = (error: "locked" | "rate_limited", liftsAt: number) =>
+  reply({ ok: false, error, retry_after: secondsUntil(liftsAt, Date.now()) }, 429);
 
 function randomString(alphabet: string, length: number): string {
   const out: string[] = [];
@@ -116,6 +121,34 @@ async function countSince(filter: { username?: string; origin?: string; kind: st
   if (filter.ok !== undefined) q = q.eq("ok", filter.ok);
   const { count } = await q;
   return count ?? 0;
+}
+
+/** Recent attempts for one username or one address, oldest rows ignored. */
+async function recentAttempts(filter: { username?: string; origin?: string; kinds: Attempt["kind"][] }, minutes: number): Promise<Attempt[]> {
+  let q = admin
+    .from("auth_attempts")
+    .select("kind, ok, at")
+    .in("kind", filter.kinds)
+    .gte("at", new Date(Date.now() - minutes * 60_000).toISOString())
+    .order("at", { ascending: false })
+    .limit(200);
+  if (filter.username) q = q.eq("username", filter.username);
+  if (filter.origin) q = q.eq("origin_hash", filter.origin);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ kind: r.kind as Attempt["kind"], ok: r.ok as boolean, at: Date.parse(r.at as string) }));
+}
+
+/**
+ * The shared allowance per address: wrong passwords, wrong recovery codes
+ * and username lookups each get the same 30 inside 15 minutes.
+ */
+async function originRefusal(origin: string, kind: "sign_in" | "recover" | "check"): Promise<Response | null> {
+  const rows = await recentAttempts({ origin, kinds: [kind] }, ORIGIN_WINDOW_MIN);
+  // lookups always count; for sign in and recovery only the misses do
+  const times = rows.filter((r) => kind === "check" || !r.ok).map((r) => r.at);
+  const lifts = originLiftsAt(times, Date.now());
+  return lifts === null ? null : wait("rate_limited", lifts);
 }
 
 /**
@@ -202,7 +235,8 @@ async function signUp(body: Json, origin: string): Promise<Response> {
   const userId = created.data.user.id;
   const claim = await admin.from("account_usernames").insert({ user_id: userId, username });
   if (claim.error) {
-    // lost a race for the same username: undo the auth user
+    // lost a race for the same username: undo the auth user (its empty
+    // profile and wallet stay behind, anonymous, since migration 0051)
     await admin.auth.admin.deleteUser(userId);
     await log(username, "sign_up", false, origin);
     return fail("username_taken", 409);
@@ -218,7 +252,8 @@ async function signUp(body: Json, origin: string): Promise<Response> {
 /** "Is this username free" for the sign up screen, limited per address. */
 async function checkName(body: Json, origin: string): Promise<Response> {
   const username = checkUsername(body.username);
-  if (!checkAllowed(await countSince({ origin, kind: "check" }, 60))) return fail("rate_limited", 429);
+  const limited = await originRefusal(origin, "check");
+  if (limited) return limited;
   await log(username ?? "", "check", true, origin);
   if (!username) return reply({ ok: true, state: "invalid" });
   if (!(await usernameIsClean(username))) return reply({ ok: true, state: "blocked" });
@@ -228,12 +263,16 @@ async function checkName(body: Json, origin: string): Promise<Response> {
 async function signIn(body: Json, origin: string): Promise<Response> {
   const username = checkUsername(body.username);
   if (!username || typeof body.password !== "string") return fail("wrong_details", 401);
-  if ((await countSince({ username, kind: "sign_in", ok: false }, SIGN_IN_WINDOW_MIN)) >= SIGN_IN_FAILS_PER_USER) {
-    return fail("locked", 429);
-  }
-  if ((await countSince({ origin, kind: "sign_in", ok: false }, SIGN_IN_WINDOW_MIN)) >= FAILS_PER_ORIGIN) {
-    return fail("rate_limited", 429);
-  }
+  // the lock lifts on its own; a refused try is not logged, so it never
+  // extends the lock
+  const now = Date.now();
+  const lockLifts = signInLockLiftsAt(
+    await recentAttempts({ username, kinds: ["sign_in", "recover"] }, SIGN_IN_WINDOW_MIN),
+    now,
+  );
+  if (lockLifts !== null) return wait("locked", lockLifts);
+  const limited = await originRefusal(origin, "sign_in");
+  if (limited) return limited;
   const userId = await userIdFor(username);
   const user = userId ? (await admin.auth.admin.getUserById(userId)).data.user : null;
   const session = user?.email ? await signInSession(user.email, body.password) : null;
@@ -249,10 +288,12 @@ async function recover(body: Json, origin: string): Promise<Response> {
   if (!username || code.length !== 12) return fail("wrong_code", 401);
   const pwErr = checkPassword(body.new_password);
   if (pwErr) return fail(pwErr);
+  // no lock per username here: a sign in lock (even one set on purpose by
+  // someone else) never stops the owner's saved code. Guessing is held back
+  // per address, and a code is one of about 7.9e17.
+  const limited = await originRefusal(origin, "recover");
+  if (limited) return limited;
   if (((await timesLeaked(body.new_password as string)) ?? 0) > 0) return fail("password_leaked");
-  if ((await countSince({ username, kind: "recover", ok: false }, 60)) >= RECOVER_FAILS_PER_USER_HOUR) {
-    return fail("locked", 429);
-  }
   const userId = await userIdFor(username);
   const { data: row } = userId
     ? await admin.from("account_recovery_codes").select("code_salt, code_hash").eq("user_id", userId).maybeSingle()
@@ -270,6 +311,27 @@ async function recover(body: Json, origin: string): Promise<Response> {
   const session = await signInSession(updated.data.user.email, body.new_password as string);
   if (!session) return fail("sign_in_failed", 500);
   return reply({ ok: true, session, recovery_code: fresh, username });
+}
+
+/**
+ * Delete my account, last step. Only the caller's own account, read from the
+ * caller's access token and never from the body; only a username account;
+ * and only once forget_my_username has run, so the order is always
+ * anonymise, forget, then this. The auth user goes outright (address,
+ * password hash, identities, sessions); the emptied profile stays as the
+ * anchor for append only money history.
+ */
+async function deleteAccount(req: Request): Promise<Response> {
+  const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) return fail("not_signed_in", 401);
+  if (data.user.user_metadata?.account !== "username") return fail("not_username_account", 403);
+  const held = await admin.from("account_usernames").select("user_id").eq("user_id", data.user.id).maybeSingle();
+  if (held.error) throw held.error;
+  if (held.data) return fail("forget_first", 409);
+  const removed = await admin.auth.admin.deleteUser(data.user.id);
+  if (removed.error) return fail("delete_failed", 500);
+  return reply({ ok: true });
 }
 
 // The rider's browser calls this directly, so only Svika's own pages may.
@@ -314,6 +376,8 @@ async function handle(req: Request): Promise<Response> {
         return await signIn(body, origin);
       case "recover":
         return await recover(body, origin);
+      case "delete_account":
+        return await deleteAccount(req);
       default:
         return fail("bad_request");
     }
