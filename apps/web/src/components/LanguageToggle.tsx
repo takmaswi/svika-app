@@ -16,7 +16,10 @@ export function LanguageToggle({ lang }: { lang: AppLanguage }) {
   const router = useRouter();
   const v2 = useUiV2();
   if (v2) {
-    const label = t(lang, lang === "en" ? "lang.switchToShona" : "lang.switchToEnglish");
+    const label = t(
+      lang,
+      lang === "en" ? "lang.switchToShona" : "lang.switchToEnglish",
+    );
     return <LangButton lang={lang} label={label} />;
   }
   function choose(next: AppLanguage) {

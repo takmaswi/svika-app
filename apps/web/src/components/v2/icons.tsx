@@ -24,7 +24,16 @@ export function BackV2({ size = 20 }: IconProps) {
 
 export function SearchV2({ size = 22 }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      aria-hidden
+    >
       <circle cx="10.5" cy="10.5" r="6.5" />
       <path d="M20 20l-4.6-4.6" />
     </svg>
@@ -68,7 +77,17 @@ export function RankV2({ size = 20 }: IconProps) {
 /** The outlined kombi used by the Ranks tab. */
 export function RanksTabV2({ size = 20 }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d="M5 7.5A2.5 2.5 0 0 1 7.5 5h7.4a2 2 0 0 1 1.7.9l2.6 3.8c.2.3.3.7.3 1.1V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2z" />
       <circle cx="8" cy="17.5" r="1.8" />
       <circle cx="16" cy="17.5" r="1.8" />
@@ -78,7 +97,17 @@ export function RanksTabV2({ size = 20 }: IconProps) {
 
 export function MeV2({ size = 20 }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <circle cx="12" cy="8.5" r="4" />
       <path d="M4.5 20.5c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5" />
     </svg>
@@ -87,7 +116,17 @@ export function MeV2({ size = 20 }: IconProps) {
 
 export function SwapV2({ size = 18 }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d="M7 4v15M3.5 7.5 7 4l3.5 3.5M17 20V5M13.5 16.5 17 20l3.5-3.5" />
     </svg>
   );

@@ -5,7 +5,8 @@
 import maplibregl from "maplibre-gl";
 
 export function addAttribution(map: maplibregl.Map): void {
-  const v2 = typeof document !== "undefined" && document.documentElement.dataset.ui === "v2";
+  const v2 =
+    typeof document !== "undefined" && document.documentElement.dataset.ui === "v2";
   if (!v2) {
     map.addControl(new maplibregl.AttributionControl({ compact: false }), "top-right");
     return;
@@ -13,7 +14,9 @@ export function addAttribution(map: maplibregl.Map): void {
   const control = new maplibregl.AttributionControl({ compact: true });
   map.addControl(control, "bottom-left");
   const fold = () => {
-    const el = map.getContainer().querySelector(".maplibregl-ctrl-attrib.maplibregl-compact");
+    const el = map
+      .getContainer()
+      .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact");
     if (!el) return false;
     el.classList.remove("maplibregl-compact-show");
     el.removeAttribute("open");

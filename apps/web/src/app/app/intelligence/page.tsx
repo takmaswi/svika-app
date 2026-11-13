@@ -39,9 +39,7 @@ export default async function IntelligencePage() {
 
       <section className="svika-card wallet-panel svika-animate-fade-up svika-rise-2">
         <h2 className="svika-title">{t(lang, "intel.rung1H")}</h2>
-        <p className="svika-body">
-          {tp(lang, "intel.rung1B", metrics.journeys)}
-        </p>
+        <p className="svika-body">{tp(lang, "intel.rung1B", metrics.journeys)}</p>
       </section>
 
       <section className="svika-card wallet-panel svika-animate-fade-up svika-rise-3">

@@ -7,7 +7,10 @@ function fakeBrowser({ v2 = true, reduce = false, vibrate = true } = {}) {
   const calls: number[] = [];
   vi.stubGlobal("document", { documentElement: { dataset: v2 ? { ui: "v2" } : {} } });
   vi.stubGlobal("window", { matchMedia: () => ({ matches: reduce }) });
-  vi.stubGlobal("navigator", vibrate ? { vibrate: (ms: number) => (calls.push(ms), true) } : {});
+  vi.stubGlobal(
+    "navigator",
+    vibrate ? { vibrate: (ms: number) => (calls.push(ms), true) } : {},
+  );
   return calls;
 }
 

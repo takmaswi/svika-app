@@ -30,8 +30,14 @@ export function tp(lang: AppLanguage, key: DictKey, count: number): string {
 }
 
 /** The phrase split around its number, so the count can sit in mono. */
-export function tpParts(lang: AppLanguage, key: DictKey, count: number): [string, string] {
-  const [before = "", after = ""] = t(lang, pluralKey(lang, key, count)).split("{count}");
+export function tpParts(
+  lang: AppLanguage,
+  key: DictKey,
+  count: number,
+): [string, string] {
+  const [before = "", after = ""] = t(lang, pluralKey(lang, key, count)).split(
+    "{count}",
+  );
   return [before, after];
 }
 

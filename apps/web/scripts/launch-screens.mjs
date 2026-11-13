@@ -32,40 +32,64 @@ if (!step || routes.length === 0) {
 }
 const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const local = BASE.includes("localhost");
-const PREVIEW = process.env.PREVIEW_KEY ?? (local ? "e2e-launch-preview-token-0001" : process.env.SVIKA_PREVIEW_TOKEN);
+const PREVIEW =
+  process.env.PREVIEW_KEY ??
+  (local ? "e2e-launch-preview-token-0001" : process.env.SVIKA_PREVIEW_TOKEN);
 const MODES = (process.env.MODES ?? "before,after").split(",");
 const OUT = join(root, "docs", "design-evidence", "launch", `step-${step}`);
 mkdirSync(OUT, { recursive: true });
 
-const slug = (r) => r.replace(/^\//, "").replace(/[^a-z0-9]+/gi, "-").replace(/-+$/, "") || "root";
+const slug = (r) =>
+  r
+    .replace(/^\//, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/-+$/, "") || "root";
 const host = new URL(BASE).hostname;
 
 const browser = await chromium.launch();
 for (const mode of MODES) {
   for (const theme of ["light", "dark"]) {
     for (const lang of ["en", "sn"]) {
-      const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, deviceScaleFactor: 2 });
+      const ctx = await browser.newContext({
+        viewport: { width: 360, height: 740 },
+        deviceScaleFactor: 2,
+      });
       const cookies = [
         { name: "svika_theme", value: theme, domain: host, path: "/" },
         { name: "svika_lang", value: lang, domain: host, path: "/" },
       ];
-      if (mode === "after" && PREVIEW) cookies.push({ name: "svika_preview", value: PREVIEW, domain: host, path: "/", httpOnly: true });
+      if (mode === "after" && PREVIEW)
+        cookies.push({
+          name: "svika_preview",
+          value: PREVIEW,
+          domain: host,
+          path: "/",
+          httpOnly: true,
+        });
       await ctx.addCookies(cookies);
       const page = await ctx.newPage();
       if (process.env.SLOW3G === "1") {
         const cdp = await ctx.newCDPSession(page);
         await cdp.send("Network.emulateNetworkConditions", {
-          offline: false, latency: 400, downloadThroughput: 50_000, uploadThroughput: 50_000,
+          offline: false,
+          latency: 400,
+          downloadThroughput: 50_000,
+          uploadThroughput: 50_000,
         });
       }
       if (process.env.SIGNED_IN === "1") {
         const res = await page.request.post(`${BASE}/e2e/login`, {
-          data: { email: process.env.TEST_RIDER_A_EMAIL, password: process.env.TEST_RIDER_A_PASSWORD },
+          data: {
+            email: process.env.TEST_RIDER_A_EMAIL,
+            password: process.env.TEST_RIDER_A_PASSWORD,
+          },
         });
         if (!res.ok()) throw new Error(`sign in failed: ${res.status()}`);
       }
       for (const route of routes) {
-        await page.goto(`${BASE}${route}`, { waitUntil: "networkidle", timeout: 90_000 }).catch(() => {});
+        await page
+          .goto(`${BASE}${route}`, { waitUntil: "networkidle", timeout: 90_000 })
+          .catch(() => {});
         await page.waitForTimeout(1_800); // entrance motion and lazy chips settle
         const file = join(OUT, `${mode}-${slug(route)}-${theme}-${lang}.png`);
         await page.screenshot({ path: file, fullPage: true });

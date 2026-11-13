@@ -8,16 +8,38 @@ import { ArrowV2, BackV2, MeV2, PinV2, RanksTabV2 } from "./icons";
 export function HeroKombi({ label }: { label: string }) {
   return (
     <div className="v2-hero-kombi v2-drive">
-      <svg className="v2-lines v2-kombi-lines" width="40" height="30" viewBox="0 0 40 30" aria-hidden>
+      <svg
+        className="v2-lines v2-kombi-lines"
+        width="40"
+        height="30"
+        viewBox="0 0 40 30"
+        aria-hidden
+      >
         <path d="M4 6h26M12 15h24M2 24h22" strokeWidth="3.2" strokeLinecap="round" />
       </svg>
-      <svg className="v2-beam v2-kombi-beam" width="120" height="70" viewBox="0 0 120 70" aria-hidden>
+      <svg
+        className="v2-beam v2-kombi-beam"
+        width="120"
+        height="70"
+        viewBox="0 0 120 70"
+        aria-hidden
+      >
         <path d="M0 34 L120 4 L120 64 L0 40 Z" opacity=".14" />
         <path d="M0 35 L80 18 L80 52 L0 39 Z" opacity=".18" />
       </svg>
-      <svg className="v2-bob v2-kombi" width="172" height="92" viewBox="0 0 172 92" role="img" aria-label={label}>
+      <svg
+        className="v2-bob v2-kombi"
+        width="172"
+        height="92"
+        viewBox="0 0 172 92"
+        role="img"
+        aria-label={label}
+      >
         <ellipse className="v2k-shadow" cx="88" cy="86" rx="76" ry="4" />
-        <path className="v2k-body" d="M8 72 V30 Q8 14 24 14 H118 Q128 14 136 21 L160 44 Q166 49 166 57 V72 Z" />
+        <path
+          className="v2k-body"
+          d="M8 72 V30 Q8 14 24 14 H118 Q128 14 136 21 L160 44 Q166 49 166 57 V72 Z"
+        />
         <rect className="v2k-win" x="20" y="24" width="24" height="18" rx="5" />
         <rect className="v2k-win" x="50" y="24" width="24" height="18" rx="5" />
         <rect className="v2k-win" x="80" y="24" width="24" height="18" rx="5" />
@@ -76,15 +98,34 @@ export function CtaPill({
     );
   }
   return (
-    <button className="v2-cta" type={type} data-testid={testId} disabled={disabled} name={name} value={value}>
+    <button
+      className="v2-cta"
+      type={type}
+      data-testid={testId}
+      disabled={disabled}
+      name={name}
+      value={value}
+    >
       {inner}
     </button>
   );
 }
 
-export function BackButton({ href, label, floating }: { href: string; label: string; floating?: boolean }) {
+export function BackButton({
+  href,
+  label,
+  floating,
+}: {
+  href: string;
+  label: string;
+  floating?: boolean;
+}) {
   return (
-    <Link href={href} aria-label={label} className={floating ? "v2-float-back" : "v2-round"}>
+    <Link
+      href={href}
+      aria-label={label}
+      className={floating ? "v2-float-back" : "v2-round"}
+    >
       <BackV2 />
     </Link>
   );
@@ -129,15 +170,61 @@ export function BottomNav({
  * soon; later its body swaps to a live preview with "Open map" without any
  * relayout, because the frame (110px, tile radius) never changes.
  */
-export function MapSlot({ badge, title, sub }: { badge: string; title: string; sub?: string }) {
+export function MapSlot({
+  badge,
+  title,
+  sub,
+}: {
+  badge: string;
+  title: string;
+  sub?: string;
+}) {
   return (
     <div className="v2-soon v2-span2" data-testid="map-slot" data-state="soon">
-      <svg width="100%" height="100%" viewBox="0 0 328 110" preserveAspectRatio="xMidYMid slice" aria-hidden>
-        <path className="v2s-main" d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32" strokeWidth="10" fill="none" strokeLinecap="round" />
-        <path className="v2s-minor" d="M70 -10 L 110 130" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <path className="v2s-minor" d="M240 -10 L 210 130" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <path className="v2s-minor" d="M-10 28 L 340 90" strokeWidth="4" fill="none" strokeLinecap="round" />
-        <path d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32" stroke="#FFFFFF" strokeOpacity=".7" strokeWidth="3" strokeDasharray="1 9" fill="none" strokeLinecap="round" />
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 328 110"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden
+      >
+        <path
+          className="v2s-main"
+          d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32"
+          strokeWidth="10"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          className="v2s-minor"
+          d="M70 -10 L 110 130"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          className="v2s-minor"
+          d="M240 -10 L 210 130"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          className="v2s-minor"
+          d="M-10 28 L 340 90"
+          strokeWidth="4"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32"
+          stroke="#FFFFFF"
+          strokeOpacity=".7"
+          strokeWidth="3"
+          strokeDasharray="1 9"
+          fill="none"
+          strokeLinecap="round"
+        />
       </svg>
       <span className="v2-soon-kombi v2-bob" aria-hidden />
       <span className="v2-soon-copy">

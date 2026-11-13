@@ -14,7 +14,11 @@ import { InfoV2 } from "./icons";
 type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 function isField(el: Element): el is Field {
-  return el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement;
+  return (
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLSelectElement ||
+    el instanceof HTMLTextAreaElement
+  );
 }
 
 export function FormCheck({ fallback }: { fallback: string }) {
@@ -54,7 +58,8 @@ export function FormCheck({ fallback }: { fallback: string }) {
       const f = event.target;
       if (f instanceof Element && isField(f) && f.checkValidity()) {
         f.removeAttribute("aria-invalid");
-        if (![...form.elements].some((el) => el.hasAttribute("aria-invalid"))) setMessage("");
+        if (![...form.elements].some((el) => el.hasAttribute("aria-invalid")))
+          setMessage("");
       }
     };
     // capture, so the check runs before any other submit handler
@@ -70,7 +75,13 @@ export function FormCheck({ fallback }: { fallback: string }) {
   return (
     // the Sign-Up notice pattern: an icon tile plus the words, never colour
     // alone (DESIGN-GAPS G2)
-    <p ref={anchor} id={errorId} className="v2-notice v2-form-error" role="alert" data-testid="form-error">
+    <p
+      ref={anchor}
+      id={errorId}
+      className="v2-notice v2-form-error"
+      role="alert"
+      data-testid="form-error"
+    >
       {message ? (
         <>
           <span className="v2-notice-icon">
@@ -82,4 +93,3 @@ export function FormCheck({ fallback }: { fallback: string }) {
     </p>
   );
 }
-
