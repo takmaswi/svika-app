@@ -5,11 +5,13 @@
   "description": "Svika Brand v2 design tokens and assets, exported from the design system project.",
   "exports": {
     "./styles.css": "./styles.css",
+    "./launch-v2.css": "./launch-v2.css",
     "./tokens/*": "./tokens/*",
     "./assets/*": "./assets/*"
   },
   "files": [
     "styles.css",
+    "launch-v2.css",
     "tokens",
     "assets"
   ]
