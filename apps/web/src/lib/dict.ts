@@ -789,6 +789,46 @@ export const dict = {
     en: "The your data page shows everything held about you. Deleting removes your name, phone and saved trips; ticket and money history stays but no longer says who you are.",
     sn: "Peji reruzivo rwako rinoratidza zvese zvakachengetwa nezvako. Kudzima kunobvisa zita, foni nenzendo dzakachengetwa; nhoroondo yematikiti nemari inosara asi haichataure kuti ndiwe ani.",
   },
+  "privacy.launch.storeH": {
+    en: "What Svika stores",
+    sn: "Zvinochengetwa neSvika",
+  },
+  "privacy.launch.storeB": {
+    en: "Your username and your password, scrambled so nobody can read it, not even us. A recovery code, scrambled the same way. Your language. The trips you save, and the trips you record and choose to send. Place names you add. If you choose to add them, an emergency contact and medical aid details.",
+    sn: "Zita rako remushandisi nepassword yako, zvakavharidzirwa zvekuti hapana anogona kuverenga, kunyange isu. Kodhi yekudzokera, yakavharidzirwa saizvozvo. Mutauro wako. Nzendo dzaunochengeta, nenzendo dzaunorekodha wosarudza kutumira. Mazita enzvimbo aunowedzera. Kana ukasarudza kuwedzera, munhu wekufonera panjodzi neruzivo rwe medical aid.",
+  },
+  "privacy.launch.neverH": {
+    en: "What Svika never asks for",
+    sn: "Zvisingambokumbirwi neSvika",
+  },
+  "privacy.launch.neverB": {
+    en: "Your phone number, your email, your real name or your ID. Svika never reads your contacts, and it uses your location only while a screen that needs it is open, like recording a trip. Never in the background.",
+    sn: "Nhamba yefoni, email, zita rako chairo kana ID. Svika haimboverenga ma contacts ako, uye inoshandisa kwauri chete kana peji rinoida rakavhurwa, sekurekodha rwendo. Kwete kumashure.",
+  },
+  "privacy.launch.keepH": {
+    en: "How long we keep it",
+    sn: "Tinozvichengeta kwenguva yakareba sei",
+  },
+  "privacy.launch.keepB": {
+    en: "Your account and trips stay until you delete them. Sign in attempts (the username, whether it worked, and a scrambled code for the network it came from) are kept for 30 days to stop password guessing, then deleted.",
+    sn: "Account yako nenzendo zvinogara kusvika wazvidzima. Kuedza kupinda (zita, kana zvakashanda, nekodhi yakavharidzirwa yenetwork yazvabva) kunochengetwa mazuva 30 kudzivirira kufungidzira password, kozodzimwa.",
+  },
+  "privacy.launch.shareH": {
+    en: "Who sees your data",
+    sn: "Ndiani anoona data rako",
+  },
+  "privacy.launch.shareB": {
+    en: "Nobody outside Svika, and Svika does not sell your data. Other riders see shared place names and shortcuts, never who you are.",
+    sn: "Hapana ari kunze kweSvika, uye Svika haitengesi data rako. Vamwe vatasvi vanoona mazita enzvimbo nemapfupi akagovaniswa, kwete kuti ndiwe ani.",
+  },
+  "privacy.launch.deleteH": {
+    en: "Deleting your account",
+    sn: "Kudzima account yako",
+  },
+  "privacy.launch.deleteB": {
+    en: "Delete my account removes your username, recovery code, saved and recorded trips, your own place names, emergency details and feedback straight away, and signs you out. Names and shortcuts other riders already agreed on stay on the shared map, with nothing that points to you.",
+    sn: "Kudzima account kunobvisa zita rako, kodhi yekudzokera, nzendo dzakachengetwa nedzakarekodhwa, mazita enzvimbo ako, ruzivo rwenjodzi nemaonero ako pakarepo, wobva wabudiswa. Mazita nemapfupi akabvumirana nevamwe vatasvi zvinosara pamepu, pasina chinoratidza iwe.",
+  },
   "privacy.versionLabel": { en: "Notice version", sn: "Notice version" },
   "privacy.yourDataLink": {
     en: "Your data and privacy",
@@ -1664,6 +1704,186 @@ export const dict = {
   "fareBoard.counted.one": {
     en: "{count} fare counted so far today",
     sn: "Mari {count} yaverengwa nhasi",
+  },
+  "acct.signupTitle": {
+    en: "Save your trips",
+    sn: "Chengetedza nzendo dzako",
+  },
+  "acct.signupBody": {
+    en: "Pick a username and a password. That is all. No phone number, no email.",
+    sn: "Sarudza zita remushandisi nepassword. Ndizvo chete. Hapana nhamba yefoni, hapana email.",
+  },
+  "acct.username": {
+    en: "Username",
+    sn: "Zita remushandisi",
+  },
+  "acct.password": {
+    en: "Password",
+    sn: "Password",
+  },
+  "acct.show": {
+    en: "Show",
+    sn: "Ratidza",
+  },
+  "acct.hide": {
+    en: "Hide",
+    sn: "Vanza",
+  },
+  "acct.nameFree": {
+    en: "This username is free",
+    sn: "Zita iri harisati ratorwa",
+  },
+  "acct.nameTaken": {
+    en: "Someone already has this username. Try another.",
+    sn: "Zita iri rakatorwa kare. Edza rimwe.",
+  },
+  "acct.nameBlocked": {
+    en: "Pick a different username.",
+    sn: "Sarudza rimwe zita.",
+  },
+  "acct.nameRules": {
+    en: "3 to 20 letters, numbers, dots or underscores.",
+    sn: "Mabhii, nhamba, madotsi kana _, 3 kusvika 20.",
+  },
+  "acct.nameMissing": {
+    en: "Pick a username.",
+    sn: "Sarudza zita remushandisi.",
+  },
+  "acct.pwShort": {
+    en: "At least 8 characters.",
+    sn: "Mavara masere zvishoma.",
+  },
+  "acct.pwGood": {
+    en: "At least 8 characters. Good.",
+    sn: "Mavara masere zvishoma. Zvakanaka.",
+  },
+  "acct.pwLong": {
+    en: "72 characters at most.",
+    sn: "Mavara 72 zvakanyanya.",
+  },
+  "acct.pwCommon": {
+    en: "People guess that password first. Pick another.",
+    sn: "Vanhu vanotanga kufungidzira password iyoyo. Sarudza imwe.",
+  },
+  "acct.pwLeaked": {
+    en: "That password has shown up in a data leak elsewhere. Pick another.",
+    sn: "Password iyoyo yakamboburitswa kune imwe nzvimbo. Sarudza imwe.",
+  },
+  "acct.notice": {
+    en: "Svika never asks for your phone number, email or name.",
+    sn: "Svika haimbokukumbiri nhamba yefoni, email kana zita rako.",
+  },
+  "acct.create": {
+    en: "Create account",
+    sn: "Gadzira account",
+  },
+  "acct.haveAccount": {
+    en: "I already have an account",
+    sn: "Ndine account kare",
+  },
+  "acct.readyTitle": {
+    en: "Your account is ready, {name}",
+    sn: "Account yako yagadzirira, {name}",
+  },
+  "acct.resetTitle": {
+    en: "Your new password is set, {name}",
+    sn: "Password yako itsva yaiswa, {name}",
+  },
+  "acct.codeBody": {
+    en: "Save this recovery code. It is the only way back in if you forget your password. We will show it once.",
+    sn: "Chengeta kodhi iyi. Ndiyo chete nzira yekudzokera mukati kana ukakanganwa password. Tichairatidza kamwe chete.",
+  },
+  "acct.codeLabel": {
+    en: "Recovery code",
+    sn: "Kodhi yekudzokera",
+  },
+  "acct.copy": {
+    en: "Copy",
+    sn: "Kopa",
+  },
+  "acct.copied": {
+    en: "Copied",
+    sn: "Yakopwa",
+  },
+  "acct.savePhoto": {
+    en: "Save as photo",
+    sn: "Chengeta sepikicha",
+  },
+  "acct.tip1": {
+    en: "Write it down or keep the photo somewhere safe.",
+    sn: "Inyore pasi kana chengeta pikicha panzvimbo yakachengeteka.",
+  },
+  "acct.tip2": {
+    en: "Never share it. Svika will never ask you for it.",
+    sn: "Usaipa munhu. Svika haimbokukumbiri iyo.",
+  },
+  "acct.saved": {
+    en: "I saved it",
+    sn: "Ndaichengeta",
+  },
+  "acct.signInTitle": {
+    en: "Welcome back",
+    sn: "Mauya zvakare",
+  },
+  "acct.signInBody": {
+    en: "Your username and password.",
+    sn: "Zita remushandisi nepassword yako.",
+  },
+  "acct.signIn": {
+    en: "Sign in",
+    sn: "Pinda",
+  },
+  "acct.forgot": {
+    en: "Forgot your password?",
+    sn: "Wakanganwa password?",
+  },
+  "acct.newAccount": {
+    en: "Create an account",
+    sn: "Gadzira account",
+  },
+  "acct.wrong": {
+    en: "That username and password do not match.",
+    sn: "Zita nepassword hazvienderani.",
+  },
+  "acct.locked": {
+    en: "Too many tries for this username. Wait 15 minutes, then try again.",
+    sn: "Waedza kakawanda nezita iri. Mira maminitsi 15, wozoedza zvakare.",
+  },
+  "acct.rateLimited": {
+    en: "Too many tries from this network. Wait a while, then try again.",
+    sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira zvishoma, wozoedza zvakare.",
+  },
+  "acct.recoverTitle": {
+    en: "Get back in",
+    sn: "Dzokera mukati",
+  },
+  "acct.recoverBody": {
+    en: "Your username and the recovery code you saved, then a new password.",
+    sn: "Zita remushandisi nekodhi yawakachengeta, wozoisa password itsva.",
+  },
+  "acct.newPassword": {
+    en: "New password",
+    sn: "Password itsva",
+  },
+  "acct.codeMissing": {
+    en: "Type the 12 character code you saved.",
+    sn: "Nyora kodhi yemavara 12 yawakachengeta.",
+  },
+  "acct.recoverCta": {
+    en: "Set new password",
+    sn: "Isa password itsva",
+  },
+  "acct.wrongCode": {
+    en: "That username and recovery code do not match.",
+    sn: "Zita nekodhi hazvienderani.",
+  },
+  "acct.failed": {
+    en: "Something went wrong on our side. Try again.",
+    sn: "Pane chakanganisika kwatiri. Edza zvakare.",
+  },
+  "acct.offline": {
+    en: "You are offline. Connect and try again.",
+    sn: "Hauna network. Batana wozoedza zvakare.",
   },
   "launch.sheetOpen": {
     en: "Show your trips and more",

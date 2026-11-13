@@ -73,10 +73,12 @@ export function CtaPill({
   disabled,
   name,
   value,
+  onClick,
 }: {
   children: ReactNode;
   href?: string;
   type?: "submit" | "button";
+  onClick?: () => void;
   testId?: string;
   disabled?: boolean;
   name?: string;
@@ -105,6 +107,7 @@ export function CtaPill({
       disabled={disabled}
       name={name}
       value={value}
+      onClick={onClick}
     >
       {inner}
     </button>

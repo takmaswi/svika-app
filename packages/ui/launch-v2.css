@@ -1550,3 +1550,148 @@
 :root[data-ui="v2"][data-theme="dark"] .v2-theme {
   color: #f5b301;
 }
+
+/* --- Sign-Up and Recovery-Code (launch Step 2), values from the screens ---- */
+.v2-account-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v2-account-form {
+  padding: 22px 18px 24px;
+}
+.v2-account-form .v2-cta {
+  margin-top: 4px;
+}
+.v2-input-pw {
+  flex: 1;
+  padding-right: 64px;
+}
+.v2-input-code {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.v2-account-links {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.v2-code-screen {
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.v2-code-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v2-code-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #d9e8cc;
+  color: #1f4d2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.v2-code-title {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+.v2-code-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--v2-ink-soft);
+}
+.v2-code-card {
+  background: var(--v2-code-card, #161d18);
+  border-radius: 22px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 14px 32px rgba(22, 29, 24, 0.25);
+}
+:root[data-ui="v2"][data-theme="dark"] {
+  --v2-code-card: #232b25;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-ui="v2"]:not([data-theme="light"]) {
+    --v2-code-card: #232b25;
+  }
+}
+.v2-code-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+.v2-code {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 3px;
+  color: #f5b301;
+  display: flex;
+  gap: 12px;
+}
+.v2-code-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.v2-code-btn {
+  flex: 1;
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+  font: 600 14px "IBM Plex Sans", sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.v2-tips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v2-tips li {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.v2-tip-n {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #f5b301;
+  color: #161d18;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 11px "DM Sans", sans-serif;
+}
+.v2-code-cta {
+  margin-top: auto;
+}
