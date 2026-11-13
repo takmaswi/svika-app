@@ -461,6 +461,10 @@
   flex-direction: column;
   gap: 18px;
 }
+/* the round back button keeps its size in the column (Sign-Up header) */
+.v2-hero-short > .v2-round {
+  align-self: flex-start;
+}
 .v2-topbar {
   position: relative;
   z-index: 2;
@@ -1369,6 +1373,11 @@
   border: none;
   background: var(--v2-hero-button);
   color: var(--v2-ink);
+}
+/* over a map it floats: the raised round button (v2-float-back, Trip-Result) */
+:root[data-ui="v2"] .plan-back-row .back-btn {
+  background: var(--v2-raised);
+  box-shadow: var(--v2-float-shadow);
 }
 
 /* the sheet over the map (Trip-Result, Rank-Page sheet values) */
