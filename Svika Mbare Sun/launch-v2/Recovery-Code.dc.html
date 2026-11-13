@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika recovery code</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes flip{from{opacity:0;transform:rotateX(70deg)}to{opacity:1;transform:none}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+.f{display:inline-block;animation:flip .4s ease-out both}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.f{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 780px; box-sizing: border-box; background: #FFFFFF; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #161D18; padding: 24px 18px; display: flex; flex-direction: column; gap: 20px">
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px">
+<span style="width: 52px; height: 52px; border-radius: 16px; background: #D9E8CC; color: #1F4D2E; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10V7.5a5 5 0 0 1 10 0V10h.5A2.5 2.5 0 0 1 20 12.5v6a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-6A2.5 2.5 0 0 1 6.5 10zm2.5 0h5V7.5a2.5 2.5 0 0 0-5 0z"></path></svg></span>
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 28px; line-height: 1.08; letter-spacing: -0.035em">Your account is ready, rudo23</h1>
+<span style="font-size: 14px; line-height: 1.5; color: #575F53">Save this recovery code. It is the only way back in if you forget your password. We will show it once.</span>
+</div>
+
+<div class="r" style="position: relative; background: #161D18; border-radius: 22px; padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: 0 14px 32px rgba(22,29,24,.25); animation-delay: .12s">
+<span style="font-size: 10.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.62)">Recovery code</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px; letter-spacing: 3px; color: #F5B301; display: flex; gap: 12px">
+<span class="f" style="animation-delay: .3s">K7QM</span><span class="f" style="animation-delay: .45s">4XRT</span><span class="f" style="animation-delay: .6s">9PLW</span>
+</span>
+<div style="display: flex; gap: 8px; width: 100%">
+<button style="flex: 1; min-height: 48px; border: none; border-radius: 999px; background: rgba(255,255,255,.1); color: #FFFFFF; font: 600 14px 'IBM Plex Sans', sans-serif; cursor: pointer">Copy</button>
+<button style="flex: 1; min-height: 48px; border: none; border-radius: 999px; background: rgba(255,255,255,.1); color: #FFFFFF; font: 600 14px 'IBM Plex Sans', sans-serif; cursor: pointer">Save as photo</button>
+</div>
+</div>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 8px; animation-delay: .22s">
+<span style="display: flex; gap: 10px; font-size: 13px; line-height: 1.45"><span style="width: 22px; height: 22px; border-radius: 999px; background: #F5B301; flex: none; display: flex; align-items: center; justify-content: center; font: 700 11px 'DM Sans', sans-serif">1</span>Write it down or keep the photo somewhere safe.</span>
+<span style="display: flex; gap: 10px; font-size: 13px; line-height: 1.45"><span style="width: 22px; height: 22px; border-radius: 999px; background: #F5B301; flex: none; display: flex; align-items: center; justify-content: center; font: 700 11px 'DM Sans', sans-serif">2</span>Never share it. Svika will never ask you for it.</span>
+</div>
+
+<button class="r" style="margin-top: auto; min-height: 58px; border: none; border-radius: 999px; padding: 9px 10px 9px 22px; background: #1F4D2E; box-shadow: 0 10px 26px rgba(31,77,46,.30); color: #FFFFFF; display: flex; align-items: center; justify-content: space-between; font: 600 16px 'IBM Plex Sans', sans-serif; cursor: pointer; animation-delay: .3s">
+<span>I saved it</span>
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

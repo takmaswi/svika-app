@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika home, final, night</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&amp;family=DM+Sans:opsz,wght@9..40,500;9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F5B301}a:hover{color:#E3A600}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes drive{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+@keyframes beam{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.4}}
+.r{animation:rise .55s cubic-bezier(.2,.8,.3,1) both}
+.drive{animation:drive .9s cubic-bezier(.2,.8,.3,1) .25s both}
+.bob{animation:bob 2.4s ease-in-out infinite}
+.beam{animation:beam 2.8s ease-in-out infinite}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.drive,.bob,.beam,.pulse{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 860px; box-sizing: border-box; background: #161D18; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #FFFFFF">
+
+<div style="position: relative; height: 262px; background: #10150F; border-radius: 0 0 34px 34px; padding: 16px 18px 0; box-sizing: border-box; overflow: hidden; box-shadow: inset 0 -1px 0 rgba(255,255,255,.06)">
+<header class="r" style="position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between">
+<span style="display: inline-flex; align-items: center; background: #FFFFFF; border-radius: 999px; padding: 6px 13px; color: #1F4D2E; box-shadow: 0 4px 16px rgba(0,0,0,.4)">
+<svg height="20" viewBox="13 5 76 92" style="display: block; margin-right: -2px; overflow: visible" role="img" aria-label="Svika"><path d="M76 26C76 18 68 14 56 14C38 14 28 22 28 32C28 44 42 48 56 50C70 52 76 58 76 68C76 80 64 86 50 86C36 86 26 80 24 70" fill="none" stroke="#1F4D2E" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="76" cy="26" r="7.5" fill="#E84C30"></circle><circle cx="24" cy="70" r="7.5" fill="#E84C30"></circle></svg>
+<span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; line-height: 1; margin-top: 2px">vika</span>
+</span>
+<div style="display: flex; gap: 6px">
+<button style="height: 44px; min-width: 44px; padding: 0 12px; border: none; border-radius: 999px; background: rgba(255,255,255,.08); color: #FFFFFF; font: 700 12px 'IBM Plex Sans', sans-serif; cursor: pointer">EN</button>
+<button aria-label="Switch to day theme" style="width: 44px; height: 44px; border: none; border-radius: 999px; background: rgba(255,255,255,.08); color: #F5B301; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8a1.2 1.2 0 0 1 1.2 1.2v1.4a1.2 1.2 0 0 1-2.4 0V3A1.2 1.2 0 0 1 12 1.8zm0 16.6a1.2 1.2 0 0 1 1.2 1.2V21a1.2 1.2 0 0 1-2.4 0v-1.4a1.2 1.2 0 0 1 1.2-1.2zM22.2 12a1.2 1.2 0 0 1-1.2 1.2h-1.4a1.2 1.2 0 0 1 0-2.4H21a1.2 1.2 0 0 1 1.2 1.2zM5.6 12a1.2 1.2 0 0 1-1.2 1.2H3a1.2 1.2 0 0 1 0-2.4h1.4A1.2 1.2 0 0 1 5.6 12z"></path></svg></button>
+<a href="#" style="height: 44px; padding: 0 16px; border-radius: 999px; background: #F5B301; color: #161D18; display: inline-flex; align-items: center; font-size: 14px; font-weight: 700; text-decoration: none">Sign in</a>
+</div>
+</header>
+
+<div class="r" style="position: relative; z-index: 2; margin-top: 26px; width: 196px; display: flex; flex-direction: column; gap: 6px; animation-delay: .08s">
+<span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,.62)">Manheru, good evening</span>
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 34px; line-height: 1.02; letter-spacing: -0.04em">Where to <span style="color: #F5B301">tonight?</span></h1>
+</div>
+
+<div class="drive" style="position: absolute; right: -14px; bottom: 50px; z-index: 1; width: 172px; height: 92px">
+<svg class="beam" width="120" height="70" viewBox="0 0 120 70" aria-hidden="true" style="position: absolute; left: 160px; top: 24px"><path d="M0 34 L120 4 L120 64 L0 40 Z" fill="#F5B301" opacity=".14"></path><path d="M0 35 L80 18 L80 52 L0 39 Z" fill="#F5B301" opacity=".18"></path></svg>
+<svg class="bob" width="172" height="92" viewBox="0 0 172 92" role="img" aria-label="Kombi" style="filter: drop-shadow(0 0 14px rgba(245,179,1,.25))">
+<path d="M8 72 V30 Q8 14 24 14 H118 Q128 14 136 21 L160 44 Q166 49 166 57 V72 Z" fill="#F5B301"></path>
+<rect x="20" y="24" width="24" height="18" rx="5" fill="#161D18" opacity=".85"></rect>
+<rect x="50" y="24" width="24" height="18" rx="5" fill="#161D18" opacity=".85"></rect>
+<rect x="80" y="24" width="24" height="18" rx="5" fill="#161D18" opacity=".85"></rect>
+<path d="M112 24 H126 Q130 24 133 27 L148 42 H112 Z" fill="#161D18" opacity=".85"></path>
+<rect x="8" y="52" width="158" height="5" fill="#1F4D2E"></rect>
+<rect x="158" y="60" width="8" height="5" rx="2" fill="#FFFFFF"></rect>
+<circle cx="40" cy="72" r="13" fill="#161D18" stroke="#10150F" stroke-width="4"></circle>
+<circle cx="40" cy="72" r="4.5" fill="#FFFFFF"></circle>
+<circle cx="134" cy="72" r="13" fill="#161D18" stroke="#10150F" stroke-width="4"></circle>
+<circle cx="134" cy="72" r="4.5" fill="#FFFFFF"></circle>
+</svg>
+</div>
+</div>
+
+<div class="r" style="position: relative; z-index: 3; margin: -34px 16px 0; animation-delay: .18s">
+<button style="width: 100%; height: 64px; border: none; border-radius: 20px; background: #232B25; box-shadow: 0 16px 36px rgba(0,0,0,.5); display: flex; align-items: center; gap: 12px; padding: 0 10px 0 18px; cursor: pointer; text-align: left">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M20 20l-4.6-4.6"></path></svg>
+<span style="flex: 1; display: flex; flex-direction: column">
+<span style="font-size: 16px; font-weight: 600; color: #FFFFFF">Search a place or rank</span>
+<span style="font-size: 12px; color: rgba(255,255,255,.62)">From my location</span>
+</span>
+<span style="width: 44px; height: 44px; border-radius: 14px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+</div>
+
+<div class="r" style="display: flex; gap: 8px; padding: 14px 16px 0; overflow: hidden; animation-delay: .26s">
+<sc-for list="{{quick}}" as="q" hint-placeholder-count="4">
+<a href="#" style="flex: none; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,.07); display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; color: #FFFFFF; text-decoration: none">{{q}}</a>
+</sc-for>
+</div>
+
+<section class="r" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 16px 16px 0; animation-delay: .34s">
+
+<a href="#" style="grid-column: span 2; background: rgba(255,255,255,.06); border-radius: 22px; padding: 16px; text-decoration: none; color: #FFFFFF; display: flex; flex-direction: column; gap: 12px">
+<span style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em">Ranks near you</span>
+<span style="font-size: 13px; font-weight: 600; color: #F5B301">See all</span>
+</span>
+<sc-for list="{{ranks}}" as="k" hint-placeholder-count="2">
+<span style="display: flex; align-items: center; gap: 12px">
+<span style="width: 38px; height: 38px; border-radius: 12px; background: #F5B301; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="#161D18" aria-hidden="true"><path d="M5 6.5A3.5 3.5 0 0 1 8.5 3h7.2a3 3 0 0 1 2.5 1.3l2.3 3.4c.3.5.5 1 .5 1.6V16a2 2 0 0 1-2 2h-.6a2.5 2.5 0 0 1-4.8 0H10.4a2.5 2.5 0 0 1-4.8 0H5a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zm9.5 0v3.5h4.3l-1.9-2.8a1.5 1.5 0 0 0-1.2-.7z"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column">
+<span style="font-size: 15px; font-weight: 600">{{k.name}}</span>
+<span style="font-size: 12px; color: rgba(255,255,255,.62)">{{k.meta}}</span>
+</span>
+<span style="display: flex; flex-direction: column; align-items: flex-end">
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 15px">$1.50</span>
+<span style="font-size: 10px; color: rgba(255,255,255,.62)">riders reported</span>
+</span>
+</span>
+</sc-for>
+</a>
+
+<a href="#" style="background: #F5B301; border-radius: 22px; padding: 16px; min-height: 136px; box-sizing: border-box; text-decoration: none; color: #161D18; display: flex; flex-direction: column; justify-content: space-between">
+<span style="width: 42px; height: 42px; border-radius: 999px; background: #161D18; display: flex; align-items: center; justify-content: center"><span class="pulse" style="width: 13px; height: 13px; border-radius: 999px; background: #E84C30"></span></span>
+<span style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; line-height: 1.1">Record a trip</span>
+<span style="font-size: 12px; font-weight: 500">Help map Harare</span>
+</span>
+</a>
+
+<a href="#" style="background: #1B3423; border-radius: 22px; padding: 16px; min-height: 136px; box-sizing: border-box; text-decoration: none; color: #FFFFFF; display: flex; flex-direction: column; justify-content: space-between">
+<span style="width: 42px; height: 42px; border-radius: 999px; background: rgba(255,255,255,.1); color: #F5B301; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5a7.5 7.5 0 0 1 7.5 7.5c0 5.2-5.9 10.6-6.6 11.2a1.4 1.4 0 0 1-1.8 0C10.4 20.6 4.5 15.2 4.5 10A7.5 7.5 0 0 1 12 2.5zm0 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; line-height: 1.1">Guide a friend</span>
+<span style="font-size: 12px; color: rgba(255,255,255,.75)">Send directions to your door</span>
+</span>
+</a>
+
+<div style="grid-column: span 2; position: relative; height: 110px; border-radius: 22px; overflow: hidden; background: #121710; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08)">
+<svg width="100%" height="100%" viewBox="0 0 328 110" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; inset: 0">
+<path d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32" stroke="#333E33" stroke-width="10" fill="none" stroke-linecap="round"></path>
+<path d="M70 -10 L 110 130" stroke="#2A342B" stroke-width="6" fill="none" stroke-linecap="round"></path>
+<path d="M240 -10 L 210 130" stroke="#2A342B" stroke-width="6" fill="none" stroke-linecap="round"></path>
+<path d="M-10 28 L 340 90" stroke="#2A342B" stroke-width="4" fill="none" stroke-linecap="round"></path>
+<path d="M-10 78 C 60 58, 120 94, 190 56 S 300 18, 340 32" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="3" stroke-dasharray="1 9" fill="none" stroke-linecap="round"></path>
+</svg>
+<span class="bob" style="position: absolute; left: 200px; top: 34px; width: 28px; height: 28px; border-radius: 9px; background: #F5B301; border: 3px solid #FFFFFF; box-sizing: border-box; filter: drop-shadow(0 0 12px rgba(245,179,1,.55))"></span>
+<span style="position: absolute; left: 16px; bottom: 14px; display: flex; flex-direction: column; gap: 5px">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #161D18; background: #F5B301; border-radius: 999px; padding: 3px 9px; align-self: flex-start">Coming soon</span>
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 17px; color: #FFFFFF; letter-spacing: -0.02em">Live kombis on the map</span>
+</span>
+</div>
+</section>
+
+<nav aria-label="Primary" style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 64px; border-radius: 24px; background: #10150F; box-shadow: 0 14px 34px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.08); display: flex; align-items: center; padding: 0 6px; z-index: 5">
+<a href="#" aria-current="page" style="flex: 1; height: 52px; border-radius: 18px; background: #F5B301; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: #161D18; font-size: 13px; font-weight: 700">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5a7.5 7.5 0 0 1 7.5 7.5c0 5.2-5.9 10.6-6.6 11.2a1.4 1.4 0 0 1-1.8 0C10.4 20.6 4.5 15.2 4.5 10A7.5 7.5 0 0 1 12 2.5zm0 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path></svg>Plan</a>
+<a href="#" style="flex: 1; height: 52px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.72); text-decoration: none; font-size: 13px; font-weight: 600; gap: 8px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.5A2.5 2.5 0 0 1 7.5 5h7.4a2 2 0 0 1 1.7.9l2.6 3.8c.2.3.3.7.3 1.1V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2z"></path><circle cx="8" cy="17.5" r="1.8"></circle><circle cx="16" cy="17.5" r="1.8"></circle></svg>Ranks</a>
+<a href="#" style="flex: 1; height: 52px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.72); text-decoration: none; font-size: 13px; font-weight: 600; gap: 8px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="4"></circle><path d="M4.5 20.5c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"></path></svg>Me</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":860}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+quick: ['Town', 'UZ', 'Avondale', "Sam Levy's"],
+ranks: [
+{ name: 'Market Square', meta: 'Kombi rank, 4 min walk' },
+{ name: 'Copacabana', meta: 'Kombi rank, 7 min walk' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

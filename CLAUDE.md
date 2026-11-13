@@ -1,10 +1,25 @@
-# CLAUDE.md — Svika rebuild (AI4I Track 3)
+# CLAUDE.md — Svika
 
 # Drop this at the root of the new repo. It governs every agent session on this codebase.
 
 ## What Svika is
 
-Digital ticketing and trip intelligence for Harare's informal kombi network. Passenger first. Riders plan trips in Shona or English, board with a short code, and stop losing money to the change problem: unreturned change becomes USD wallet credit instead of leaving with the kombi. Conductors clear fares offline on their own phones and earn commission on digital fares. Owners get real revenue visibility, an AI watchdog on leakage, and statements that speak to ZIMRA's real presumptive tax ($50-60/month via ZINARA). Server side AI does three load bearing jobs: arrival prediction with no timetable, learned commute alerts, and revenue anomaly detection. A Zimbabwean voice guides riders in ride ("Wakusvika pa turn off, chiburuka"). Target: POTRAZ AI for Impact Challenge 2026, Track 3, bootcamp Mutare 27 Jul-1 Aug 2026.
+Trip intelligence and a safety net for Harare's informal kombi network. The promise is safety, trust, predictability and dignity; tickets, codes and the wallet are mechanisms, never the pitch. Riders plan trips in Shona or English, board with a short code, share a trip with family, and unreturned change becomes USD wallet credit. Conductors clear fares offline on their own phones. Owners see every kombi live with trips and earnings by route. The ticket record becomes the passenger manifest a crash alarm needs inside the golden hour (safety layer is roadmap). Server side AI does three load bearing jobs: arrival prediction with no timetable, learned commute alerts, and revenue anomaly detection (flags unusual days, never a person). A Zimbabwean voice guides riders in ride ("Wakusvika pa turn off, chiburuka"). Current target: 2026 POTRAZ Innovation Expo and Conference, Seed Level, ZIEC Bulawayo, 29 Sep to 2 Oct 2026. The AI4I challenge is closed; this repo is svika-app on GitHub.
+
+## Money model and Road Memory (final rulings by Mhofu, 18 Sep 2026, as submitted to the POTRAZ Expo)
+
+Safety is free. Intelligence and peace of mind pay. Every pitch, doc and screen must match this. Retired: the six line stack, wallet float, records as collateral, the leakage watchdog as a pitch, the ZIMRA presumptive tax angle, fleet management as the first line.
+
+- Free for every rider, always: trip planning, board code, voice guidance, share my ride, safety warnings, the family arrival link. Cash always boards and never loses its place in the queue.
+- Family plan: $2 a month for a parent or guardian to follow up to five dependants (children or elderly parents).
+- Rider premium: smart routing, arrival predictions, commute alerts, saved routines, in small daily or weekly bundles.
+- In app ads for free riders (Mhofu wants in app ads specifically), by route and time of day; consented and aggregated, never during ride guidance. POTRAZ is the Data Protection Authority.
+- Commute plans for employers and schools.
+- Fleet safety management for owners (kept, but never the front page): kombis live, drivers' safety scores, crash risk on their routes.
+- Later: insurers and medical aids (accident cover at boarding, lower premiums for safer kombis).
+- Not Svika's concern: who funds conductor commission.
+
+Road Memory (building next, the headline AI story): AI that learns from every crash and near miss (where, when, light, weather, water crossings, speed before impact, reported cause, joined with trip data and rider flags of reckless driving) and prevents the next: safest route shown beside the fastest, flood and night warnings, rider flags for reckless driving, kombi safety badges riders can see, driver safety scores, a monthly why crashes happened report for TSCZ, ZRP and road authorities, responders placed where crashes cluster. Baseline: plain crash counts per stretch; the model must beat it using trips taken. Flags patterns, never names a driver. First data: docs/KOMBI-SAFETY-EVIDENCE-2026.md. Pitch labels are Live today / Simulated / Building next / Vision; Mhofu pitches the full vision, labelled, never limited to what is built.
 
 Reference documents live in the owner's planning folder: PHASE-3-STRATEGY.md (product decisions), PHASE-4-BUILD-PLAN.md (phases P0-P6 with gates), COMBINED-EVIDENCE-BASE.md (verified facts), AI4I-RUBRIC-NOTES.md (scoring). When in doubt, those win over improvisation.
 

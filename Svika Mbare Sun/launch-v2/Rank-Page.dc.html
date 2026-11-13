@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika rank page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F4D2E}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes ripple{0%{transform:scale(.6);opacity:.5}100%{transform:scale(2.6);opacity:0}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+.rip{animation:ripple 1.8s ease-out infinite}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.rip{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 800px; box-sizing: border-box; background: #FFFFFF; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #161D18">
+
+<div style="position: relative; height: 210px; background: #F4F5F1; overflow: hidden">
+<svg width="360" height="210" viewBox="0 0 360 210" aria-hidden="true" style="position: absolute; inset: 0">
+<path d="M-20 120 L 380 100" stroke="#E1E3DA" stroke-width="17" stroke-linecap="round"></path><path d="M-20 120 L 380 100" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"></path>
+<path d="M120 -20 L 140 230" stroke="#E1E3DA" stroke-width="15" stroke-linecap="round"></path><path d="M120 -20 L 140 230" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"></path>
+<path d="M250 -20 L 236 230" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M-20 40 L 380 30" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+<rect x="20" y="140" width="70" height="46" rx="10" fill="#EAECE5"></rect><rect x="270" y="130" width="70" height="56" rx="10" fill="#EAECE5"></rect>
+</svg>
+<span style="position: absolute; left: 172px; top: 92px; width: 22px; height: 22px">
+<span class="rip" style="position: absolute; inset: 0; border-radius: 999px; background: #E84C30"></span>
+<span style="position: absolute; inset: 3px; border-radius: 999px; background: #E84C30; border: 3px solid #FFFFFF; box-sizing: border-box"></span>
+</span>
+<a href="#" aria-label="Back" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 6px 16px rgba(22,29,24,.14); color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 10.1c0-.72-.58-1.3-1.3-1.3H12V6.1c0-1.28-1.5-1.94-2.42-1.05L3.3 11.1c-.6.58-.6 1.54 0 2.12l6.28 6.05C10.5 20.16 12 19.5 12 18.22V15.5h6.7a1.3 1.3 0 0 0 1.3-1.3z"></path></svg></a>
+<a href="#" aria-label="Share this rank" style="position: absolute; right: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 6px 16px rgba(22,29,24,.14); color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path></svg></a>
+</div>
+
+<div style="position: relative; margin-top: -24px; background: #FFFFFF; border-radius: 26px 26px 0 0; padding: 20px 18px 0; display: flex; flex-direction: column; gap: 18px">
+
+<div class="r" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 6px">
+<span style="font-size: 10.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; background: #161D18; color: #F5B301; border-radius: 999px; padding: 4px 10px">Kombi rank</span>
+<span style="font-size: 10.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; background: #F4F5F1; color: #575F53; border-radius: 999px; padding: 4px 10px">Unverified</span>
+</div>
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.035em">Market Square</h1>
+<span style="font-size: 13px; color: #575F53">Harare CBD. Official City of Harare terminus.</span>
+</div>
+
+<div class="r" style="position: relative; display: flex; background: #161D18; color: #FFFFFF; border-radius: 22px; overflow: hidden; animation-delay: .1s">
+<div style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.62)">Fare</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px; color: #F5B301">$1.50</span>
+<span style="font-size: 11px; color: rgba(255,255,255,.62)">riders reported, 30 days</span>
+</div>
+<div style="width: 0; border-left: 1.5px dashed rgba(255,255,255,.3); margin: 12px 0"></div>
+<div style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.62)">Boarded here</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 26px">{{count}}</span>
+<span style="font-size: 11px; color: rgba(255,255,255,.62)">riders this week</span>
+</div>
+</div>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px; animation-delay: .18s">
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px">Kombis from here go to</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<a href="#" style="height: 40px; padding: 0 14px; border-radius: 999px; background: #F4F5F1; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 600; text-decoration: none; color: #161D18">Avondale</a>
+<a href="#" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px dashed rgba(22,29,24,.25); display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 600; text-decoration: none; color: #1F4D2E">Add a destination</a>
+</div>
+</div>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px; animation-delay: .26s">
+<button style="min-height: 58px; border: none; border-radius: 999px; padding: 9px 10px 9px 22px; background: #1F4D2E; box-shadow: 0 10px 26px rgba(31,77,46,.30); color: #FFFFFF; display: flex; align-items: center; justify-content: space-between; font: 600 16px 'IBM Plex Sans', sans-serif; cursor: pointer">
+<span>I boarded here</span>
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+<div style="display: flex; gap: 8px">
+<a href="#" style="flex: 1; min-height: 48px; border-radius: 999px; background: #F4F5F1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; text-decoration: none; color: #161D18">Directions</a>
+<a href="#" style="flex: 1; min-height: 48px; border-radius: 999px; background: #F4F5F1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; text-decoration: none; color: #161D18">Something wrong? Fix it</a>
+</div>
+</div>
+
+<span style="font-size: 11px; color: #575F53; text-align: center">Rank data &#169; OpenStreetMap contributors and Svika riders</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+return { count: '[N]' };
+}
+}
+</script>
+</body>
+</html>

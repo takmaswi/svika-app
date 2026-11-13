@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika shared directions, friend view</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&amp;family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F4D2E}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes ripple{0%{transform:scale(.6);opacity:.6}100%{transform:scale(2.8);opacity:0}}
+@keyframes walk{0%{offset-distance:0%}100%{offset-distance:100%}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+.rip{animation:ripple 1.8s ease-out infinite}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.rip{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 800px; box-sizing: border-box; background: #FFFFFF; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #161D18">
+
+<div style="position: relative; height: 300px; background: #F4F5F1; overflow: hidden">
+<svg width="360" height="300" viewBox="0 0 360 300" aria-hidden="true" style="position: absolute; inset: 0">
+<path d="M-20 230 C 90 200, 160 250, 380 160" stroke="#E1E3DA" stroke-width="17" fill="none" stroke-linecap="round"></path><path d="M-20 230 C 90 200, 160 250, 380 160" stroke="#FFFFFF" stroke-width="11" fill="none" stroke-linecap="round"></path>
+<path d="M200 -20 L 230 320" stroke="#E1E3DA" stroke-width="15" stroke-linecap="round"></path><path d="M200 -20 L 230 320" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"></path>
+<path d="M-20 90 L 380 120" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+<rect x="250" y="40" width="80" height="50" rx="12" fill="#D9E8CC"></rect>
+<path d="M60 222 C 120 210, 170 232, 214 214 L 222 130 L 290 118" stroke="#161D18" stroke-opacity=".85" stroke-width="5" stroke-dasharray="1 11" fill="none" stroke-linecap="round"></path>
+<circle cx="214" cy="214" r="7" fill="#E84C30" stroke="#FFFFFF" stroke-width="3"></circle>
+<circle cx="222" cy="130" r="7" fill="#E84C30" stroke="#FFFFFF" stroke-width="3"></circle>
+<rect x="281" y="109" width="18" height="18" rx="5" fill="#161D18" stroke="#FFFFFF" stroke-width="3"></rect>
+</svg>
+<span style="position: absolute; left: 206px; top: 148px; width: 20px; height: 20px">
+<span class="rip" style="position: absolute; inset: 0; border-radius: 999px; background: #1F4D2E"></span>
+<span style="position: absolute; inset: 2px; border-radius: 999px; background: #1F4D2E; border: 3px solid #FFFFFF; box-sizing: border-box"></span>
+</span>
+<span style="position: absolute; left: 16px; top: 16px; display: inline-flex; align-items: center; background: #FFFFFF; border-radius: 999px; padding: 6px 12px; box-shadow: 0 6px 16px rgba(22,29,24,.14); color: #1F4D2E">
+<svg height="18" viewBox="13 5 76 92" style="display: block; margin-right: -2px; overflow: visible" role="img" aria-label="Svika"><path d="M76 26C76 18 68 14 56 14C38 14 28 22 28 32C28 44 42 48 56 50C70 52 76 58 76 68C76 80 64 86 50 86C36 86 26 80 24 70" fill="none" stroke="#1F4D2E" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="76" cy="26" r="7.5" fill="#E84C30"></circle><circle cx="24" cy="70" r="7.5" fill="#E84C30"></circle></svg>
+<span style="font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 16px; line-height: 1; margin-top: 2px">vika</span>
+</span>
+</div>
+
+<div style="position: relative; margin-top: -28px; background: #FFFFFF; border-radius: 28px 28px 0 0; box-shadow: 0 -12px 30px rgba(22,29,24,.10); padding: 18px 18px 0; display: flex; flex-direction: column; gap: 14px">
+
+<div class="r" style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 600; color: #575F53">rudo23 sent you directions</span>
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.03em">To Rudo's place, Avondale</h1>
+</div>
+
+<div class="r" role="status" style="display: flex; gap: 12px; align-items: center; background: #F5B301; border-radius: 18px; padding: 14px; animation-delay: .1s">
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #161D18; color: #F5B301; display: flex; align-items: center; justify-content: center; flex: none; font: 800 16px 'DM Sans', sans-serif">3</span>
+<span style="display: flex; flex-direction: column"><span style="font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 17px">Your stop is next</span><span style="font-size: 13px">Chiburuka at Avondale Shops</span></span>
+</div>
+
+<ol class="r" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; animation-delay: .18s">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<li style="display: flex; align-items: center; gap: 12px; min-height: 46px; opacity: {{s.op}}">
+<span style="width: 28px; height: 28px; border-radius: 9px; background: {{s.bg}}; color: {{s.fg}}; display: flex; align-items: center; justify-content: center; font: 700 12px 'DM Sans', sans-serif; flex: none">{{s.n}}</span>
+<span style="flex: 1; font-size: 14px; font-weight: 600">{{s.t}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; color: #575F53">{{s.m}}</span>
+</li>
+</sc-for>
+</ol>
+
+<span style="font-size: 11.5px; color: #575F53">Your location stays on your phone. Nobody sees where you are.</span>
+
+<a href="#" class="r" style="min-height: 52px; border-radius: 999px; background: #F4F5F1; display: flex; align-items: center; justify-content: center; font-size: 14.5px; font-weight: 600; text-decoration: none; color: #161D18; animation-delay: .26s">Get Svika, it is free</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const done = { bg: '#D9E8CC', fg: '#1F4D2E', op: '.55' };
+return {
+steps: [
+{ n: '1', t: 'Walk to Market Square rank', m: '4 min', ...done },
+{ n: '2', t: 'Board a kombi to Avondale', m: '$1.50', ...done },
+{ n: '3', t: 'Get off at Avondale Shops', m: 'next', bg: '#161D18', fg: '#F5B301', op: '1' },
+{ n: '4', t: 'Walk to the gate', m: '3 min', bg: '#F4F5F1', fg: '#161D18', op: '1' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika trip result</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F4D2E}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.3s ease-out .3s forwards}
+.pop{transform-box:fill-box;transform-origin:center;animation:pop .35s ease-out both}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.pop{animation:none}.draw{animation:none;stroke-dashoffset:0}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 820px; box-sizing: border-box; background: #FFFFFF; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #161D18">
+
+<div style="position: relative; height: 250px; background: #F4F5F1; overflow: hidden">
+<svg width="360" height="250" viewBox="0 0 360 250" aria-hidden="true" style="position: absolute; inset: 0">
+<path d="M-20 180 C 80 150, 140 210, 380 120" stroke="#E1E3DA" stroke-width="17" fill="none" stroke-linecap="round"></path>
+<path d="M-20 180 C 80 150, 140 210, 380 120" stroke="#FFFFFF" stroke-width="11" fill="none" stroke-linecap="round"></path>
+<path d="M150 -20 L 190 270" stroke="#E1E3DA" stroke-width="15" fill="none" stroke-linecap="round"></path>
+<path d="M150 -20 L 190 270" stroke="#FFFFFF" stroke-width="9" fill="none" stroke-linecap="round"></path>
+<path d="M-20 60 L 380 90" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round"></path>
+<path d="M260 -20 L 300 270" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round"></path>
+<rect x="210" y="30" width="60" height="40" rx="10" fill="#D9E8CC"></rect>
+<path d="M120 200 L 168 170 C 180 120, 200 90, 250 62" stroke="#161D18" stroke-opacity=".85" stroke-width="5" stroke-dasharray="1 11" fill="none" stroke-linecap="round"></path>
+<path class="draw" pathLength="1" d="M120 200 L 168 170 C 180 120, 200 90, 250 62" stroke="#1F4D2E" stroke-width="5" fill="none" stroke-linecap="round" opacity=".0"></path>
+<circle class="pop" cx="168" cy="170" r="7" fill="#E84C30" stroke="#FFFFFF" stroke-width="3" style="animation-delay: .9s"></circle>
+<circle class="pop" cx="250" cy="62" r="7" fill="#E84C30" stroke="#FFFFFF" stroke-width="3" style="animation-delay: 1.4s"></circle>
+<circle cx="120" cy="200" r="8" fill="#1F4D2E" stroke="#FFFFFF" stroke-width="3"></circle>
+<text x="182" y="186" font-family="IBM Plex Mono, monospace" font-size="9" font-weight="600" fill="#6E766A" letter-spacing=".6">MARKET SQUARE</text>
+<text x="196" y="52" font-family="IBM Plex Mono, monospace" font-size="9" font-weight="600" fill="#6E766A" letter-spacing=".6">AVONDALE SHOPS</text>
+</svg>
+<a href="#" aria-label="Back" style="position: absolute; left: 16px; top: 16px; width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 6px 16px rgba(22,29,24,.14); color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 10.1c0-.72-.58-1.3-1.3-1.3H12V6.1c0-1.28-1.5-1.94-2.42-1.05L3.3 11.1c-.6.58-.6 1.54 0 2.12l6.28 6.05C10.5 20.16 12 19.5 12 18.22V15.5h6.7a1.3 1.3 0 0 0 1.3-1.3z"></path></svg></a>
+</div>
+
+<div style="position: relative; margin-top: -26px; background: #FFFFFF; border-radius: 28px 28px 0 0; box-shadow: 0 -12px 30px rgba(22,29,24,.10); padding: 10px 18px 0; display: flex; flex-direction: column; gap: 16px">
+<span style="align-self: center; width: 38px; height: 4px; border-radius: 999px; background: rgba(22,29,24,.16)"></span>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px; animation-delay: .05s">
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 22px; line-height: 1.15; letter-spacing: -0.03em">To Avondale Shops</h1>
+<div style="display: flex; gap: 8px">
+<span style="display: flex; flex-direction: column; padding: 10px 14px; border-radius: 16px; background: #F5B301; flex: 1">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase">Fare</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 20px">$1.50</span>
+</span>
+<span style="display: flex; flex-direction: column; padding: 10px 14px; border-radius: 16px; background: #F4F5F1; flex: 1">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #575F53">Trip</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 20px">22 min</span>
+</span>
+<span style="display: flex; flex-direction: column; padding: 10px 14px; border-radius: 16px; background: #F4F5F1; flex: 1">
+<span style="font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #575F53">Kombis</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 20px">1</span>
+</span>
+</div>
+<span style="font-size: 11.5px; color: #575F53">Fare is what riders reported this month. Time is a typical trip.</span>
+</div>
+
+<ol class="r" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; animation-delay: .18s">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<li style="display: flex; gap: 14px">
+<span style="display: flex; flex-direction: column; align-items: center; flex: none; width: 36px">
+<span style="width: 36px; height: 36px; border-radius: 12px; background: {{s.bg}}; color: {{s.fg}}; display: flex; align-items: center; justify-content: center; font: 700 14px 'DM Sans', sans-serif">{{s.n}}</span>
+<span style="width: 2px; flex: 1; min-height: 14px; background: {{s.line}}"></span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 6px 0 14px; flex: 1">
+<span style="font-size: 15px; font-weight: 600">{{s.title}}</span>
+<span style="font-size: 12.5px; color: #575F53">{{s.sub}}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 13px; padding-top: 8px; color: #161D18">{{s.time}}</span>
+</li>
+</sc-for>
+</ol>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px; animation-delay: .3s">
+<button style="min-height: 58px; border: none; border-radius: 999px; padding: 9px 10px 9px 22px; background: #1F4D2E; box-shadow: 0 10px 26px rgba(31,77,46,.30); color: #FFFFFF; display: flex; align-items: center; justify-content: space-between; font: 600 16px 'IBM Plex Sans', sans-serif; cursor: pointer">
+<span>Start trip</span>
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+<div style="display: flex; gap: 8px">
+<a href="#" style="flex: 1; min-height: 48px; border-radius: 999px; background: #F4F5F1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; text-decoration: none; color: #161D18">Save trip</a>
+<a href="#" style="flex: 1.4; min-height: 48px; border-radius: 999px; background: #F4F5F1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; text-decoration: none; color: #161D18">Send to a friend</a>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":820}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+steps: [
+{ n: '1', title: 'Walk to Market Square rank', sub: 'From your location', time: '4 min', bg: '#F4F5F1', fg: '#161D18', line: 'rgba(22,29,24,.12)' },
+{ n: '2', title: 'Board a kombi to Avondale', sub: 'Pay $1.50 on board, cash welcome', time: '', bg: '#F5B301', fg: '#161D18', line: '#F5B301' },
+{ n: '3', title: 'Get off at Avondale Shops', sub: 'King George Rd', time: '16 min', bg: '#161D18', fg: '#F5B301', line: 'rgba(22,29,24,.12)' },
+{ n: '4', title: 'Walk to your destination', sub: 'Arrive', time: '2 min', bg: '#F4F5F1', fg: '#161D18', line: 'transparent' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

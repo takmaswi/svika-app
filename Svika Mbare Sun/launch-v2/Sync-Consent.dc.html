@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika sync places consent</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1F4D2E}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 780px; box-sizing: border-box; background: #FFFFFF; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #161D18; padding: 16px 18px 22px; display: flex; flex-direction: column; gap: 18px">
+
+<a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 999px; background: #F4F5F1; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 10.1c0-.72-.58-1.3-1.3-1.3H12V6.1c0-1.28-1.5-1.94-2.42-1.05L3.3 11.1c-.6.58-.6 1.54 0 2.12l6.28 6.05C10.5 20.16 12 19.5 12 18.22V15.5h6.7a1.3 1.3 0 0 0 1.3-1.3z"></path></svg></a>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 28px; line-height: 1.08; letter-spacing: -0.035em">Sync your places?</h1>
+<span style="font-size: 14px; line-height: 1.5; color: #575F53">Right now your Home and Work live only on this phone. Here is what changes if you sync.</span>
+</div>
+
+<div class="r" style="display: flex; flex-direction: column; gap: 10px; animation-delay: .1s">
+<div style="display: flex; gap: 12px; background: #D9E8CC; border-radius: 18px; padding: 14px">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #1F4D2E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex: none; font: 800 15px 'DM Sans', sans-serif">+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; color: #143D22"><span style="font-size: 14px; font-weight: 700">What you get</span><span style="font-size: 13px; line-height: 1.45">Your places on a new or second phone, after you sign in.</span></span>
+</div>
+<div style="display: flex; gap: 12px; background: #FFF4D1; border-radius: 18px; padding: 14px">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center; flex: none; font: 800 16px 'DM Sans', sans-serif">!</span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 700">The risk</span><span style="font-size: 13px; line-height: 1.45">Svika would store where your home and work are. If our systems were ever broken into, that could be exposed.</span></span>
+</div>
+<div style="display: flex; gap: 12px; background: #F4F5F1; border-radius: 18px; padding: 14px">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #161D18; color: #F5B301; display: flex; align-items: center; justify-content: center; flex: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 700">You stay in control</span><span style="font-size: 13px; line-height: 1.45">Only you can see them. Unsync any time and we delete our copy at once.</span></span>
+</div>
+</div>
+
+<div class="r" style="margin-top: auto; display: flex; flex-direction: column; gap: 8px; animation-delay: .2s">
+<button style="min-height: 58px; border: none; border-radius: 999px; padding: 9px 10px 9px 22px; background: #1F4D2E; box-shadow: 0 10px 26px rgba(31,77,46,.30); color: #FFFFFF; display: flex; align-items: center; justify-content: space-between; font: 600 16px 'IBM Plex Sans', sans-serif; cursor: pointer">
+<span>I understand, sync my places</span>
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+<a href="#" style="min-height: 48px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; text-decoration: none; color: #161D18">Keep them on this phone only</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":780}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

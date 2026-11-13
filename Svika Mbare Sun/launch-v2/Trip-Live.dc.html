@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Svika trip in progress</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,600;9..40,700;9..40,800&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F5B301}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.4}}
+@keyframes ripple{0%{transform:scale(.6);opacity:.6}100%{transform:scale(2.8);opacity:0}}
+@keyframes slide{from{transform:translateY(-100%);opacity:0}to{transform:none;opacity:1}}
+.r{animation:rise .5s cubic-bezier(.2,.8,.3,1) both}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+.rip{animation:ripple 1.8s ease-out infinite}
+.slide{animation:slide .4s cubic-bezier(.2,.8,.3,1) .4s both}
+button:active,a:active{transform:scale(0.98)}
+@media (prefers-reduced-motion: reduce){.r,.pulse,.rip,.slide{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 360px; height: 800px; box-sizing: border-box; background: #161D18; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; color: #FFFFFF; padding: 16px 16px 22px; display: flex; flex-direction: column; gap: 16px">
+
+<header style="display: flex; align-items: center; justify-content: space-between">
+<span style="height: 36px; padding: 0 12px; border-radius: 999px; background: #10150F; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600"><span class="pulse" style="width: 8px; height: 8px; border-radius: 999px; background: #E84C30"></span>Recording your trip</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; color: rgba(255,255,255,.62)">09:42</span>
+</header>
+
+<div class="slide" role="status" style="background: #F5B301; color: #161D18; border-radius: 22px; padding: 16px; display: flex; gap: 14px; align-items: center; box-shadow: 0 14px 34px rgba(0,0,0,.45)">
+<span style="position: relative; width: 44px; height: 44px; flex: none">
+<span class="rip" style="position: absolute; inset: 8px; border-radius: 999px; background: #161D18"></span>
+<span style="position: absolute; inset: 0; border-radius: 999px; background: #161D18; color: #F5B301; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5a7.5 7.5 0 0 1 7.5 7.5c0 5.2-5.9 10.6-6.6 11.2a1.4 1.4 0 0 1-1.8 0C10.4 20.6 4.5 15.2 4.5 10A7.5 7.5 0 0 1 12 2.5zm0 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path></svg></span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.02em">Your stop is next</span>
+<span style="font-size: 13px; font-weight: 500">Chiburuka at Avondale Shops</span>
+</span>
+</div>
+
+<div class="r" style="background: rgba(255,255,255,.06); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; animation-delay: .1s">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; gap: 14px">
+<span style="display: flex; flex-direction: column; align-items: center; width: 24px; flex: none">
+<span style="width: 24px; height: 24px; border-radius: 999px; background: {{s.dot}}; border: {{s.ring}}; box-sizing: border-box"></span>
+<span style="width: 2px; flex: 1; min-height: 18px; background: {{s.line}}"></span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 2px 0 16px">
+<span style="font-size: 14.5px; font-weight: 600; color: {{s.color}}">{{s.t}}</span>
+<span style="font-size: 12px; color: rgba(255,255,255,.55)">{{s.sub}}</span>
+</span>
+</div>
+</sc-for>
+</div>
+
+<div class="r" style="display: flex; align-items: center; gap: 12px; background: #1B3423; border-radius: 18px; padding: 12px 12px 12px 14px; animation-delay: .2s">
+<span style="width: 36px; height: 36px; border-radius: 999px; background: #F5B301; color: #161D18; display: flex; align-items: center; justify-content: center; font: 800 14px 'DM Sans', sans-serif; flex: none">M</span>
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Mai Rudo is following</span><span style="font-size: 12px; color: rgba(255,255,255,.62)">Link ends when you arrive</span></span>
+<button style="height: 44px; padding: 0 12px; border: none; border-radius: 12px; background: rgba(255,255,255,.1); color: #FFFFFF; font: 600 13px 'IBM Plex Sans', sans-serif; cursor: pointer">Stop sharing</button>
+</div>
+
+<button class="r" style="margin-top: auto; min-height: 58px; border: none; border-radius: 999px; padding: 9px 10px 9px 22px; background: #F5B301; box-shadow: 0 10px 26px rgba(0,0,0,.4); color: #161D18; display: flex; align-items: center; justify-content: space-between; font: 700 16px 'IBM Plex Sans', sans-serif; cursor: pointer; animation-delay: .3s">
+<span>I have arrived</span>
+<span style="width: 40px; height: 40px; border-radius: 999px; background: #161D18; color: #F5B301; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 10.1c0-.72.58-1.3 1.3-1.3H12V6.1c0-1.28 1.5-1.94 2.42-1.05l6.28 6.05c.6.58.6 1.54 0 2.12l-6.28 6.05C13.5 20.16 12 19.5 12 18.22V15.5H5.3A1.3 1.3 0 0 1 4 14.2z"></path></svg></span>
+</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":360,"height":800}}'>
+class Component extends DCLogic {
+renderVals() {
+const done = { dot: '#1F4D2E', ring: '3px solid #1F4D2E', line: '#1F4D2E', color: 'rgba(255,255,255,.55)' };
+return {
+steps: [
+{ t: 'Walked to Market Square', sub: 'Done', ...done },
+{ t: 'Boarded the kombi', sub: 'Done', ...done },
+{ t: 'Get off at Avondale Shops', sub: 'Next, about 2 min', dot: '#F5B301', ring: '4px solid rgba(245,179,1,.35)', line: 'rgba(255,255,255,.12)', color: '#FFFFFF' },
+{ t: 'Walk to your destination', sub: '2 min', dot: 'transparent', ring: '2px solid rgba(255,255,255,.3)', line: 'transparent', color: 'rgba(255,255,255,.8)' }
+]
+};
+}
+}
+</script>
+</body>
+</html>
