@@ -75,7 +75,9 @@
   --v2-field-bg: #F4F5F1;
   --v2-field-focus-bg: #FFFFFF;
   --v2-field-focus: #1F4D2E;
-  --v2-field-error: #E84C30;
+  /* the screens show no error state; signal is live dots and stops only, so
+     a wrong field is an ink ring plus the notice pattern (DESIGN-GAPS G2) */
+  --v2-field-error: #161D18;
   --v2-ok: #1F4D2E;
 
   /* --- bottom nav ---------------------------------------------------------- */
@@ -113,6 +115,7 @@
   --border-soft: 0 solid transparent;
   --border-pill: 0 solid transparent;
   --border-key: 0 solid transparent;
+  --border-nav: 0 solid transparent;
 }
 
 /* --- night (Home-Final-Night.dc.html) ------------------------------------- */
@@ -168,6 +171,7 @@
   --v2-field-bg: rgba(255, 255, 255, 0.07);
   --v2-field-focus-bg: #232B25;
   --v2-field-focus: #F5B301;
+  --v2-field-error: #FFFFFF;
   --v2-ok: #F5B301;
   --v2-nav-bg: #10150F;
   --v2-nav-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -227,6 +231,7 @@
     --v2-field-bg: rgba(255, 255, 255, 0.07);
     --v2-field-focus-bg: #232B25;
     --v2-field-focus: #F5B301;
+    --v2-field-error: #FFFFFF;
     --v2-ok: #F5B301;
     --v2-nav-bg: #10150F;
     --v2-nav-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -263,6 +268,12 @@
 }
 :root[data-ui="v2"] :is(button, a, [role="button"]):active {
   transform: var(--v2-press);
+}
+
+/* screen reader only text */
+.v2-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 
 /* --- screen ------------------------------------------------------------------ */
@@ -450,6 +461,14 @@
   position: absolute; right: 6px; top: 5px; height: 44px; padding: 0 12px; border: none; border-radius: 12px;
   background: transparent; font: 600 13px "IBM Plex Sans", sans-serif; color: var(--v2-link); cursor: pointer;
 }
+/* labels and errors added to the existing screens, shown only under v2 */
+.v2-only { display: none; }
+:root[data-ui="v2"] .v2-only { display: revert; }
+.v2-form-error { margin: 0; align-items: center; font-weight: 600; color: var(--v2-ink); }
+.v2-form-error:empty { display: none; }
+:root[data-ui="v2"] :is(.auth-input, .home-search-pill, .v2-input)[aria-invalid="true"],
+:root[data-ui="v2"] :is(.auth-input, .home-search-pill, .v2-input)[aria-invalid="true"]:focus { border-color: var(--v2-field-error); }
+
 .v2-meter { display: flex; gap: 4px; margin-top: 2px; }
 .v2-meter span { flex: 1; height: 5px; border-radius: 999px; background: var(--v2-track); }
 .v2-meter span[data-on="true"] { background: var(--v2-ok); }
@@ -530,6 +549,61 @@
 :root[data-ui="v2"] .auth-input:focus,
 :root[data-ui="v2"] .home-search-pill:focus { border-color: var(--v2-field-focus); background: var(--v2-field-focus-bg); }
 :root[data-ui="v2"] .svika-body { font-size: 16px; }
+
+/* map overlay top row: the approved hero header buttons (Home-Final
+   <header>), lifted onto a raised surface because they float over a map
+   rather than the marigold band. Logged as DESIGN-GAPS G1. */
+:root[data-ui="v2"] .home-chips { top: 12px; left: var(--v2-edge); right: var(--v2-edge); }
+:root[data-ui="v2"] .home-chips-right { gap: 6px; }
+:root[data-ui="v2"] .home-chip {
+  min-height: var(--v2-target); padding: 0 16px; border: none;
+  background: var(--v2-raised); color: var(--v2-ink); box-shadow: var(--v2-float-shadow);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+:root[data-ui="v2"] .home-chip-brand { background: #FFFFFF; box-shadow: var(--v2-brand-shadow); padding: 0 13px; }
+:root[data-ui="v2"] .home-chip:has(.v2-round, .theme-toggle) { padding: 0; min-width: var(--v2-target); justify-content: center; }
+:root[data-ui="v2"] .home-chip .v2-round { background: transparent; color: var(--v2-ink); }
+:root[data-ui="v2"] .home-chip-profile { padding: 0 2px; }
+:root[data-ui="v2"] .theme-toggle { width: var(--v2-target); height: var(--v2-target); margin: 0; color: var(--v2-ink); }
+:root[data-ui="v2"] .guest-signin-chip {
+  background: var(--v2-signin-bg); color: var(--v2-signin-ink) !important;
+  font-size: 14px; font-weight: var(--v2-signin-weight); text-decoration: none;
+}
+
+/* the sheet over the map (Trip-Result, Rank-Page sheet values) */
+:root[data-ui="v2"] .home-sheet {
+  border: none; border-radius: var(--v2-r-sheet) var(--v2-r-sheet) 0 0;
+  background: var(--v2-canvas); box-shadow: var(--v2-sheet-shadow);
+  transition-duration: var(--v2-sheet);
+}
+:root[data-ui="v2"] .home-search-go {
+  width: var(--v2-target); height: var(--v2-target); border-radius: var(--v2-r-go);
+  background: var(--v2-go-bg); color: var(--v2-go-ink);
+}
+
+/* plan Step 1.7: map credits are a small info button bottom left, seated
+   just above whichever sheet the screen peeks (heights from globals.css) */
+:root[data-ui="v2"] .home-screen { --v2-map-floor: 406px; }
+:root[data-ui="v2"] .home-screen:has(.plan-sheet) { --v2-map-floor: 340px; }
+:root[data-ui="v2"] .home-screen:has(.plan-sheet-warned) { --v2-map-floor: 462px; }
+@media (max-height: 760px) {
+  :root[data-ui="v2"] .home-screen:not(:has(.plan-sheet)) { --v2-map-floor: 358px; }
+}
+:root[data-ui="v2"] .home-screen .maplibregl-ctrl-bottom-left { bottom: var(--v2-map-floor); }
+:root[data-ui="v2"] .maplibregl-ctrl-bottom-left > .maplibregl-ctrl-attrib.maplibregl-compact {
+  margin: 0 0 10px var(--v2-edge); min-height: 44px; min-width: 44px; padding: 0 0 0 44px;
+  border-radius: 22px; background: var(--v2-raised); color: var(--v2-ink); box-shadow: var(--v2-float-shadow);
+  display: flex; align-items: center; box-sizing: border-box;
+}
+:root[data-ui="v2"] .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) { padding: 0; width: 44px; }
+:root[data-ui="v2"] .maplibregl-ctrl-attrib.maplibregl-compact-show { padding-right: 14px; }
+:root[data-ui="v2"] .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib-button {
+  left: 0; top: 0; width: 44px; height: 44px; border-radius: 22px;
+  background-position: center; background-repeat: no-repeat; background-size: 22px; background-color: transparent;
+}
+:root[data-ui="v2"] .maplibregl-ctrl-attrib-inner { font-size: 11px; line-height: 1.35; color: var(--v2-ink-soft); }
+:root[data-ui="v2"] .maplibregl-ctrl-attrib-inner a { color: var(--v2-ink-soft); }
+:root[data-ui="v2"][data-theme="dark"] .maplibregl-ctrl-attrib-button { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   .v2-rise, .v2-drive, .v2-bob, .v2-pulse, .v2-lines, .v2-beam, .v2-sheet, .v2-skel { animation: none !important; }

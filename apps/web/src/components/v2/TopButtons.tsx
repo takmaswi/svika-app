@@ -20,14 +20,15 @@ export function LangButton({ lang, label }: { lang: AppLanguage; label: string }
     <button
       type="button"
       className="v2-round"
-      aria-label={label}
       data-testid="lang-button"
       onClick={() => {
         document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=${YEAR_S}; samesite=lax`;
         router.refresh();
       }}
     >
+      {/* the name starts with the visible text (WCAG 2.5.3 label in name) */}
       {lang.toUpperCase()}
+      <span className="v2-sr"> {label}</span>
     </button>
   );
 }

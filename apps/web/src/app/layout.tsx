@@ -8,6 +8,7 @@ import "./globals.css";
 import { getLang } from "@/lib/i18n";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { flagOn } from "@/lib/flags-server";
+import { UiV2Provider } from "@/lib/ui-v2";
 
 export const metadata: Metadata = {
   title: "Svika",
@@ -25,7 +26,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       {...(theme ? { "data-theme": theme } : {})}
       {...(uiV2 ? { "data-ui": "v2" } : {})}
     >
-      <body className="svika-body-base">{children}</body>
+      <body className="svika-body-base">
+        <UiV2Provider on={uiV2}>{children}</UiV2Provider>
+      </body>
     </html>
   );
 }
