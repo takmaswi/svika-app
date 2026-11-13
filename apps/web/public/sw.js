@@ -7,6 +7,10 @@
 //   - PMTiles range requests: each viewed byte range is cached and served
 //     stale while revalidate, so a repeat visit paints from disk and a
 //     visited area keeps rendering in airplane mode
+//   - the hosted PMTiles file (Supabase Storage, CHECKS 15): cache first
+//     with no background refresh. Its object name is its version (a new
+//     extract uploads under a new name), and every refetch is paid egress
+//     on the storage plan, so a range once seen is never fetched again
 //   - MapTiler (fallback provider only): cache first, as before
 //   - the shell a map screen stands on: visited page documents are network
 //     first with a cache fallback (never stale while online), and Next's
@@ -188,13 +192,16 @@ async function storeRange(cache, key, res) {
   await trim(cache);
 }
 
-function serveRange(event, req) {
+function serveRange(event, req, { revalidate = true } = {}) {
   const range = req.headers.get("range");
   if (!range) return fetch(req);
   return (async () => {
     const cache = await caches.open(TILE_CACHE);
     const key = rangeKey(req, range);
     const hit = await cache.match(key);
+    if (hit && !revalidate) {
+      return new Response(await hit.arrayBuffer(), { status: 206, headers: hit.headers });
+    }
     const refresh = fetch(req.clone())
       .then((res) => storeRange(cache, key, res).then(() => res))
       .catch(() => null);
@@ -234,6 +241,16 @@ self.addEventListener("fetch", (event) => {
         }
       })(),
     );
+    return;
+  }
+
+  // The hosted PMTiles extract (public map bucket on Supabase Storage).
+  if (
+    url.hostname.endsWith(".supabase.co") &&
+    url.pathname.startsWith("/storage/v1/object/public/map/") &&
+    url.pathname.endsWith(".pmtiles")
+  ) {
+    event.respondWith(serveRange(event, req, { revalidate: false }));
     return;
   }
 

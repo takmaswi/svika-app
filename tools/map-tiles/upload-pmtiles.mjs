@@ -33,7 +33,9 @@ const res = await fetch(`${url}/storage/v1/object/map/harare.pmtiles`, {
     Authorization: `Bearer ${key}`,
     "Content-Type": "application/octet-stream",
     "x-upsert": "true",
-    "cache-control": "86400",
+    // Storage turns this into the served Cache-Control; the bare number
+    // form came back as "public, 86400", which browsers do not cache
+    "cache-control": "max-age=604800",
   },
   body,
 });

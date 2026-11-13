@@ -4,7 +4,7 @@
 // out and signed in and fails on any visible text, label or alt text that
 // matches the honesty pattern.
 import { expect, test, type Page } from "@playwright/test";
-import { enableLaunchPreview } from "./launch-helpers";
+import { E2E_PREVIEW_TOKEN, enableLaunchPreview } from "./launch-helpers";
 
 const HONESTY = /demo|mock|simulat|generated|sample/i;
 
@@ -115,10 +115,20 @@ test.describe("launch profile honesty", () => {
     await crawl(page, "signed in");
   });
 
-  test("the pitch door is closed without its key", async ({ page }) => {
-    const res = await page.goto("/pitch");
-    expect(res?.status()).toBe(404);
-    const wrong = await page.goto("/pitch?key=not-the-key-0123456789");
-    expect(wrong?.status()).toBe(404);
+  test("the pitch and preview doors are closed without their key and never indexed", async ({ page }) => {
+    for (const door of ["/pitch", "/preview"]) {
+      for (const path of [door, `${door}?key=not-the-key-0123456789abcdef`]) {
+        const res = await page.goto(path);
+        expect(res?.status(), path).toBe(404);
+        expect(res?.headers()["x-robots-tag"], path).toBe("noindex, nofollow");
+      }
+    }
+  });
+
+  test("the preview key leaves the address bar on first use", async ({ page }) => {
+    await page.goto(`/preview?key=${E2E_PREVIEW_TOKEN}`);
+    await expect(page).toHaveURL(/\/app$/);
+    const cookie = (await page.context().cookies()).find((c) => c.name === "svika_preview");
+    expect(cookie?.httpOnly).toBe(true);
   });
 });
