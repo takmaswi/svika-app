@@ -82,6 +82,18 @@ export const dict = {
   },
   "rider.fromLabel": { en: "From", sn: "Kubva" },
   "rider.toLabel": { en: "To", sn: "Kuenda" },
+  "rider.fromMissing": {
+    en: "Type where you are starting from.",
+    sn: "Nyora paunobva.",
+  },
+  "rider.toMissing": {
+    en: "Type where you are going.",
+    sn: "Nyora kwaunoenda.",
+  },
+  "form.fillThis": {
+    en: "Fill this in to carry on.",
+    sn: "Zadza pano kuti uenderere mberi.",
+  },
   "rider.fromPlaceholder": {
     en: "e.g. Heights, UZ, Market Square",
     sn: "sekuti Heights, UZ, Market Square",
@@ -826,6 +838,8 @@ export const dict = {
   "lang.shona": { en: "Shona", sn: "Shona" },
   "lang.ndebele": { en: "Ndebele", sn: "Ndebele" },
   "lang.comingSoon": { en: "coming soon", sn: "zvichauya" },
+  "lang.switchToShona": { en: "Switch to Shona", sn: "Chinja kuShona" },
+  "lang.switchToEnglish": { en: "Switch to English", sn: "Chinja kuChirungu" },
 
   "yourdata.title": {
     en: "What Svika knows about you",
@@ -1567,6 +1581,10 @@ export const dict = {
   "launch.mapSoonH": {
     en: "Live kombis on the map: coming soon",
     sn: "Makombi ari kufamba pamepu: achauya munguva pfupi",
+  },
+  "launch.sheetOpen": {
+    en: "Show your trips and more",
+    sn: "Wona nzendo dzako nezvimwe",
   },
   "launch.mapSoon": {
     en: "Record your trips to help us get there.",

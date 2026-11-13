@@ -7,6 +7,7 @@ import { ArrowIcon } from "@/components/icons";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InitialAvatar } from "@/components/profile/InitialAvatar";
+import { FormCheck } from "@/components/v2/FormCheck";
 import type { AppTheme } from "@/lib/theme";
 import type { LiveMapPlaceName } from "@/components/map/LiveMap";
 
@@ -92,21 +93,28 @@ export function LaunchHome({
       </header>
 
       <HomeSheet
-        openLabel={t(lang, "home.sheetOpen")}
+        openLabel={t(lang, "launch.sheetOpen")}
         closeLabel={t(lang, "home.sheetClose")}
         title={t(lang, "rider.searchTitle")}
         hint={t(lang, "home.sheetHint")}
         peek={
           <form className="home-search" action="/app/plan" method="get">
+            <label className="v2-field-label v2-only" htmlFor="from">
+              {t(lang, "rider.fromLabel")}
+            </label>
             <input
               id="from"
               name="from"
               className="home-search-pill"
               placeholder={t(lang, "rider.fromPlaceholder")}
               aria-label={t(lang, "rider.fromLabel")}
+              data-error={t(lang, "rider.fromMissing")}
               autoComplete="off"
               required
             />
+            <label className="v2-field-label v2-only" htmlFor="to">
+              {t(lang, "rider.toLabel")}
+            </label>
             <div className="home-search-row">
               <input
                 id="to"
@@ -114,6 +122,7 @@ export function LaunchHome({
                 className="home-search-pill"
                 placeholder={t(lang, "rider.toPlaceholder")}
                 aria-label={t(lang, "rider.toLabel")}
+                data-error={t(lang, "rider.toMissing")}
                 autoComplete="off"
                 required
               />
@@ -125,6 +134,7 @@ export function LaunchHome({
                 <ArrowIcon />
               </button>
             </div>
+            <FormCheck fallback={t(lang, "form.fillThis")} />
           </form>
         }
       >

@@ -78,7 +78,8 @@ export function HomeSheet({
             type="button"
             className="home-sheet-titletoggle touch-target"
             aria-expanded={open}
-            aria-label={toggleLabel}
+            // named by its visible title and hint (WCAG 2.5.3 label in name);
+            // aria-expanded carries the open or closed state
             onClick={toggle}
           >
             <h1 className="svika-title home-sheet-title">{title}</h1>
