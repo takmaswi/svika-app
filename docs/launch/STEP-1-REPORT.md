@@ -1,6 +1,6 @@
 # Step 1 report: UI foundation upgrade (launch-v2 system)
 
-Plan: docs/LAUNCH-CROWD-PLAN.md, Step 1. Flag: `ui_v2`. Status: built, wall below.
+Plan: docs/LAUNCH-CROWD-PLAN.md, Step 1. Flag: `ui_v2`. Status: wall green, shipped.
 
 The plan splits the work: Step 1 brings the launch-v2 system to the screens that exist today; Step 3 onward rebuilds each screen to its approved layout. So this step changes surfaces, spacing, targets, fields, motion, plurals and empty states, not page layouts.
 
@@ -41,3 +41,15 @@ G1 top row over a map, G2 field errors, G3 map credits. Each copies the nearest 
 - Unit: `test/plural.test.ts` (7), `test/haptics.test.ts` (3).
 - Screenshots, 360px, both themes, both languages: `docs/design-evidence/launch/step-1/`. "before-*" for the public screens are the live Step 0 deploy with the preview cookie; "after-*" are this build with the preview cookie; signed in screens have both from the local server (every launch flag on, `ui_v2` off for before).
 - Lighthouse accessibility: below.
+
+## Wall (13 Nov 2026, on b956019)
+
+One production build, servers started once, e2e with one worker.
+
+| check | result |
+| --- | --- |
+| typecheck | clean |
+| lint | clean |
+| unit | 531 passed: shared 114, spine 101, conductor 37, web 279 |
+| e2e | 89 passed, 0 failed, 0 skipped (35 spec files, 13.2 min) |
+| db:security-test | 276 passed, 0 failed, 0 skipped (no database change in this step) |
