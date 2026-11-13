@@ -10,7 +10,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { loginAs, waitForHydration } from "./helpers";
 
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 const UZ = "University of Zimbabwe";
 const PLAN_UZ = `/app/plan?from=Heights&to=${encodeURIComponent(UZ)}`;
 

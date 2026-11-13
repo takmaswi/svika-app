@@ -15,7 +15,7 @@ function catMinuteOfDay(): number {
   return shifted.getUTCHours() * 60 + shifted.getUTCMinutes();
 }
 
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 
 async function loginTakunda(page: Page): Promise<void> {
   const res = await page.request.post("/e2e/login", {

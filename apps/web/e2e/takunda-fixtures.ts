@@ -7,7 +7,7 @@
 // is never touched. Callers must restore with offsetMinutes 0 when done.
 import { createClient } from "@supabase/supabase-js";
 
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 // Two rides per day across the miner's whole 28 day lookback (56 rides,
 // the RPC caps at 60). Density matters, not just coverage: every e2e run
 // books a REAL ticket as Takunda that can never be deleted (wallet paid,

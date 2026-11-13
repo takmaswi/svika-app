@@ -26,7 +26,7 @@ for (const f of [".env.local", ".env"]) {
 const BASE = "http://localhost:3000";
 const OUT = join(repoRoot, "docs", "design-evidence", "answer-home");
 const MOBILE = { width: 360, height: 740 };
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 const HISTORY_DAYS = 14;
 
 const catNow = new Date(Date.now() + 2 * 60 * 60_000);

@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { loginAs, waitForHydration } from "./helpers";
 import { rebuildTakundaHistory, takundaFixtureBalance } from "./takunda-fixtures";
 
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 
 /** Minutes past midnight in Harare (CAT, UTC+2). */
 function catMinuteOfDay(): number {

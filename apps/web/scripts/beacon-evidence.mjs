@@ -38,7 +38,7 @@ const anon = () =>
 // a few riders waiting at different stops, so the list has something to say
 const RIDERS = [
   [process.env.DEMO_RIDER_EMAIL, process.env.DEMO_RIDER_PASSWORD, 0],
-  ["demo.takunda@svika.app", process.env.DEMO_JUDGE_PASSWORD, 3],
+  ["demo.takunda.v2@svika.app", process.env.DEMO_JUDGE_PASSWORD, 3],
   ["demo.rudo@svika.app", process.env.DEMO_JUDGE_PASSWORD, 3],
 ];
 

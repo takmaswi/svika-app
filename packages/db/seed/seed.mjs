@@ -576,7 +576,11 @@ await ensureDemoPool();
 // data, enumerated in demo_commute_fixtures and rebuilt around the seed
 // moment so the mined window is live whenever the demo runs; no money
 // moves for fixtures (disclosure register entry).
-const TAKUNDA_EMAIL = "demo.takunda@svika.app";
+// CHECKS 16 (closed 2026-11-13): a fresh account. Every e2e run books real,
+// undeletable tickets as Takunda; on the first account 72 such strays
+// outvoted the 56 ride fixture and moved the mined window off the staged
+// moment. The retired demo.takunda@svika.app keeps its ledger history.
+const TAKUNDA_EMAIL = "demo.takunda.v2@svika.app";
 const TAKUNDA_HISTORY_DAYS = 14;
 async function ensureTakunda() {
   const password = process.env.DEMO_JUDGE_PASSWORD;
