@@ -1956,3 +1956,13 @@
   font: inherit;
   color: var(--v2-ink-soft) !important;
 }
+
+/* --- Home-Final front door (plan Step 3.1) ---------------------------------------------------- */
+.v2-tile-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.v2-chips + .v2-tiles {
+  padding-top: 16px;
+}

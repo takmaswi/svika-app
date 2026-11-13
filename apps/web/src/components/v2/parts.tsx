@@ -142,11 +142,14 @@ export function BottomNav({
   labels,
   meHref,
   label,
+  tabs = ["plan", "ranks", "me"],
 }: {
   active: NavTab | null;
   labels: Record<NavTab, string>;
   meHref: string;
   label: string;
+  /** Ranks joins once the rank directory exists (Step 4). */
+  tabs?: NavTab[];
 }) {
   const item = (tab: NavTab, href: string, icon: ReactNode) => (
     <Link
@@ -161,9 +164,9 @@ export function BottomNav({
   );
   return (
     <nav className="v2-nav" aria-label={label}>
-      {item("plan", "/app", <PinV2 />)}
-      {item("ranks", "/app/ranks", <RanksTabV2 />)}
-      {item("me", meHref, <MeV2 />)}
+      {tabs.includes("plan") && item("plan", "/app", <PinV2 />)}
+      {tabs.includes("ranks") && item("ranks", "/app/ranks", <RanksTabV2 />)}
+      {tabs.includes("me") && item("me", meHref, <MeV2 />)}
     </nav>
   );
 }

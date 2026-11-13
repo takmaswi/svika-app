@@ -52,6 +52,7 @@ import { kombiStrings } from "@/lib/kombi/strings";
 import { SIM_VEHICLES } from "@/lib/map/sim-config";
 import { flagOn } from "@/lib/flags-server";
 import { LaunchHome, type LaunchSavedTrip } from "@/components/home/LaunchHome";
+import { FrontDoor } from "@/components/door/FrontDoor";
 
 interface SavedTripRow {
   id: string;
@@ -103,6 +104,23 @@ export default async function RiderHome({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // launch Step 3: the approved Home-Final front door (Step 7 gives signed
+  // in riders their personal home)
+  if (await flagOn("front_door")) {
+    const profile = user
+      ? (await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle())
+          .data
+      : null;
+    return (
+      <FrontDoor
+        lang={lang}
+        theme={theme}
+        signedIn={Boolean(user)}
+        fullName={(profile as { full_name: string | null } | null)?.full_name ?? null}
+        guide={false}
+      />
+    );
+  }
   // launch profile (Step 0): the honest home, no simulated kombis, no
   // arrival estimates, no wallet or tickets (rulings 3 and 14)
   if (await flagOn("launch")) {

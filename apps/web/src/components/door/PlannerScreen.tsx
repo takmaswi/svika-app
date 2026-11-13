@@ -9,13 +9,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { BackButton } from "@/components/v2/parts";
 import { PinV2, SwapV2 } from "@/components/v2/icons";
-import {
-  RECENT_KEY,
-  locationParam,
-  pushRecent,
-  readRecent,
-  splitMatch,
-} from "@/lib/door/ends";
+import { whereAmI } from "@/lib/door/locate";
+import { RECENT_KEY, pushRecent, readRecent, splitMatch } from "@/lib/door/ends";
 
 type Kind = "stop" | "suburb" | "place" | "poi" | "road";
 interface Suggestion {
@@ -44,17 +39,6 @@ export interface PlannerStrings {
 }
 
 const DEBOUNCE_MS = 220;
-
-function whereAmI(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (!("geolocation" in navigator)) return reject(new Error("none"));
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(locationParam(pos.coords.latitude, pos.coords.longitude)),
-      reject,
-      { enableHighAccuracy: false, timeout: 12_000, maximumAge: 60_000 },
-    );
-  });
-}
 
 export function PlannerScreen({
   initialTo,
