@@ -36,8 +36,8 @@ export const RESERVED = new Set([
   "owner", "conductor", "hwindi", "system", "null", "undefined", "moderator",
 ]);
 
-// A short local screen of the passwords people guess first. The Supabase
-// leaked password check (HaveIBeenPwned) is a dashboard setting for Mhofu.
+// A short local screen of the passwords people guess first. It holds when
+// the leaked password check below (Have I Been Pwned) cannot be reached.
 export const COMMON_PASSWORDS = new Set([
   "password", "password1", "password123", "12345678", "123456789", "1234567890",
   "qwertyuiop", "qwerty123", "11111111", "00000000", "iloveyou", "abc12345",

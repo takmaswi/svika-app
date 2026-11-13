@@ -60,10 +60,17 @@ test.describe("username accounts", () => {
     );
     // the same name is now taken for anyone else
     await page.getByTestId("recovery-saved").click();
-    await page.waitForURL(/\/(consent|app)/);
-    if (page.url().includes("/consent"))
-      await page.getByTestId("consent-accept").click();
-    await expect(page.getByTestId("profile-chip")).toBeVisible({ timeout: 20_000 });
+    // a new account meets the consent screen first, and it never claims a
+    // phone number or a name the rider was never asked for
+    const accept = page.getByTestId("consent-accept");
+    const chip = page.getByTestId("profile-chip");
+    await expect(accept.or(chip)).toBeVisible({ timeout: 20_000 });
+    if (await accept.isVisible()) {
+      await expect(page.getByText("Your username and language choice")).toBeVisible();
+      await expect(page.getByText(/phone number/i)).toHaveCount(0);
+      await accept.click();
+    }
+    await expect(chip).toBeVisible({ timeout: 20_000 });
   });
 
   test("the name is taken once claimed", async ({ page, context }) => {
@@ -141,7 +148,7 @@ test.describe("username accounts", () => {
     // after recovery, and the one above; two more make five, and the sixth
     // try is refused before any password is checked
     for (let i = 0; i < 2; i++) {
-      await signIn(page, `wrong ${i}`);
+      await signIn(page, `wrong guess ${i}`);
       await expect(page.getByTestId("account-error")).toHaveText(
         "That username and password do not match.",
       );
