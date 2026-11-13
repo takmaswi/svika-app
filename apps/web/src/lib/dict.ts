@@ -831,8 +831,8 @@ export const dict = {
     sn: "Kudzima account yako",
   },
   "privacy.launch.deleteB": {
-    en: "Delete my account removes your username, recovery code, saved and recorded trips, your own place names, emergency details and feedback straight away, and signs you out. Names and shortcuts other riders already agreed on stay on the shared map, with nothing that points to you.",
-    sn: "Kudzima account kunobvisa zita rako, kodhi yekudzokera, nzendo dzakachengetwa nedzakarekodhwa, mazita enzvimbo ako, ruzivo rwenjodzi nemaonero ako pakarepo, wobva wabudiswa. Mazita nemapfupi akabvumirana nevamwe vatasvi zvinosara pamepu, pasina chinoratidza iwe.",
+    en: "Delete my account removes your username, recovery code, saved and recorded trips, your own place names, emergency details and feedback straight away, then the account itself with its password, and signs you out. Names and shortcuts other riders already agreed on stay on the shared map, with nothing that points to you.",
+    sn: "Kudzima account kunobvisa zita rako, kodhi yekudzokera, nzendo dzakachengetwa nedzakarekodhwa, mazita enzvimbo ako, ruzivo rwenjodzi nemaonero ako pakarepo, neaccount pachayo nepassword yayo, wobva wabudiswa. Mazita nemapfupi akabvumirana nevamwe vatasvi zvinosara pamepu, pasina chinoratidza iwe.",
   },
   "privacy.versionLabel": { en: "Notice version", sn: "Notice version" },
   "privacy.yourDataLink": {
