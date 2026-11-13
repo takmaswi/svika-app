@@ -3,13 +3,23 @@ import { getLang, t } from "@/lib/i18n";
 import { CONSENT_VERSION } from "@svika/shared";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { BackIcon } from "@/components/icons";
+import { flagOn } from "@/lib/flags-server";
 
 // The plain language privacy notice. Public: readable before signing in and
 // linked from the consent screen. Short sections, no legal wall.
 export default async function PrivacyPage() {
   const lang = await getLang();
 
-  const sections = [
+  // launch Step 2.6: what we store, what we never ask for, how long we keep
+  // it, for username accounts. The pre launch notice stays for the rest.
+  const launchSections = [
+    ["privacy.launch.storeH", "privacy.launch.storeB"],
+    ["privacy.launch.neverH", "privacy.launch.neverB"],
+    ["privacy.launch.keepH", "privacy.launch.keepB"],
+    ["privacy.launch.shareH", "privacy.launch.shareB"],
+    ["privacy.launch.deleteH", "privacy.launch.deleteB"],
+  ] as const;
+  const preLaunchSections = [
     ["privacy.collectH", "privacy.collectB"],
     ["privacy.whyH", "privacy.whyB"],
     ["privacy.moneyH", "privacy.moneyB"],
@@ -17,6 +27,7 @@ export default async function PrivacyPage() {
     ["privacy.shareH", "privacy.shareB"],
     ["privacy.controlH", "privacy.controlB"],
   ] as const;
+  const sections = (await flagOn("accounts")) ? launchSections : preLaunchSections;
 
   return (
     <main className="shell">

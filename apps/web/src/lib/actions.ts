@@ -42,6 +42,10 @@ export async function deleteMyData(): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("anonymise_me");
   if (error) redirect("/app/privacy?err=1");
+  // a username account (launch Step 2) also loses its username and recovery
+  // code, so the name is free again and nothing can sign back in
+  const forget = await supabase.rpc("forget_my_username");
+  if (forget.error) redirect("/app/privacy?err=1");
   await supabase.auth.signOut();
   redirect("/");
 }
