@@ -36,18 +36,58 @@ export async function acceptConsent(): Promise<void> {
  * The delete action on the your data page. The ledger is append only, so
  * this anonymises instead of erasing: the RPC strips name and phone, drops
  * saved trips and appends a consent withdrawal, then the session ends and
- * the consent gate stays closed until a fresh accept.
+ * the consent gate stays closed until a fresh accept. A username account
+ * goes further: its username, recovery code and auth user are removed too.
  */
 export async function deleteMyData(): Promise<void> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
   const { error } = await supabase.rpc("anonymise_me");
   if (error) redirect("/app/privacy?err=1");
   // a username account (launch Step 2) also loses its username and recovery
   // code, so the name is free again and nothing can sign back in
   const forget = await supabase.rpc("forget_my_username");
   if (forget.error) redirect("/app/privacy?err=1");
+  if (user.user_metadata?.account === "username") {
+    // last, the auth user itself goes (svika-accounts delete_account,
+    // migration 0051); the emptied profile stays for the money history
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session || !(await deleteAuthUser(session.access_token)))
+      redirect("/app/privacy?err=1");
+    // the session died with the user, so only the cookies need clearing
+    await supabase.auth.signOut({ scope: "local" });
+    redirect("/");
+  }
   await supabase.auth.signOut();
   redirect("/");
+}
+
+/** Asks svika-accounts to remove the caller's own auth user. */
+async function deleteAuthUser(accessToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/svika-accounts`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ action: "delete_account" }),
+        cache: "no-store",
+      },
+    );
+    const json = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+    return json?.ok === true;
+  } catch {
+    return false;
+  }
 }
 
 export interface PurchasedTicket {
@@ -275,7 +315,9 @@ export async function giftRide(formData: FormData): Promise<void> {
     p_to_stop: leg.alightStopId,
   });
   if (error) {
-    redirect(`${back}&err=${error.message.includes("insufficient") ? "balance" : "gift"}`);
+    redirect(
+      `${back}&err=${error.message.includes("insufficient") ? "balance" : "gift"}`,
+    );
   }
   const ticketId = (data as { ticket_id: string }[] | null)?.[0]?.ticket_id;
   if (!ticketId) redirect(`${back}&err=gift`);

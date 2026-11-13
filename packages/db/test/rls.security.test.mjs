@@ -2708,5 +2708,59 @@ check(
   );
 }
 
+// ---- 0051 delete my account removes the auth user (launch Step 2) ----------
+// svika-accounts delete_account removes only the caller's own username
+// account, read from the caller's token, and only after anonymise_me and
+// forget_my_username. One real account per run (sign ups are 10 an hour per
+// address). After it, the token's user no longer exists in auth at all.
+{
+  const fn = `${URL}/functions/v1/svika-accounts`;
+  const call = (token, body) =>
+    fetch(fn, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: ANON, authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => null) }));
+
+  const guest = await call(ANON, { action: "delete_account" });
+  check("AU-12 a guest key cannot delete any account", guest.status === 401 && guest.json?.ok === false);
+
+  const phoneTok = (await A.c.auth.getSession()).data.session?.access_token;
+  const notMine = await call(phoneTok, { action: "delete_account" });
+  check(
+    "AU-13 a phone or email account is never deleted through the account function",
+    notMine.status === 403 && notMine.json?.error === "not_username_account",
+    JSON.stringify(notMine.json),
+  );
+
+  const name = `rls_${Date.now().toString(36)}`.slice(0, 20);
+  const pw = `Rls probe ${Math.random().toString(36).slice(2, 12)}`;
+  const made = await call(ANON, { action: "sign_up", username: name, password: pw });
+  if (!made.json?.ok) {
+    skip("AU-14..AU-16", `could not create a probe account: ${JSON.stringify(made.json)}`);
+  } else {
+    const token = made.json.session.access_token;
+    const probe = client();
+    await probe.auth.setSession({ access_token: token, refresh_token: made.json.session.refresh_token });
+    const early = await call(token, { action: "delete_account" });
+    check(
+      "AU-14 the auth user is not deleted while the username is still held",
+      early.status === 409 && early.json?.error === "forget_first",
+      JSON.stringify(early.json),
+    );
+    const anonymised = await probe.rpc("anonymise_me");
+    const forgot = await probe.rpc("forget_my_username");
+    const gone = await call(token, { action: "delete_account" });
+    const after = await client().auth.getUser(token);
+    check(
+      "AU-15 after anonymise_me and forget_my_username the auth user is deleted outright",
+      !anonymised.error && !forgot.error && gone.json?.ok === true && !!after.error && !after.data.user,
+      JSON.stringify({ anonymise: anonymised.error?.message, forget: forgot.error?.message, gone: gone.json, after: after.error?.message }),
+    );
+    const again = await call(token, { action: "delete_account" });
+    check("AU-16 the deleted account's token opens nothing afterwards", again.status === 401);
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
