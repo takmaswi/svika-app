@@ -4,10 +4,12 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { BackIcon } from "@/components/icons";
 import {
   DISCLOSURE_ROWS,
+  LAUNCH_DISCLOSURE_ROWS,
   DISCLOSURE_UPDATED,
   type DisclosureTier,
 } from "@/lib/disclosure";
 import { REPO_URL } from "@/lib/site";
+import { flagOn } from "@/lib/flags-server";
 
 // The disclosure register on screen: what is real and what is staged, feature
 // by feature, for a judge to open before or during the demo. Public, readable
@@ -15,6 +17,8 @@ import { REPO_URL } from "@/lib/site";
 // chips are the honesty split the whole product is built around.
 export default async function RegisterPage() {
   const lang = await getLang();
+  const launch = await flagOn("launch");
+  const rows = launch ? LAUNCH_DISCLOSURE_ROWS : DISCLOSURE_ROWS;
   const tierLabel = (tier: DisclosureTier): string =>
     tier === 1 ? t(lang, "register.tier1") : t(lang, "register.tier2");
 
@@ -29,21 +33,23 @@ export default async function RegisterPage() {
 
       <section className="svika-card wallet-panel svika-animate-fade-up">
         <h1 className="svika-headline">{t(lang, "register.title")}</h1>
-        <p className="svika-body register-intro">{t(lang, "register.intro")}</p>
+        <p className="svika-body register-intro">{t(lang, launch ? "register.launchIntro" : "register.intro")}</p>
 
         <div className="register-legend">
           <p className="register-legend-row">
             <span className="tier-chip tier-chip-1">{t(lang, "register.tier1")}</span>
             <span className="svika-meta">{t(lang, "register.tier1Note")}</span>
           </p>
-          <p className="register-legend-row">
-            <span className="tier-chip tier-chip-2">{t(lang, "register.tier2")}</span>
-            <span className="svika-meta">{t(lang, "register.tier2Note")}</span>
-          </p>
+          {!launch && (
+            <p className="register-legend-row">
+              <span className="tier-chip tier-chip-2">{t(lang, "register.tier2")}</span>
+              <span className="svika-meta">{t(lang, "register.tier2Note")}</span>
+            </p>
+          )}
         </div>
 
         <ul className="register-list">
-          {DISCLOSURE_ROWS.map((row) => (
+          {rows.map((row) => (
             <li key={row.feature} className="register-row">
               <div className="register-row-head">
                 <h2 className="svika-title register-feature">{row.feature}</h2>

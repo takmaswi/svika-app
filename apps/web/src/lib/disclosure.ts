@@ -266,3 +266,28 @@ export const DISCLOSURE_ROWS: readonly DisclosureRow[] = [
       "English and Shona are the live languages: every rider facing string exists in both and the toggle switches the whole app. Ndebele is roadmap; the control renders it as a disabled coming soon chip that switches no strings, proven by unit and e2e tests.",
   },
 ];
+
+// Launch profile (Step 0): the public register lists only what the launch
+// app actually shows. Paid, operator and simulated rows stay in the pitch
+// build's register above; Step 12 rewrites this list for the full launch.
+const LAUNCH_FEATURES: ReadonlySet<string> = new Set([
+  "Trip search, plan, fare quote",
+  "Live map: corridor geometry and stops",
+  "Saved trips (nickname a trip)",
+  "Destination first planning",
+  "Day and night theme",
+  "Consent and privacy",
+  "Share my ride",
+  "Record my trip (M1, extended by Partner)",
+  "Svika Partner",
+  "Share a trip as a guide link (M2)",
+  "Guardian mode: family links and safe arrival (V3)",
+  "Places layer: names and shortcuts (M3)",
+  "Did we get you there right (D2)",
+  "Guest mode (V2)",
+  "Language support (English, Shona live; Ndebele roadmap)",
+]);
+
+export const LAUNCH_DISCLOSURE_ROWS: readonly DisclosureRow[] = DISCLOSURE_ROWS.filter(
+  (row) => row.tier === 1 && LAUNCH_FEATURES.has(row.feature),
+);
