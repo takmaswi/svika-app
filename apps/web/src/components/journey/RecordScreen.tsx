@@ -39,6 +39,7 @@ import {
 import { TraceMapLazy } from "@/components/map/TraceMapLazy";
 import { BackIcon } from "@/components/icons";
 import { BoardSheet, MarkSheet } from "./RecordSheets";
+import { confirmTap } from "@/lib/haptics";
 
 interface RecordScreenProps {
   lang: AppLanguage;
@@ -214,6 +215,7 @@ export function RecordScreen({
       mode: journeyModeFor(snap?.legs ?? [], mode),
       endedAt: journey.endedAt ?? endedAtRef.current ?? Date.now(),
     });
+    confirmTap();
     let saved = "local";
     if (choice === "agree") {
       const {
