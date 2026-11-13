@@ -76,3 +76,37 @@ export function resolvePlaceQuery(entries: GeoPlace[], query: string): PlaceQuer
     suggestions: scored.slice(0, MAX_SUGGESTIONS).map((s) => s.place),
   };
 }
+
+/** Suggestions while the rider types (launch Step 3): from two letters. */
+export const SUGGEST_MIN_LETTERS = 2;
+
+/**
+ * Names that start with what was typed come first, then names with a word
+ * that starts with it, then names that contain it; the kind bonus breaks
+ * ties, then the name. Duplicates by normalised name collapse to the first.
+ */
+export function suggestPlaces(entries: GeoPlace[], query: string, limit = 6): GeoPlace[] {
+  const q = normalize(query);
+  if (q.length < SUGGEST_MIN_LETTERS) return [];
+  const seen = new Set<string>();
+  return entries
+    .map((place) => {
+      const name = normalize(place.name);
+      let score = 0;
+      if (name.startsWith(q)) score = 3;
+      else if (name.split(" ").some((w) => w.startsWith(q))) score = 2;
+      else if (q.length >= 3 && name.includes(q)) score = 1;
+      return { place, name, score };
+    })
+    .filter((s) => s.score > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        KIND_BONUS[b.place.kind] - KIND_BONUS[a.place.kind] ||
+        a.name.length - b.name.length ||
+        a.place.name.localeCompare(b.place.name, "en"),
+    )
+    .filter((s) => (seen.has(s.name) ? false : (seen.add(s.name), true)))
+    .slice(0, limit)
+    .map((s) => s.place);
+}

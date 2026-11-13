@@ -1704,3 +1704,184 @@
 .v2-code-cta {
   margin-top: auto;
 }
+
+/* --- Planner (launch-v2 Planner.dc.html, plan Step 3.2) --------------------------------------- */
+.v2-planner-head {
+  background: var(--v2-hero);
+  color: var(--v2-hero-ink);
+  padding: 16px 16px 20px;
+  border-radius: 0 0 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.v2-planner-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.v2-planner-card {
+  background: var(--v2-raised);
+  color: var(--v2-ink);
+  border-radius: var(--v2-r-search);
+  box-shadow: 0 12px 28px rgba(22, 29, 24, 0.16);
+  padding: 4px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.v2-planner-card:focus-within {
+  box-shadow:
+    0 12px 28px rgba(22, 29, 24, 0.16),
+    0 0 0 2px var(--v2-field-focus);
+}
+.v2-planner-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+}
+.v2-planner-row-from {
+  border-bottom: 1px solid var(--v2-step-line);
+}
+.v2-planner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #1f4d2e;
+  box-shadow: 0 0 0 4px #d9e8cc;
+  flex: none;
+}
+.v2-planner-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--v2-ink);
+  flex: none;
+}
+.v2-planner-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.v2-planner-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--v2-ink-soft);
+}
+.v2-planner-label-to {
+  color: var(--v2-link);
+}
+.v2-planner-input {
+  border: none;
+  outline: none;
+  padding: 0;
+  min-height: 28px;
+  font:
+    600 16px "IBM Plex Sans",
+    sans-serif;
+  color: var(--v2-ink);
+  background: transparent;
+}
+.v2-planner-swap {
+  width: var(--v2-target);
+  height: var(--v2-target);
+  border: none;
+  border-radius: 999px;
+  background: var(--v2-surface-soft);
+  color: var(--v2-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.v2-planner-body {
+  padding: 18px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.v2-planner-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2-planner-heading {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--v2-ink-soft);
+  padding: 0 4px 6px;
+}
+.v2-planner-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--v2-ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.v2-planner-item-recent {
+  min-height: 56px;
+}
+.v2-planner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--v2-r-icon);
+  background: var(--v2-surface-soft);
+  color: var(--v2-ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.v2-planner-icon-place {
+  background: var(--v2-tile-b-bg);
+  color: var(--v2-link);
+}
+.v2-planner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.v2-planner-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.v2-planner-name b {
+  font-weight: 700;
+}
+.v2-planner-hint {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--v2-surface-soft);
+  border-radius: 18px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.v2-planner-aa {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #161d18;
+  color: #f5b301;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font:
+    700 13px "DM Sans",
+    sans-serif;
+}

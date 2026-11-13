@@ -195,7 +195,13 @@ export async function saveTrip(formData: FormData): Promise<void> {
   const destLng = Number(formData.get("destLng"));
   const nickname = String(formData.get("nickname") ?? "").trim();
   const toParam = toStop || destName;
-  const back = `/app/plan?from=${encodeURIComponent(fromStop)}&to=${encodeURIComponent(toParam)}`;
+  // a trip planned from the rider's location (launch Step 3) comes back to
+  // the same plan; only a plan page on this site is accepted
+  const backRaw = String(formData.get("back") ?? "");
+  const back =
+    backRaw.startsWith("/app/plan?") && !backRaw.includes("//")
+      ? backRaw
+      : `/app/plan?from=${encodeURIComponent(fromStop)}&to=${encodeURIComponent(toParam)}`;
   const toPlace = !toStop && destName !== "";
   if (!fromStop || !toParam || fromStop === toStop) redirect("/app");
   if (toPlace && !(Number.isFinite(destLat) && Number.isFinite(destLng))) {
