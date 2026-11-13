@@ -34,7 +34,8 @@ test.describe("launch-v2 foundation", () => {
     test("map credits are a small info button bottom left that opens on tap", async ({
       page,
     }) => {
-      await page.goto("/app");
+      // Step 3 moved the map off the home; the trip result carries it.
+      await page.goto("/app/plan?from=Heights&to=Rezende");
       const credits = page.locator(
         ".maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact",
       );
@@ -51,31 +52,28 @@ test.describe("launch-v2 foundation", () => {
     test("a missing field is named in Svika copy, never the browser bubble", async ({
       page,
     }) => {
-      await page.goto("/app");
-      await expect(page.locator("label[for=from]")).toBeVisible();
-      await page.locator("form.home-search button[type=submit]").click();
-      await expect(page).toHaveURL(/\/app$/);
+      // Step 3 replaced the home form with the planner; sign up keeps a form.
+      await page.goto("/signup");
+      await page.getByTestId("signup-submit").click();
+      await expect(page).toHaveURL(/\/signup$/);
       await expect(page.getByTestId("form-error")).toHaveText(
-        "Type where you are starting from.",
+        "3 to 20 letters, numbers, dots or underscores.",
       );
-      await expect(page.locator("#from")).toHaveAttribute("aria-invalid", "true");
-      await expect(page.locator("#from")).toBeFocused();
-      await page.locator("#from").fill("Heights");
-      await page.locator("form.home-search button[type=submit]").click();
-      await expect(page.getByTestId("form-error")).toHaveText(
-        "Type where you are going.",
-      );
-      await expect(page.locator("#to")).toBeFocused();
-      await page.locator("#to").fill("Rezende");
-      await page.locator("form.home-search button[type=submit]").click();
-      await expect(page).toHaveURL(/\/app\/plan\?/);
+      await expect(page.locator("#username")).toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator("#username")).toBeFocused();
+      await page.locator("#username").fill("ab");
+      await page.getByTestId("signup-submit").click();
+      await expect(page.locator("#username")).toBeFocused();
+      await page.locator("#username").fill("kombi_rider");
+      await page.getByTestId("signup-submit").click();
+      await expect(page.getByTestId("form-error")).toHaveText("At least 8 characters.");
+      await expect(page.locator("#password")).toBeFocused();
     });
 
-    test("a one kombi trip says 1 kombi", async ({ page }) => {
+    test("a one kombi trip counts 1 kombi", async ({ page }) => {
       await page.goto("/app/plan?from=Heights&to=Rezende");
-      const meta = page.locator(".plan-fare-meta");
-      await expect(meta).toContainText(/\b1 kombi\b/);
-      await expect(meta).not.toContainText("1 kombis");
+      await expect(page.getByTestId("trip-kombis")).toHaveText("1");
+      await expect(page.getByTestId("trip-result")).not.toContainText("1 kombis");
     });
   });
 });
