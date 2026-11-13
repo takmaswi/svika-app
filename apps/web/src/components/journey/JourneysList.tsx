@@ -94,9 +94,13 @@ export function JourneysList({ lang }: { lang: AppLanguage }) {
       </Link>
 
       {rows !== null && rows.length === 0 && (
-        <p className="svika-body empty-note" data-testid="journeys-empty">
-          {t(lang, "journey.listEmpty")}
-        </p>
+        <div className="empty-note" data-testid="journeys-empty">
+          <p className="svika-body">{t(lang, "journey.listEmpty")}</p>
+          {/* plan Step 1.6: an empty state says what the rider can do */}
+          <Link className="auth-link touch-target" href="/app/record" data-testid="journeys-empty-record">
+            {t(lang, "journey.recordCta")}
+          </Link>
+        </div>
       )}
 
       <ul className="journey-list">

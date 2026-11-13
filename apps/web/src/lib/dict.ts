@@ -1111,9 +1111,10 @@ export const dict = {
   },
   "journey.listTitle": { en: "My trips", sn: "Nzendo dzangu" },
   "journey.listEmpty": {
-    en: "No recorded trips yet. Start one from the plan screen or your ticket.",
-    sn: "Hapasati pane nzendo dzakarekodhwa. Tanga imwe papeji yekuronga kana patikiti rako.",
+    en: "No recorded trips yet. Record your next walk or kombi ride and it shows up here.",
+    sn: "Hapasati pane nzendo dzakarekodhwa. Rekodha rwendo rwako runotevera rwunobva rwaonekwa pano.",
   },
+  "journey.recordCta": { en: "Record a trip", sn: "Rekodha rwendo" },
   "journey.localChip": { en: "On this device", sn: "Pafoni ino" },
   "journey.conflictChip": { en: "Sync conflict", sn: "Sync haina kuwirirana" },
   "journey.record": { en: "Record this trip", sn: "Rekodha rwendo urwu" },
