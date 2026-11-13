@@ -3,11 +3,16 @@
 // per network address that a caller cannot dodge.
 import { describe, expect, test } from "vitest";
 import {
+  CHECKS_PER_ORIGIN_HOUR,
+  RESERVED,
   SIGN_UPS_PER_ORIGIN_HOUR,
   SYNTHETIC_DOMAIN,
   UNKNOWN_ORIGIN,
+  breachCount,
+  checkAllowed,
   checkPassword,
   checkUsername,
+  hibpQuery,
   clientAddress,
   originHash,
   signUpAllowed,
@@ -57,5 +62,30 @@ describe("passwords", () => {
     expect(checkPassword("x".repeat(73))).toBe("password_long");
     expect(checkPassword("Password123")).toBe("password_common");
     expect(checkPassword("kombi rank at fourth street")).toBeNull();
+  });
+});
+
+describe("leaked password check (Have I Been Pwned range API)", () => {
+  test("only the first five characters of the SHA-1 ever leave the function", async () => {
+    // SHA-1 of "password" is 5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8
+    expect(await hibpQuery("password")).toEqual({ prefix: "5BAA6", suffix: "1E4C9B93F3F0682250B6CF8331B7EE68FD8" });
+  });
+  test("reads the count for our suffix from the range answer, zero when absent", () => {
+    const body = "0018A45C4D1DEF81644B54AB7F969B88D65:1\r\n1E4C9B93F3F0682250B6CF8331B7EE68FD8:9545824\r\n";
+    expect(breachCount(body, "1E4C9B93F3F0682250B6CF8331B7EE68FD8")).toBe(9545824);
+    expect(breachCount(body, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")).toBe(0);
+    // padded rows (Add-Padding) carry a zero count and never count as seen
+    expect(breachCount("ABCDEF0123456789ABCDEF0123456789ABC:0\n", "ABCDEF0123456789ABCDEF0123456789ABC")).toBe(0);
+  });
+});
+
+describe("username availability check", () => {
+  test("has its own allowance per address", () => {
+    expect(checkAllowed(CHECKS_PER_ORIGIN_HOUR - 1)).toBe(true);
+    expect(checkAllowed(CHECKS_PER_ORIGIN_HOUR)).toBe(false);
+  });
+  test("reserved names are never free", () => {
+    expect(RESERVED.has("admin")).toBe(true);
+    expect(RESERVED.has("svika")).toBe(true);
   });
 });

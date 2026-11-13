@@ -19,19 +19,25 @@
 // this function directly, so that address is the rider's own; a call relayed
 // through the web server would put every rider in Vercel's bucket.
 //
-// Actions (POST JSON): sign_up, sign_in, recover, delete. Responses are
+// Actions (POST JSON): check_username, sign_up, sign_in, recover. Deleting
+// an account is the web app's own anonymise path plus forget_my_username
+// (lib/actions.ts): with the username gone the hidden address is unreachable. Responses are
 // { ok: true, ... } or { ok: false, error: <code> } with Svika error codes
 // the web app turns into Svika copy.
 import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 import {
+  ATTEMPT_RETENTION_DAYS,
   FAILS_PER_ORIGIN,
   RECOVER_FAILS_PER_USER_HOUR,
   RESERVED,
   SIGN_IN_FAILS_PER_USER,
   SIGN_IN_WINDOW_MIN,
+  breachCount,
+  checkAllowed,
   checkPassword,
   checkUsername,
   clientAddress,
+  hibpQuery,
   originHash,
   sha256Hex,
   signUpAllowed,
@@ -112,6 +118,32 @@ async function countSince(filter: { username?: string; origin?: string; kind: st
   return count ?? 0;
 }
 
+/**
+ * Leaked password adapter (plan Step 2.2). Only the first five characters
+ * of the SHA-1 leave; padding hides the answer size. If the service is slow
+ * or down the answer is null and the local list in checkPassword still
+ * holds, so sign up never depends on a vendor being up.
+ */
+async function timesLeaked(password: string): Promise<number | null> {
+  try {
+    const { prefix, suffix } = await hibpQuery(password);
+    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+      headers: { "Add-Padding": "true", "User-Agent": "svika-accounts" },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) return null;
+    return breachCount(await res.text(), suffix);
+  } catch {
+    return null;
+  }
+}
+
+/** The attempt log keeps ATTEMPT_RETENTION_DAYS; older rows go. */
+async function pruneAttempts(): Promise<void> {
+  const cutoff = new Date(Date.now() - ATTEMPT_RETENTION_DAYS * 86_400_000).toISOString();
+  await admin.from("auth_attempts").delete().lt("at", cutoff);
+}
+
 async function usernameIsClean(u: string): Promise<boolean> {
   if (RESERVED.has(u)) return false;
   const { data, error } = await admin.rpc("username_is_clean", { p_username: u });
@@ -152,6 +184,9 @@ async function signUp(body: Json, origin: string): Promise<Response> {
     await log(username, "sign_up", false, origin);
     return fail("username_taken", 409);
   }
+  if (((await timesLeaked(body.password as string)) ?? 0) > 0) {
+    return fail("password_leaked");
+  }
 
   const email = syntheticEmail(randomString("abcdefghijklmnopqrstuvwxyz0123456789", 20));
   const created = await admin.auth.admin.createUser({
@@ -174,9 +209,20 @@ async function signUp(body: Json, origin: string): Promise<Response> {
   }
   const code = await storeRecoveryCode(userId);
   await log(username, "sign_up", true, origin);
+  await pruneAttempts();
   const session = await signInSession(email, body.password as string);
   if (!session) return fail("sign_in_failed", 500);
   return reply({ ok: true, session, recovery_code: code, username });
+}
+
+/** "Is this username free" for the sign up screen, limited per address. */
+async function checkName(body: Json, origin: string): Promise<Response> {
+  const username = checkUsername(body.username);
+  if (!checkAllowed(await countSince({ origin, kind: "check" }, 60))) return fail("rate_limited", 429);
+  await log(username ?? "", "check", true, origin);
+  if (!username) return reply({ ok: true, state: "invalid" });
+  if (!(await usernameIsClean(username))) return reply({ ok: true, state: "blocked" });
+  return reply({ ok: true, state: (await userIdFor(username)) ? "taken" : "free" });
 }
 
 async function signIn(body: Json, origin: string): Promise<Response> {
@@ -203,6 +249,7 @@ async function recover(body: Json, origin: string): Promise<Response> {
   if (!username || code.length !== 12) return fail("wrong_code", 401);
   const pwErr = checkPassword(body.new_password);
   if (pwErr) return fail(pwErr);
+  if (((await timesLeaked(body.new_password as string)) ?? 0) > 0) return fail("password_leaked");
   if ((await countSince({ username, kind: "recover", ok: false }, 60)) >= RECOVER_FAILS_PER_USER_HOUR) {
     return fail("locked", 429);
   }
@@ -225,29 +272,28 @@ async function recover(body: Json, origin: string): Promise<Response> {
   return reply({ ok: true, session, recovery_code: fresh, username });
 }
 
-async function closeAccount(req: Request): Promise<Response> {
-  const jwt = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const asUser = createClient(URL_, ANON, {
-    global: { headers: { Authorization: `Bearer ${jwt}` } },
-    auth: { persistSession: false },
-  });
-  const { data: me } = await asUser.auth.getUser(jwt);
-  if (!me.user) return fail("not_signed_in", 401);
-  // the existing anonymise path (0021, 0024 and their successors) first,
-  // as the rider, then the username and code, then the sign in itself
-  const anon = await asUser.rpc("anonymise_me");
-  if (anon.error) return fail("delete_failed", 500);
-  const forget = await asUser.rpc("forget_my_username");
-  if (forget.error) return fail("delete_failed", 500);
-  await admin.auth.admin.updateUserById(me.user.id, {
-    password: randomString("abcdefghijklmnopqrstuvwxyz0123456789", 40),
-    ban_duration: "876000h",
-  });
-  await admin.auth.admin.signOut(jwt).catch(() => {});
-  return reply({ ok: true });
+// The rider's browser calls this directly, so only Svika's own pages may.
+const ALLOWED_ORIGINS = new Set(
+  (Deno.env.get("SVIKA_ALLOWED_ORIGINS") ?? "https://svika-web.vercel.app,http://localhost:3000")
+    .split(",")
+    .map((o) => o.trim()),
+);
+
+function withCors(req: Request, res: Response): Response {
+  const origin = req.headers.get("origin");
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return res;
+  const headers = new Headers(res.headers);
+  headers.set("access-control-allow-origin", origin);
+  headers.set("access-control-allow-headers", "authorization, apikey, content-type, x-client-info");
+  headers.set("access-control-allow-methods", "POST, OPTIONS");
+  headers.set("vary", "origin");
+  return new Response(res.body, { status: res.status, headers });
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req) => withCors(req, await handle(req)));
+
+async function handle(req: Request): Promise<Response> {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204 });
   if (req.method !== "POST") return fail("method", 405);
   let body: Json;
   try {
@@ -260,18 +306,18 @@ Deno.serve(async (req) => {
   const origin = await originHash(clientAddress(req.headers), SERVICE);
   try {
     switch (body.action) {
+      case "check_username":
+        return await checkName(body, origin);
       case "sign_up":
         return await signUp(body, origin);
       case "sign_in":
         return await signIn(body, origin);
       case "recover":
         return await recover(body, origin);
-      case "delete":
-        return await closeAccount(req);
       default:
         return fail("bad_request");
     }
   } catch {
     return fail("server_error", 500);
   }
-});
+}

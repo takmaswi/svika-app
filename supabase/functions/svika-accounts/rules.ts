@@ -23,6 +23,10 @@ export const FAILS_PER_ORIGIN = 30;
  */
 export const SIGN_UPS_PER_ORIGIN_HOUR = 10;
 export const RECOVER_FAILS_PER_USER_HOUR = 5;
+/** "Is this username free" lookups per network address per hour. */
+export const CHECKS_PER_ORIGIN_HOUR = 120;
+/** The attempt log keeps rows this long, then the function deletes them. */
+export const ATTEMPT_RETENTION_DAYS = 30;
 
 /** Callers with no readable address share this one limited bucket. */
 export const UNKNOWN_ORIGIN = "unknown";
@@ -89,4 +93,29 @@ export function originHash(address: string, pepper: string): Promise<string> {
 
 export function signUpAllowed(signUpsFromOriginLastHour: number): boolean {
   return signUpsFromOriginLastHour < SIGN_UPS_PER_ORIGIN_HOUR;
+}
+
+export function checkAllowed(checksFromOriginLastHour: number): boolean {
+  return checksFromOriginLastHour < CHECKS_PER_ORIGIN_HOUR;
+}
+
+/**
+ * Leaked password check, k-anonymity style (Have I Been Pwned range API):
+ * only the first five hex characters of the password's SHA-1 leave the
+ * function; the answer lists every known suffix under that prefix and the
+ * match happens here.
+ */
+export async function hibpQuery(password: string): Promise<{ prefix: string; suffix: string }> {
+  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password));
+  const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return { prefix: hex.slice(0, 5), suffix: hex.slice(5) };
+}
+
+/** How often our suffix appears in a range answer; 0 when absent or padded. */
+export function breachCount(rangeBody: string, suffix: string): number {
+  for (const line of rangeBody.split(/\r?\n/)) {
+    const [s, n] = line.trim().split(":");
+    if (s?.toUpperCase() === suffix) return Number(n) || 0;
+  }
+  return 0;
 }
