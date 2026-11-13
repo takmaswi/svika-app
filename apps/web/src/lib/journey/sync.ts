@@ -15,9 +15,11 @@
 // behind.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { toRpcLeg } from "./legs";
-import { planBatches, toRpcPoint } from "./policy";
+import { planBatches, toRpcPoint, tracesToPrune } from "./policy";
 import {
+  deletePoints,
   getJourney,
+  listJourneys,
   listLegs,
   listMarks,
   listPoints,
@@ -159,6 +161,10 @@ export async function syncJourney(
     await putJourney(journey);
   }
 
+  if (journey.status === "complete" && journey.statusSynced) {
+    await pruneConfirmedTraces();
+  }
+
   if (!journey.statusSynced && journey.status === "discarded") {
     const { error } = await supabase.rpc("discard_rider_journey", {
       p_journey: journey.id,
@@ -169,4 +175,20 @@ export async function syncJourney(
   }
 
   return { ok: true };
+}
+
+/**
+ * CHECKS 14: drop the local points of older saved trips the server has
+ * fully confirmed, keeping the newest few traces and every unsynced trip.
+ * The journey rows stay, so trips and contribution counts are untouched.
+ */
+export async function pruneConfirmedTraces(): Promise<number> {
+  const ids = tracesToPrune(await listJourneys());
+  for (const id of ids) {
+    const journey = await getJourney(id);
+    if (!journey) continue;
+    await deletePoints(id);
+    await putJourney({ ...journey, pointsPruned: true });
+  }
+  return ids.length;
 }

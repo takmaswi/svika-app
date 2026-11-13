@@ -40,6 +40,9 @@ export interface LocalJourney {
   conflict: boolean;
   /** Legs, marks and fare notes have reached the server for this trip. */
   partnerSynced?: boolean;
+  /** CHECKS 14: the local points were dropped after the server confirmed
+   *  every one; the trace is read from the server from then on. */
+  pointsPruned?: boolean;
 }
 
 export interface LocalPoint {
@@ -115,10 +118,7 @@ function request<T>(req: IDBRequest<T>): Promise<T> {
   });
 }
 
-async function store(
-  name: string,
-  mode: IDBTransactionMode,
-): Promise<IDBObjectStore> {
+async function store(name: string, mode: IDBTransactionMode): Promise<IDBObjectStore> {
   const db = await openDb();
   return db.transaction(name, mode).objectStore(name);
 }

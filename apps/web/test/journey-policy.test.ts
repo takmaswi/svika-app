@@ -8,7 +8,8 @@ import {
   toRpcPoint,
   type PhaseState,
 } from "../src/lib/journey/policy";
-import type { LocalPoint } from "../src/lib/journey/store";
+import type { LocalJourney, LocalPoint } from "../src/lib/journey/store";
+import { tracesToPrune, KEEP_RECENT_TRACES } from "../src/lib/journey/policy";
 
 const watching: PhaseState = { phase: "watching", stillStreak: 0 };
 const still = { speedMps: 0, movedM: 0 };
@@ -90,5 +91,55 @@ describe("sync batching", () => {
 
   test("the leg a point was captured on rides with it", () => {
     expect(toRpcPoint({ ...pt(4), legIndex: 2 }).leg_index).toBe(2);
+  });
+});
+
+// CHECKS 14: the recording queue cap. Only fully confirmed saved trips
+// beyond the newest few lose their local points; unsynced trips never do.
+
+function saved(id: string, endedAt: number, over: Partial<LocalJourney> = {}): LocalJourney {
+  return {
+    id,
+    mode: "walk",
+    status: "complete",
+    startedAt: endedAt - 60_000,
+    endedAt,
+    distanceM: 100,
+    pointCount: 10,
+    syncedThrough: 9,
+    serverKnown: true,
+    statusSynced: true,
+    conflict: false,
+    ...over,
+  };
+}
+
+describe("tracesToPrune", () => {
+  test("keeps the newest saved traces and prunes the confirmed older ones", () => {
+    const journeys = Array.from({ length: KEEP_RECENT_TRACES + 3 }, (_, i) =>
+      saved(`j${i}`, 1_000_000 + i * 1000),
+    );
+    // j0..j2 are the oldest three
+    expect(tracesToPrune(journeys).sort()).toEqual(["j0", "j1", "j2"]);
+  });
+
+  test("never prunes an unsynced, half synced or recording trip", () => {
+    const old = 1_000;
+    const journeys = [
+      ...Array.from({ length: KEEP_RECENT_TRACES }, (_, i) => saved(`new${i}`, 1_000_000 + i)),
+      saved("unsent", old, { serverKnown: false, syncedThrough: -1 }),
+      saved("halfway", old + 1, { syncedThrough: 4 }),
+      saved("unsaved-status", old + 2, { statusSynced: false }),
+      saved("recording", old + 3, { status: "recording" }),
+    ];
+    expect(tracesToPrune(journeys)).toEqual([]);
+  });
+
+  test("does not prune the same trip twice", () => {
+    const journeys = [
+      ...Array.from({ length: KEEP_RECENT_TRACES }, (_, i) => saved(`new${i}`, 1_000_000 + i)),
+      saved("done", 5, { pointsPruned: true }),
+    ];
+    expect(tracesToPrune(journeys)).toEqual([]);
   });
 });

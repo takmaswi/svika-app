@@ -67,6 +67,16 @@ export interface RecorderSnapshot {
   legMode: LegMode;
   /** Marked stops dropped so far; also the next mark's seq. */
   markCount: number;
+  /** The phone ran out of storage mid recording (CHECKS 14): capture
+   *  stopped by name and what was recorded so far is kept to save. */
+  storageFull: boolean;
+}
+
+/** IndexedDB reports a full disk as QuotaExceededError (legacy code 22). */
+export function isQuotaError(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) return false;
+  const e = err as { name?: string; code?: number };
+  return e.name === "QuotaExceededError" || e.code === 22;
 }
 
 type Listener = (s: RecorderSnapshot) => void;
@@ -87,6 +97,7 @@ export class JourneyRecorder {
     legs: [],
     legMode: "walking",
     markCount: 0,
+    storageFull: false,
   };
   private listeners = new Set<Listener>();
   private watchId: number | null = null;
@@ -159,6 +170,7 @@ export class JourneyRecorder {
       legs,
       legMode: "walking",
       markCount: 0,
+      storageFull: false,
     });
     this.beginWatch();
   }
@@ -192,7 +204,8 @@ export class JourneyRecorder {
     // recording started before this batch) gets a fresh opening leg rather
     // than a guess about which leg the rider was on
     const stored = await listLegs(journey.id);
-    const legs = stored.length > 0 ? stored : [openingLeg(journey.id, journey.startedAt)];
+    const legs =
+      stored.length > 0 ? stored : [openingLeg(journey.id, journey.startedAt)];
     if (stored.length === 0) await putLegs(legs);
     this.phaseState = { phase: "watching", stillStreak: 0 };
     this.emit({
@@ -242,10 +255,7 @@ export class JourneyRecorder {
    * that fix's time and `markedAt` is now, because the gap between them is
    * how far behind the mark may be, and merging the two hides that.
    */
-  async mark(
-    kind: LocalMark["kind"],
-    name: string | null,
-  ): Promise<LocalMark | null> {
+  async mark(kind: LocalMark["kind"], name: string | null): Promise<LocalMark | null> {
     const journeyId = this.snapshot.journeyId;
     const fix = this.lastAccepted;
     if (!journeyId || !fix || this.snapshot.status !== "recording") return null;
@@ -359,18 +369,27 @@ export class JourneyRecorder {
     const kept = shouldKeepPoint(prev, candidate);
     if (kept) {
       const journeyId = this.snapshot.journeyId!;
-      await addPoint({
-        journeyId,
-        seq: this.seq,
-        lat: candidate.lat,
-        lng: candidate.lng,
-        accuracyM: candidate.accuracyM,
-        recordedAt: candidate.recordedAt,
-        // stamped at capture, never joined by wall clock afterwards: a leg
-        // boundary is the system clock and a fix is the GPS clock, and the
-        // two drift
-        legIndex: currentLegIndex(this.snapshot.legs),
-      });
+      try {
+        await addPoint({
+          journeyId,
+          seq: this.seq,
+          lat: candidate.lat,
+          lng: candidate.lng,
+          accuracyM: candidate.accuracyM,
+          recordedAt: candidate.recordedAt,
+          // stamped at capture, never joined by wall clock afterwards: a leg
+          // boundary is the system clock and a fix is the GPS clock, and the
+          // two drift
+          legIndex: currentLegIndex(this.snapshot.legs),
+        });
+      } catch (err) {
+        if (!isQuotaError(err)) throw err;
+        // a full phone stops the recording by name instead of failing
+        // silently; everything captured so far stays to be saved
+        await this.stop();
+        this.emit({ storageFull: true });
+        return;
+      }
       this.seq += 1;
       const hopSeconds = prev ? (candidate.recordedAt - prev.recordedAt) / 1000 : 0;
       // replay compresses the clock, so every hop would read as a teleport

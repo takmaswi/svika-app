@@ -6,12 +6,8 @@
 // NAPS: the watch is released so the radio can sleep, and a timer wakes it
 // for one fix every DELAY_STILL_MS. Real movement on a nap fix wakes the
 // watch again. Thresholds live in @svika/shared journey-trace.
-import {
-  MIN_MOVE_METERS,
-  STILL_SPEED_MPS,
-  type TracePoint,
-} from "@svika/shared";
-import type { LocalPoint } from "./store";
+import { MIN_MOVE_METERS, STILL_SPEED_MPS, type TracePoint } from "@svika/shared";
+import type { LocalJourney, LocalPoint } from "./store";
 
 export type RecorderPhase = "watching" | "napping";
 
@@ -93,4 +89,41 @@ export function toTracePoint(p: LocalPoint): TracePoint {
     accuracyM: p.accuracyM,
     recordedAt: p.recordedAt,
   };
+}
+
+/**
+ * CHECKS 14, the recording queue cap (proposed in CHECKS-FOR-MHOFU.md and
+ * closed by the launch plan). The traces of this many most recent saved
+ * trips stay on the phone so a rider can look back at a walk they just did.
+ */
+export const KEEP_RECENT_TRACES = 5;
+
+/** Every point of this saved trip has reached the server and been confirmed. */
+export function isFullyConfirmed(j: LocalJourney): boolean {
+  return (
+    j.status === "complete" &&
+    j.serverKnown &&
+    j.statusSynced &&
+    j.syncedThrough >= j.pointCount - 1
+  );
+}
+
+/**
+ * The journeys whose local POINTS may be dropped: saved, fully confirmed by
+ * the server, and older than the KEEP_RECENT_TRACES newest saved trips.
+ * The journey row itself (summary, legs, marks) is never pruned, and an
+ * unsynced or still recording journey is never a candidate: the offline
+ * first promise keeps those forever.
+ */
+export function tracesToPrune(
+  journeys: readonly LocalJourney[],
+  keep = KEEP_RECENT_TRACES,
+): string[] {
+  const saved = journeys
+    .filter((j) => j.status === "complete")
+    .sort((a, b) => (b.endedAt ?? b.startedAt) - (a.endedAt ?? a.startedAt));
+  return saved
+    .slice(keep)
+    .filter((j) => isFullyConfirmed(j) && !j.pointsPruned)
+    .map((j) => j.id);
 }

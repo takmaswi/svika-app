@@ -154,7 +154,10 @@ export function RecordScreen({
   useEffect(() => {
     if (screen !== "recording" || !consented || !snap?.journeyId) return;
     const journeyId = snap.journeyId;
-    const id = setInterval(() => void syncJourney(supabase, journeyId), replay ? 2000 : 20_000);
+    const id = setInterval(
+      () => void syncJourney(supabase, journeyId),
+      replay ? 2000 : 20_000,
+    );
     return () => clearInterval(id);
   }, [screen, consented, snap?.journeyId, supabase, replay]);
 
@@ -164,6 +167,15 @@ export function RecordScreen({
     await recorder.start(mode);
     setScreen("recording");
   };
+
+  // CHECKS 14: a full phone ends the recording by name; go straight to
+  // the save screen so nothing captured so far is lost
+  useEffect(() => {
+    if (snap?.storageFull && screen === "recording") {
+      endedAtRef.current = Date.now();
+      setScreen("finish");
+    }
+  }, [snap?.storageFull, screen]);
 
   const stop = async () => {
     setSheet("none");
@@ -329,7 +341,7 @@ export function RecordScreen({
             <span className="record-pill svika-glass" data-testid="leg-chip">
               {t(lang, "journey.legLabel")}
               <span className="svika-mono-code" data-testid="leg-index">
-                {(snap?.legs.length ?? 1)}
+                {snap?.legs.length ?? 1}
               </span>
               <span data-testid="leg-mode">
                 {t(lang, `journey.legMode.${legMode}` as DictKey)}
@@ -404,6 +416,11 @@ export function RecordScreen({
         <header className="screen-head">
           <h1 className="svika-headline">{t(lang, "journey.finishTitle")}</h1>
         </header>
+        {snap?.storageFull && (
+          <p className="auth-error svika-body" role="alert" data-testid="storage-full">
+            {t(lang, "journey.storageFull")}
+          </p>
+        )}
         {consentOpen ? (
           <section
             className="svika-card wallet-panel svika-animate-fade-up"
@@ -441,7 +458,9 @@ export function RecordScreen({
               </div>
               <div className="record-summary-row">
                 <dt className="svika-meta">{t(lang, "journey.duration")}</dt>
-                <dd className="svika-mono-code">{formatElapsed(endedAt - startedAt)}</dd>
+                <dd className="svika-mono-code">
+                  {formatElapsed(endedAt - startedAt)}
+                </dd>
               </div>
               <div className="record-summary-row">
                 <dt className="svika-meta">{t(lang, "journey.points")}</dt>
@@ -467,7 +486,10 @@ export function RecordScreen({
               )}
             </dl>
             {isPartner && (
-              <p className="svika-meta record-sheet-hint" data-testid="finish-partner-note">
+              <p
+                className="svika-meta record-sheet-hint"
+                data-testid="finish-partner-note"
+              >
                 {t(lang, "partner.recordNote")}
               </p>
             )}
@@ -518,7 +540,11 @@ export function RecordScreen({
         <h1 className="svika-headline">{t(lang, "journey.recordTitle")}</h1>
       </header>
       <section className="svika-card wallet-panel svika-animate-fade-up">
-        <div className="record-mode-row" role="radiogroup" aria-label={t(lang, "journey.recordTitle")}>
+        <div
+          className="record-mode-row"
+          role="radiogroup"
+          aria-label={t(lang, "journey.recordTitle")}
+        >
           {(["walk", "kombi"] as const).map((m) => (
             <button
               key={m}

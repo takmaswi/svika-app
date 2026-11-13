@@ -1047,6 +1047,11 @@ export const dict = {
   "journey.start": { en: "Start recording", sn: "Tanga kurekodha" },
   "journey.rec": { en: "Recording", sn: "Kurekodha" },
   "journey.stop": { en: "Stop recording", sn: "Misa kurekodha" },
+  // CHECKS 14: the named failure when the phone is out of storage
+  "journey.storageFull": {
+    en: "Your phone is out of space, so recording stopped. Save this trip now, then free some space before the next one.",
+    sn: "Foni yako yazara, saka kurekodha kwamira. Chengeta rwendo urwu izvozvi, wobva wabvisa zvimwe usati waita rumwe.",
+  },
   "journey.deniedH": {
     en: "Svika cannot see your location",
     sn: "Svika haikwanise kuona pauri",
