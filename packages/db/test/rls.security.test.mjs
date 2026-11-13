@@ -2669,5 +2669,44 @@ check(
   );
 }
 
+// ---- 0050 username accounts (launch Step 2) --------------------------------
+// Only the svika-accounts Edge Function (service role) creates, reads or
+// clears usernames, recovery codes and the attempt log. A rider can read
+// their own username row and nothing else.
+{
+  const anonNames = await anon.from("account_usernames").select("username").limit(5);
+  check("AU-1 a guest reads no usernames", !!anonNames.error || (anonNames.data ?? []).length === 0);
+  const riderNames = await A.c.from("account_usernames").select("user_id");
+  check(
+    "AU-2 a rider sees at most their own username row",
+    !riderNames.error && (riderNames.data ?? []).every((r) => r.user_id === A.uid),
+    riderNames.error?.message ?? "",
+  );
+  const codes = await A.c.from("account_recovery_codes").select("user_id").limit(1);
+  check("AU-3 no client reads recovery codes", !!codes.error || (codes.data ?? []).length === 0);
+  const anonCodes = await anon.from("account_recovery_codes").select("user_id").limit(1);
+  check("AU-4 a guest reads no recovery codes", !!anonCodes.error || (anonCodes.data ?? []).length === 0);
+  const attempts = await A.c.from("auth_attempts").select("id").limit(1);
+  check("AU-5 no client reads the attempt log", !!attempts.error || (attempts.data ?? []).length === 0);
+  const forge = await A.c.from("auth_attempts").insert({ username: "rls_probe", kind: "sign_in", ok: true });
+  check("AU-6 no client writes the attempt log", !!forge.error);
+  const claim = await A.c.from("account_usernames").insert({ user_id: A.uid, username: "rls_probe_name" });
+  check("AU-7 a rider cannot claim a username directly", !!claim.error);
+  const codeForge = await A.c
+    .from("account_recovery_codes")
+    .insert({ user_id: A.uid, code_salt: "x", code_hash: "y" });
+  check("AU-8 a rider cannot plant a recovery code", !!codeForge.error);
+  const screen = await A.c.rpc("username_is_clean", { p_username: "tendai" });
+  check("AU-9 only the account function screens usernames", !!screen.error);
+  const anonForget = await anon.rpc("forget_my_username");
+  check("AU-10 a guest cannot call forget_my_username", !!anonForget.error);
+  const mine = await A.c.rpc("my_username");
+  check(
+    "AU-11 my_username answers for the caller only (none for a phone or email account)",
+    !mine.error && mine.data === null,
+    mine.error?.message ?? String(mine.data),
+  );
+}
+
 console.log(`\n${passed} passed, ${failed} failed, ${skipped} skipped`);
 process.exit(failed === 0 ? 0 : 1);
