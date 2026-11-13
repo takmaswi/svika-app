@@ -14,6 +14,7 @@
 // docs/MAP-CAMERA.md; the movement pipeline in docs/MAP-MOVEMENT.md.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { addAttribution } from "@/lib/map/attribution";
 import { useEffect, useRef, useState } from "react";
 import { clampFitPadding } from "@/lib/map/camera-fit";
 import { corridorLine, corridorMetrics, corridorStops } from "@/lib/map/corridor-data";
@@ -632,7 +633,7 @@ export function LiveMap({
         attributionControl: false,
       });
       // OSM attribution must stay readable (ODbL), so never collapse it.
-      map.addControl(new maplibregl.AttributionControl({ compact: false }), "top-right");
+      addAttribution(map);
       mapRef.current = map;
       map.touchPitch.disable();
 

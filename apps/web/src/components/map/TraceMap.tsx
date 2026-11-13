@@ -13,6 +13,7 @@
 // pixels.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { addAttribution } from "@/lib/map/attribution";
 import { useEffect, useRef, useState } from "react";
 import { clampFitPadding } from "@/lib/map/camera-fit";
 import { ensurePmtilesProtocol } from "@/lib/map/pmtiles-protocol";
@@ -152,7 +153,7 @@ export function TraceMap({ labels, trace, position, camera, testId }: TraceMapPr
         zoom: FOLLOW_ZOOM,
         attributionControl: false,
       });
-      map.addControl(new maplibregl.AttributionControl({ compact: false }), "top-right");
+      addAttribution(map);
       mapRef.current = map;
 
       map.on("style.load", () => {

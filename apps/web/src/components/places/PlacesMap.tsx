@@ -16,6 +16,7 @@
 // coordinates and content, never pixels.
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { addAttribution } from "@/lib/map/attribution";
 import { useEffect, useRef, useState } from "react";
 import { ensurePmtilesProtocol } from "@/lib/map/pmtiles-protocol";
 import { buildMbareSunStyle, MAP_COLORS, type MapTheme } from "@/lib/map/style";
@@ -165,7 +166,7 @@ export function PlacesMap({
         zoom: PLACES_ZOOM,
         attributionControl: false,
       });
-      map.addControl(new maplibregl.AttributionControl({ compact: false }), "top-right");
+      addAttribution(map);
       mapRef.current = map;
 
       map.on("style.load", () => {
