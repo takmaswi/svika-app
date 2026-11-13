@@ -20,7 +20,7 @@ export type AccountsReply =
       recovery_code?: string;
       username?: string;
     }
-  | { ok: false; error: string };
+  | { ok: false; error: string; retry_after?: number };
 
 export async function callAccounts(
   body: Record<string, unknown>,
@@ -53,4 +53,4 @@ export async function adoptSession(session: Session): Promise<boolean> {
   return !error;
 }
 
-export { codeGroups, errorKey, strength } from "./format";
+export { codeGroups, errorKey, errorText, strength } from "./format";

@@ -1,6 +1,8 @@
 // Pure helpers for the account screens (no network, no framework), so the
 // unit suite can prove them.
-import type { DictKey } from "../dict";
+import type { AppLanguage } from "@svika/shared";
+import { t, type DictKey } from "../dict";
+import { tp } from "../plural";
 
 /** The function's error codes, in Svika copy. */
 export const ERROR_COPY: Record<string, DictKey> = {
@@ -20,6 +22,30 @@ export const ERROR_COPY: Record<string, DictKey> = {
 
 export function errorKey(code: string): DictKey {
   return ERROR_COPY[code] ?? "acct.failed";
+}
+
+/** Refusals that come with a wait, worded with the minutes left. */
+const WAIT_COPY: Record<string, DictKey> = {
+  locked: "acct.lockedWait",
+  rate_limited: "acct.rateLimitedWait",
+};
+
+/** The function's retry_after (seconds) as whole minutes, rounded up. */
+export function waitMinutes(retryAfter: unknown): number | null {
+  if (typeof retryAfter !== "number" || !(retryAfter > 0)) return null;
+  return Math.ceil(retryAfter / 60);
+}
+
+/** An error in Svika copy; a lock or a limit says how long to wait. */
+export function errorText(
+  lang: AppLanguage,
+  code: string,
+  retryAfter?: unknown,
+): string {
+  const minutes = waitMinutes(retryAfter);
+  const waitKey = WAIT_COPY[code];
+  if (waitKey && minutes !== null) return tp(lang, waitKey, minutes);
+  return t(lang, errorKey(code));
 }
 
 /** "K7QM4XRT9PLW" as the three groups the screen shows. */

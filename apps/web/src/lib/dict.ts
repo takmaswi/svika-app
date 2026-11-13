@@ -1850,13 +1850,31 @@ export const dict = {
     en: "That username and password do not match.",
     sn: "Zita nepassword hazvienderani.",
   },
+  // without a retry_after from the function: the longest a lock can last
   "acct.locked": {
-    en: "Too many tries for this username. Wait 15 minutes, then try again.",
-    sn: "Waedza kakawanda nezita iri. Mira maminitsi 15, wozoedza zvakare.",
+    en: "Too many tries for this username. Wait up to 15 minutes, then try again.",
+    sn: "Waedza kakawanda nezita iri. Mira kusvika maminitsi 15, wozoedza zvakare.",
   },
   "acct.rateLimited": {
-    en: "Too many tries from this network. Wait a while, then try again.",
-    sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira zvishoma, wozoedza zvakare.",
+    en: "Too many tries from this network. Wait up to 15 minutes, then try again.",
+    sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira kusvika maminitsi 15, wozoedza zvakare.",
+  },
+  // with the function's retry_after, the minutes actually left
+  "acct.lockedWait": {
+    en: "Too many tries for this username. Wait {count} minutes, then try again.",
+    sn: "Waedza kakawanda nezita iri. Mira maminitsi {count}, wozoedza zvakare.",
+  },
+  "acct.lockedWait.one": {
+    en: "Too many tries for this username. Wait 1 minute, then try again.",
+    sn: "Waedza kakawanda nezita iri. Mira miniti {count}, wozoedza zvakare.",
+  },
+  "acct.rateLimitedWait": {
+    en: "Too many tries from this network. Wait {count} minutes, then try again.",
+    sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira maminitsi {count}, wozoedza zvakare.",
+  },
+  "acct.rateLimitedWait.one": {
+    en: "Too many tries from this network. Wait 1 minute, then try again.",
+    sn: "Kwaedzwa kakawanda kubva panetwork iyi. Mira miniti {count}, wozoedza zvakare.",
   },
   "acct.recoverTitle": {
     en: "Get back in",

@@ -10,7 +10,7 @@ import { t, type DictKey } from "@/lib/dict";
 import {
   adoptSession,
   callAccounts,
-  errorKey,
+  errorText,
   type NameState,
 } from "@/lib/accounts/client";
 import { FormCheck } from "@/components/v2/FormCheck";
@@ -67,7 +67,7 @@ export function SignUpForm({ lang, shell }: { lang: AppLanguage; shell: ShellTex
     const r = await callAccounts({ action: "sign_up", username: clean, password });
     if (!r.ok) {
       if (r.error === "username_taken") setNameState("taken");
-      setError(t(lang, errorKey(r.error)));
+      setError(errorText(lang, r.error, r.retry_after));
       setBusy(false);
       return;
     }

@@ -5,7 +5,7 @@
 import { useState, type FormEvent } from "react";
 import type { AppLanguage } from "@svika/shared";
 import { t } from "@/lib/dict";
-import { adoptSession, callAccounts, errorKey } from "@/lib/accounts/client";
+import { adoptSession, callAccounts, errorText } from "@/lib/accounts/client";
 import { FormCheck } from "@/components/v2/FormCheck";
 import { CtaPill } from "@/components/v2/parts";
 import { PasswordField } from "./PasswordField";
@@ -40,7 +40,7 @@ export function RecoverForm({ lang, shell }: { lang: AppLanguage; shell: ShellTe
       new_password: password,
     });
     if (!r.ok || !r.session || !r.recovery_code || !(await adoptSession(r.session))) {
-      setError(t(lang, r.ok ? "acct.failed" : errorKey(r.error)));
+      setError(r.ok ? t(lang, "acct.failed") : errorText(lang, r.error, r.retry_after));
       setBusy(false);
       return;
     }
